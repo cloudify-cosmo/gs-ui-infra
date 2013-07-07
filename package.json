@@ -1,4 +1,5 @@
 {
+  "readmore":"https://npmjs.org/doc/json.html",
   "name": "gs-ui-infra",
   "version": "0.0.0",
   "description": "Infrastructure scripts for GS UI",
