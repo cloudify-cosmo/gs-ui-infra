@@ -14,6 +14,9 @@
   "license": "BSD",
   "readmeFilename": "README.md",
   "gitHead": "b56a0a313c02a6b4d37bf735f9766960d5c5ff1f",
+    "bin":{
+        "gsui":"./bin/gsui"
+    },
   "bugs": {
     "url": "https://github.com/guy-mograbi-at-gigaspaces/gs-ui-infra/issues"
   }
