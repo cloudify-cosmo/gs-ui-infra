@@ -1,0 +1,20 @@
+{
+  "name": "gs-ui-infra",
+  "version": "0.0.0",
+  "description": "Infrastructure scripts for GS UI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guy-mograbi-at-gigaspaces/gs-ui-infra.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "b56a0a313c02a6b4d37bf735f9766960d5c5ff1f",
+  "bugs": {
+    "url": "https://github.com/guy-mograbi-at-gigaspaces/gs-ui-infra/issues"
+  }
+}
