@@ -28,8 +28,12 @@ module.exports = function( grunt ){
         },
         uglify: {
             config1 : {
+                "options":{
+                    "report":"min",
+                    "banner":"/*! this guy mograbi banner! */"
+                },
                 files: {
-                    "gs-ui-infra.min.js":['assets/javascripts/*.js']
+                    "dist/gs-ui-infra.min.js":['assets/javascripts/*.js']
                 }
             }
         }
