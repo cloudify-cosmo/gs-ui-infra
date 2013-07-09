@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-      "install":"echo \"after install in gs-ui-infra\""
+      "install":"grunt"
   },
   "repository": {
     "type": "git",
