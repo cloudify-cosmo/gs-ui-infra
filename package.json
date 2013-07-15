@@ -1,31 +1,36 @@
 {
-  "readmore":"https://npmjs.org/doc/json.html",
   "name": "gs-ui-infra",
   "version": "0.0.0",
-  "description": "Infrastructure scripts for GS UI",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-      "install":"grunt"
+  "dependencies": {
+    "express": "~3.0.0",
+    "ejs": "~0.8.4",
+    "grunt-karma": "~0.4.5"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/guy-mograbi-at-gigaspaces/gs-ui-infra.git"
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-concat": "~0.2.0",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-compass": "~0.2.0",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-cssmin": "~0.6.0",
+    "grunt-contrib-connect": "~0.3.0",
+    "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-htmlmin": "~0.1.3",
+    "grunt-contrib-imagemin": "~0.1.4",
+    "grunt-contrib-livereload": "~0.1.2",
+    "grunt-bower-requirejs": "~0.4.2",
+    "grunt-usemin": "~0.1.11",
+    "grunt-regarde": "~0.1.1",
+    "grunt-rev": "~0.1.0",
+    "grunt-karma": "~0.4.3",
+    "grunt-open": "~0.2.0",
+    "matchdep": "~0.1.2",
+    "grunt-google-cdn": "~0.1.2",
+    "grunt-ngmin": "~0.0.2"
   },
-  "author": "",
-  "license": "BSD",
-  "readmeFilename": "README.md",
-  "gitHead": "b56a0a313c02a6b4d37bf735f9766960d5c5ff1f",
-    "bin":{
-        "gsui":"./bin/gsui"
-    },
-  "bugs": {
-    "url": "https://github.com/guy-mograbi-at-gigaspaces/gs-ui-infra/issues"
-  },
-    "devDependencies":{
-        "grunt":"~0.4.1",
-        "grunt-contrib-clean": "~0.4.1",
-        "matchdep": "~0.1.2",
-        "grunt-contrib-uglify": "~0.2.0"
-    }
+  "engines": {
+    "node": ">=0.8.0"
+  }
 }

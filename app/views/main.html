@@ -1,0 +1,130 @@
+<header>
+    <hgroup class="grid-container">
+        <h1>UI Kitchen Sink</h1>
+        <h2>Reusable Components for the GigaSpaces Management Console</h2>
+    </hgroup>
+</header>
+
+<div class="getting-started">
+    <div class="grid-container">
+        <h2>Getting Started</h2>
+
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante
+            dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris.
+            Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.
+        </p>
+
+        <h3>Dependencies</h3>
+
+        <p>
+            Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur
+            sodales
+            ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In
+            scelerisque
+            sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor.
+            Morbi
+            lectus risus, iaculis vel, suscipit quis, luctus non, massa.
+        </p>
+    </div>
+</div>
+
+<div class="grid-container">
+
+    <!-- TODO turn into template for each component -->
+    <!-- gauges -->
+    <div class="component grid-100" ng-controller="GaugesCtrl">
+        <h3 class="heading grid-100">Health Gauge</h3>
+        <hr/>
+        <div class="demo grid-50">
+            <div class="controls grid-100">
+                <label for="gauge-val">Value</label>
+                <input id="gauge-val" name="gauge-val" type="number" step="10" min="0" max="100"
+                       ng-model="gauge.val"/>
+                <label for="gauge-anim">Sensitivity</label>
+                <input id="gauge-anim" name="gauge-anim" type="number" min="0" max="20"
+                       ng-model="gauge.sensitivity"/>
+            </div>
+            <hr/>
+            <div class="demo">
+                <div class="grid-container">
+                    <gs-gauge class="grid-100"
+                              sensitivity="gauge.sensitivity"
+                              val="gauge.val"
+                            ></gs-gauge>
+                </div>
+                <div class="grid-container">
+                    <gs-gauge class="grid-33"
+                              sensitivity="gauge.sensitivity"
+                              val="gauge.val"
+                              colors="gauge.themes.fire"
+                            ></gs-gauge>
+                    <gs-gauge class="grid-33"
+                              sensitivity="gauge.sensitivity"
+                              val="gauge.val"
+                              colors="gauge.themes.grayscale"
+                            ></gs-gauge>
+                    <gs-gauge class="grid-33"
+                              sensitivity="gauge.sensitivity"
+                              val="gauge.val"
+                              colors="gauge.themes.sky"
+                            ></gs-gauge>
+                </div>
+            </div>
+        </div>
+        <div class="description grid-50">
+            <h4>Options</h4>
+            <dl>
+                <dt><code>sensitivity</code> number</dt>
+                <dd>
+                    Controls the pointer animation speed, the higher the sensitivity, the higher the speed.
+                    Values are in the range of 0 to 20, where the maximum value will result in immediate
+                    response, i.e. without transition animation.
+                </dd>
+                <dt><code>val</code> number</dt>
+                <dd>
+                    Sets the value for the gauge, in the range of 0 to 100.
+                </dd>
+                <dt><code>colors</code> object</dt>
+                <dd>
+                    Configures the color theme by providing an object with the following properties,
+                    as CSS color values:
+                    <dl>
+                        <dt><code>border</code> string</dt>
+                        <dd>The border color.</dd>
+                        <dt><code>tick</code> string</dt>
+                        <dd>The tick color.</dd>
+                        <dt><code>background</code> array(2)</dt>
+                        <dd>The background gradient colors, bottom-up.</dd>
+                        <dt><code>basis</code> array(2)</dt>
+                        <dd>The basis gradient colors, bottom-up.</dd>
+                        <dt><code>pointer</code> array(3)</dt>
+                        <dd>The pointer colors, in the following order: border, left-gradient, right-gradient.</dd>
+                        <dt><code>dial</code> array(5)</dt>
+                        <dd>The dial gradient colors, left to right.</dd>
+                    </dl>
+                </dd>
+            </dl>
+        </div>
+        <hr class="grid-100"/>
+        <div class="source grid-100">
+            <tabset>
+                <tab ng-repeat="tab in tabs" heading="{{tab.title}}" active="tab.active">
+                    <!-- TODO correct language attribute not being injected into directive -->
+                    <codeblock language="tab.language" source="tab.content"></codeblock>
+                </tab>
+            </tabset>
+        </div>
+    </div>
+    <!-- gauges end -->
+    <hr/>
+
+</div>
+
+<footer>
+    <div class="grid-container">
+        <p class="right-text">
+            behold, i am the page footer
+        </p>
+    </div>
+</footer>
