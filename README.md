@@ -1,4 +1,7 @@
 
+[![Build Status](https://travis-ci.org/guy-mograbi-at-gigaspaces/gs-ui-infra.png)](https://travis-ci.org/guy-mograbi-at-gigaspaces/gs-ui-infra.png)
+
+
 # To set up projects like this one do the following:
 
 
