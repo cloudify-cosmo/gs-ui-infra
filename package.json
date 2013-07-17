@@ -6,6 +6,9 @@
     "ejs": "~0.8.4",
     "grunt-karma": "~0.4.5"
   },
+    "scripts":{
+        "test":"mocha"
+    },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-copy": "~0.4.1",
