@@ -11,7 +11,7 @@ angular.module('gsUiInfra')
                 colors:'='
             },
 
-            link: function(scope, element/*, attrs*/) {
+            link: function(scope, element, attrs) {
 
                 var validateArray = function(arr, minLength) {
                     return (arr && arr.length >= +minLength) && arr;
@@ -145,6 +145,9 @@ angular.module('gsUiInfra')
                     var angle = (percent * (_maxAngle - _minAngle) / 100) + _minAngle;
                     _pointer.animate({'transform': getPointerRotation(angle)}, getAnimationDuration());
                 });
+
+                // add hooks for styling
+                element.addClass('gs-gauge');
 
             }
         };
