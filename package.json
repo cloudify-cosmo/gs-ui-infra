@@ -7,7 +7,7 @@
     "grunt-karma": "~0.4.5"
   },
     "scripts":{
-        "test":"mocha"
+        "test":"./node_modules/.bin/karma start --single-run --browsers PhantomJS,Firefox"
     },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -31,7 +31,8 @@
     "grunt-open": "~0.2.0",
     "matchdep": "~0.1.2",
     "grunt-google-cdn": "~0.1.2",
-    "grunt-ngmin": "~0.0.2"
+    "grunt-ngmin": "~0.0.2",
+    "karma":"~0.8"
   },
   "engines": {
     "node": ">=0.8.0"
