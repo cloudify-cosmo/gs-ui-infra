@@ -7,7 +7,7 @@
     "grunt-karma": "~0.4.5"
   },
     "scripts":{
-        "test":"./node_modules/.bin/karma start --single-run --browsers PhantomJS,Firefox"
+        "test":"./node_modules/.bin/karma start --single-run --browsers PhantomJS"
     },
   "devDependencies": {
     "grunt": "~0.4.1",
