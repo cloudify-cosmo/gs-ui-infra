@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra', ['ui.bootstrap']);
+angular.module('gsUiInfra',[]);
 //    .config(function ($routeProvider) {
 //        $routeProvider
 //            .when('/', {
