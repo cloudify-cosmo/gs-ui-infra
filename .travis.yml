@@ -14,5 +14,6 @@ notifications:
       - eliranm@gigaspaces.com
       - evgeny@gigaspaces.com
       - erez@gigaspaces.com
+
 #    on_success: [always|never|change] # default: change
 #    on_failure: [always|never|change] # default: always
