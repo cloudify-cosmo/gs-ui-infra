@@ -30,12 +30,9 @@ angular.module('gsUiInfra')
                 };
 
                 var getAnimationDuration = function() {
-                    // TODO
-                    // make this a logarithmic increment rather linear
-                    // (humans perceive changes logarithmically)
-
-                    // derive a number between 0 and the maximum desired duration, based on the sensitivity value
-                    return 1800 * (Math.abs(scope.sensitivity - 20) / 10);
+                    // calculates a logarithmic increment rather linear, as humans perceive changes logarithmically.
+                    // increment base is set to 1.5, as it is a natural perceptive change point
+                    return 80 * Math.pow(1.5, Math.abs(scope.sensitivity - 10)) - 40;
                 };
 
                 var _basis,
