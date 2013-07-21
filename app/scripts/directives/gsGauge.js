@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .directive('gsGauge', function () {
+    .directive('gsGauge', ['arrayUtils', function (arrayUtils) {
         return {
             template: '<div></div>',
             restrict: 'E',
@@ -12,10 +12,6 @@ angular.module('gsUiInfra')
             },
 
             link: function(scope, element, attrs) {
-
-                var validateArray = function(arr, minLength) {
-                    return (arr && arr.length >= +minLength) && arr;
-                };
 
                 var getPointerRotation = function(angle) {
                     return 'R' + angle + ',41.986123,120';
@@ -42,12 +38,23 @@ angular.module('gsUiInfra')
                     _pathArr = [],
                     _r = new window.Raphael(element[0], '100%', '100%'),
                     _dialSet = _r.set(),
-                    _borderColor = scope.colors && scope.colors.border || '#6098bf',
-                    _tickColor = scope.colors && scope.colors.tick || '#467fa6',
-                    _bgColors = scope.colors && validateArray(scope.colors.background, 2) || ['#e0f3ff', '#ffffff'],
-                    _dialColors = scope.colors && validateArray(scope.colors.dial, 5) || ['#4fc71c', '#dbd100', '#ff9400', '#f0691a', '#f2004d'],
-                    _basisColors = scope.colors && validateArray(scope.colors.basis, 2) || ['#588fb3', '#bfe0f5'],
-                    _pointerColors = scope.colors && validateArray(scope.colors.pointer, 3) || ['#555555', '#ebebeb', '#aeb0b0'];
+                    // default colors
+                    _borderColor = '#6098bf',
+                    _tickColor = '#467fa6',
+                    _bgColors = ['#e0f3ff', '#ffffff'],
+                    _dialColors = ['#4fc71c', '#dbd100', '#ff9400', '#f0691a', '#f2004d'],
+                    _basisColors = ['#588fb3', '#bfe0f5'],
+                    _pointerColors = ['#555555', '#ebebeb', '#aeb0b0'];
+
+                // custom theme override
+                if (scope.colors) {
+                    _borderColor = scope.colors.border || _borderColor;
+                    _tickColor = scope.colors.tick || _tickColor;
+                    _bgColors = arrayUtils.dissolve(scope.colors.background, _bgColors);
+                    _dialColors = arrayUtils.dissolve(scope.colors.dial, _dialColors);
+                    _basisColors = arrayUtils.dissolve(scope.colors.basis, _basisColors);
+                    _pointerColors = arrayUtils.dissolve(scope.colors.pointer, _pointerColors);
+                }
 
                 var frameBox =
                     _r.path('M89,11.842c0-1.176-0.691-2.342-2.254-2.342H11.304 C9.738,9.5,8,9.666,8,10.842v38.382c0,1.178,1.738,2.275,3.304,2.275h76.442c1.563,0,1.254-1.098,1.254-2.275V11.842z')
@@ -150,4 +157,4 @@ angular.module('gsUiInfra')
         };
 
 
-    });
+    }]);
