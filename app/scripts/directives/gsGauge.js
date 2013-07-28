@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .directive('gsGauge', ['arrayUtils', function (arrayUtils) {
+    .directive('gsGauge', ['$window', 'arrayUtils', function ($window, arrayUtils) {
         return {
-            template: '<div></div>',
+            template: '',
             restrict: 'E',
             scope:{
                 val:'=',
@@ -26,17 +26,31 @@ angular.module('gsUiInfra')
                 };
 
                 var getAnimationDuration = function() {
-                    // calculates a logarithmic increment rather linear, as humans perceive changes logarithmically.
-                    // increment base is set to 1.5, as it is a natural perceptive change point
+                    // calculates a logarithmic increment rather than linear, as humans perceive changes logarithmically.
+                    // increment base is set to 1.5, as it is a natural factor for meaningful perceived changes
                     return 80 * Math.pow(1.5, Math.abs(scope.sensitivity - 10)) - 40;
                 };
+
+                var addClassRaphael = function(el, className) {
+                    var dom = el.node,
+                        classNames = (dom.getAttribute('class') || '').split(' ');
+                    classNames.push(className);
+                    dom.setAttribute('class',  classNames.join(' '));
+                }
+
+                var removeClassRaphael = function(el, className) {
+                    var dom = el.node,
+                        classNames = dom.getAttribute('class').split(' ');
+                    classNames.splice(classNames.indexOf(className), 1);
+                    dom.setAttribute('class', classNames.join(' '));
+                }
 
                 var _basis,
                     _pointer,
                     _minAngle = -17.4,
                     _maxAngle = 17.1,
                     _pathArr = [],
-                    _r = new window.Raphael(element[0], '100%', '100%'),
+                    _r = new $window.Raphael(element[0], '100%', '100%'),
                     _dialSet = _r.set(),
                     // default colors
                     _borderColor = '#6098bf',
@@ -136,18 +150,23 @@ angular.module('gsUiInfra')
 
                 // set initial position for the needle
                 _pointer.transform(getPointerRotation(_minAngle));
+                addClassRaphael(_pointer, 'pointer');
 
                 // adjust for container size
                 _r.setViewBox(0, 0, getPathOuterWidth(frameBox), getPathOuterHeight(frameBox), true);
                 _r.setSize('100%', _r.canvas.clientWidth / (getPathOuterWidth(frameBox) / getPathOuterHeight(frameBox)));
 
                 // tie animation on value change
-                scope.$watch('val', function(percent){
+                scope.$watch('val', function(newValue) {
+                    var percent = +newValue;
                     if (percent > 100 || percent < 0) {
                         return;
                     }
                     var angle = (percent * (_maxAngle - _minAngle) / 100) + _minAngle;
-                    _pointer.animate({'transform': getPointerRotation(angle)}, getAnimationDuration());
+                    addClassRaphael(_pointer, 'animated');
+                    _pointer.animate({'transform': getPointerRotation(angle)}, getAnimationDuration(), function() {
+                        removeClassRaphael(_pointer, 'animated');
+                    });
                 });
 
                 // add hooks for styling
