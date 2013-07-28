@@ -103,7 +103,7 @@ describe('Directive: gsGauge', function () {
             // wait for the animation-finished state
             setTimeout(function() {
                 afterAnimation = exists('.pointer:not(.animated)');
-            }, 5);
+            }, 800);
         });
 
         waitsFor(function() {
