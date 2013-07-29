@@ -5,7 +5,9 @@ describe('Directive: gsGauge', function () {
     var el, scope;
 
     function getTransformationMatrix(selector) {
-        return el[0].querySelector(selector).getAttribute('transform');
+        var result =  el[0].querySelector(selector).getAttribute('transform');
+        console.log(["result is " , result]);
+        return result;
     }
 
     function exists(selector) {
@@ -45,15 +47,8 @@ describe('Directive: gsGauge', function () {
         // activate pointer change
         jasmineUtils.set(scope, 'val', 90);
 
-        runs(function() {
-            // check the transformation matrix. we don't need a delay, just make sure it's in the future
-            setTimeout(function() {
-                changed = oldTransformationMatrix != getTransformationMatrix('.pointer');
-            }, 0);
-        });
-
         waitsFor(function() {
-            return changed;
+            return changed = oldTransformationMatrix != getTransformationMatrix('.pointer');
         }, 'pointer transformation matrix to change', 500);
 
         runs(function() {
