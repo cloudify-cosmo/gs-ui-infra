@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Trigger a Travis CI build
+#
+# this is only possible by changing a file in the project, than pushing this file to the watched repository.
+# in this script we will change a single file (this one), commit it, and than perform a push to that file alone
+# (using a dedicated branch).
+#-----------------------------------------------------------------------------------------------------------------------
+
+# update the trigger uid commented line below with the current time (format: seconds since epoch + current nanoseconds)
+sed -i '/^\# last trigger uid:.*$/c \# last trigger uid: '`date +%s%N` $0
+
+# last trigger uid: 1375091939764295030
+
+# TODO implement git cherry-push
+
+# commit only this file
+git commit -m 'travis build manual trigger' $0
+
+# create a new tracking branch from the remote
+
+# cherry-pick the local commit into the new branch
+
+# push to the remote
+
+# rebase the original tracking branch
+
+
+
+# REFERENCES
+# see http://stackoverflow.com/a/639500/547020 on how to get own filename
+# see http://stackoverflow.com/a/6389338/547020 on how to implement git cherry-push
