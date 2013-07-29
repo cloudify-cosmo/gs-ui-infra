@@ -11,7 +11,7 @@
 # update the trigger uid commented line below with the current time (format: seconds since epoch + current nanoseconds)
 sed -i '/^\# last trigger uid:.*$/c \# last trigger uid: '`date +%s%N` $0
 
-# last trigger uid: 1375091939764295030
+# last trigger uid: 1375091977507890401
 
 # TODO implement git cherry-push
 
