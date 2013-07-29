@@ -9,5 +9,5 @@
  * Configuration context for the jasmine testing suites.
  */
 window.jasmineConf = {
-    render: true
+    render: false
 };
