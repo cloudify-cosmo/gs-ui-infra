@@ -29,5 +29,9 @@ git commit -m 'travis build manual trigger' $0
 
 
 # REFERENCES
-# see http://stackoverflow.com/a/639500/547020 on how to get own filename
-# see http://stackoverflow.com/a/6389338/547020 on how to implement git cherry-push
+# - see http://stackoverflow.com/a/639500/547020 on how to get own filename
+# - see http://stackoverflow.com/a/6389338/547020 and
+# http://stackoverflow.com/questions/7545953/push-just-one-file-to-github-from-a-local-repository
+# on how to implement git cherry-push
+# - see http://www.thegeekstuff.com/2009/11/unix-sed-tutorial-append-insert-replace-and-count-file-lines/#replace_lines
+# on replacing lines using sed
