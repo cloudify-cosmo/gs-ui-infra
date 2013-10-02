@@ -5,7 +5,9 @@ describe('Directive: gsGauge', function () {
     var el, scope;
 
     function getTransformationMatrix(selector) {
-        return el[0].querySelector(selector).getAttribute('transform');
+        var result =  el[0].querySelector(selector).getAttribute('transform');
+        console.log(["result is " , result]);
+        return result;
     }
 
     function exists(selector) {
