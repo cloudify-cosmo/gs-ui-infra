@@ -833,59 +833,100 @@ angular.module('gsUiInfra')
 
                     /* layered layouter */
 
-                    GsD3Graph.Layout.Layered = function (criteria, layers) {
+                    /**
+                     * Use the layred layouter to represent a graph with containment relationships with
+                     * a tensor (3 dimensional matrix).
+                     *
+                     * @constructor
+                     */
+                    GsD3Graph.Layout.Layered = function () {
                         GsD3Graph.Layout.call(this);
 
-                        // example data
-                        criteria = "type";
-                        layers = [
-                            ["cloudify.tosca.types.network"],
-                            ["cloudify.tosca.types.tier"],
-                            ["cloudify.tosca.types.host"],
-                            ["cloudify.tosca.types.db_server","cloudify.tosca.types.middleware_server","cloudify.tosca.types.web_server"],
-                            ["cloudify.tosca.types.app_module"]
-                        ];
-
                         this.data = [];
+                        this.tensor;
                     };
 
                     GsD3Graph.Layout.Layered.prototype = new GsD3Graph.Layout();
 
                     GsD3Graph.Layout.Layered.prototype.layout = function (data) {
                         this.data = data;
-                        this.layoutPrepare();
+                        this.tensor = this.layoutPrepare();
                         this.layoutCalcBounds();
+                        return this.tensor;
                     };
 
                     GsD3Graph.Layout.Layered.prototype.layoutPrepare = function () {
 
+                        // TODO
+                        // * extract functions to utilities
+                        // * pass configuration object to control which level spans what axis (for X/Y)
+                        //   implementation details: consider that only 'tier's are laid out vertically, all other levels - horizontally
+                        // * implement layoutCalcBounds() and populate a class member
+
                         // PSEUDO
-                        // 1. build a tree from graph according to containment dependencies:
-                        // [app] -> network -> tier -> host -> server -> module
+                        // 1. build a tree from graph according to containment relationships
                         // 2. traverse the tree, determine X,Y,Z values for each node:
                         //      Z will determine the padding as well as the width and height for any level that's not the deepest
                         //      (deepest level has fixed dimensions)
                         //      X,Y will determine the X,Y position in the layout
-                        //      consider that only 'tier's are laid out vertically, all other levels - horizontally
 
-                        var tree = [
 
-                            ], // {node: [children]}?
-                            ni = this.data.nodes.length,
-                            ei = this.data.edges.length,
-                            contained;
-                        while (ni--) {
-                            var n = this.data.nodes[ni];
-                            while (ei--) {
-                                var e = this.data.edges[ei];
-                                if (e.source === n.id || e.target === n.id) {
+                        // build a tree from graph according to containment relationships
 
-                                }
-                                // deep level
-                                contained = e.type === 'contained_in';
+                        var self = this,
+                            forest = getForest(),
+                            ei = this.data.edges.length;
+                        console.log('- - - before tree built - - -')
+                        console.log(JSON.stringify(forest, null, 4));
+
+                        // TODO add `while (tree not built)` if necessary. add tests to see what depth this loop can handle
+                        while (ei--) {
+                            var e = this.data.edges[ei];
+                            if (e.type === 'contained_in') {
+                                var source = $window.GsUtils.findBy(forest, 'id', e.source.id),
+                                    target = $window.GsUtils.findBy(forest, 'id', e.target.id);
+                                var child = forest.splice(forest.indexOf(source), 1)[0];
+                                target.children.push(child);
                             }
                         }
 
+                        var tree = {id: "root", children: forest};
+                        console.log('- - - after tree built - - -')
+                        console.log(JSON.stringify(tree, null, 4));
+
+                        function getForest() {
+                            var forest = [],
+                                i = self.data.nodes.length;
+                            while (i--) {
+                                var n = self.data.nodes[i];
+                                forest.push({id: n.id, children: []});
+                            }
+                            return forest;
+                        }
+
+                        // traverse the tree, attach X,Y,Z values for each node
+                        // to represent a tensor (3 dimensional matrix)
+
+                        var depth = -1;
+                        function walk(tree) { // using BFT
+                            depth++;
+                            var i = tree.children.length;
+                            while (i--) {
+                                var node = tree.children[i];
+                                node.layoutPosZ = depth;
+                                node.layoutPosX = i;
+                                node.layoutPosY = 0;
+                                node.children && node.children.length && walk(node);
+                            }
+                            depth--;
+                            return tree;
+                        }
+
+                        var tensor = walk(tree);
+                        console.log('- - - after recursive traversal - - -')
+                        console.log(JSON.stringify(tensor, null, 4));
+
+                        return tensor;
                     };
 
                     GsD3Graph.Layout.Layered.prototype.layoutCalcBounds = function () {
@@ -989,100 +1030,7 @@ angular.module('gsUiInfra')
                             }
                         ]
                     };
-                    /*
-                     return {
-                     "nodes": [
-                     {
-                     "id": 0,
-                     "type": "PROCESSING_UNIT",
-                     "puType": "MIRROR",
-                     "selectable": true,
-                     "name": "Node A",
-                     "color": "blue",
-                     "status": "ok",
-                     "components": ["web"]
-                     },
-                     {
-                     "id": 1,
-                     "type": "PROCESSING_UNIT",
-                     "puType": "LOAD_BALANCER",
-                     "selectable": true,
-                     "name": "I'm Node B",
-                     "color": "red",
-                     "status": "working",
-                     "components": ["gateway"]
-                     },
-                     {
-                     "id": 2,
-                     "type": "PROCESSING_UNIT",
-                     "puType": "WEB_APP",
-                     "selectable": true,
-                     "name": "Node C, Mothafucka",
-                     "status": "critical",
-                     "color": "green"
-                     },
-                     {
-                     "id": 3,
-                     "type": "PROCESSING_UNIT",
-                     "puType": "WEB_SERVER",
-                     "selectable": true,
-                     "name": "Node D",
-                     "color": "yellow",
-                     "status": "warn",
-                     "components": ["processing", "database"]
-                     },
-                     {
-                     "id": 4,
-                     "type": "PROCESSING_UNIT",
-                     "puType": "STATEFUL",
-                     "selectable": true,
-                     "name": "E",
-                     "color": "orange",
-                     "components": ["custom", "processing", "partition-ha"],
-                     "icon": "http://www.plexoft.com/SBF/icons/smiley.gif"
-                     },
-                     {
-                     "id": 5,
-                     "type": "DATABASE",
-                     "name": "database"
-                     },
-                     {
-                     "id": 6,
-                     "type": "PROCESSING_UNIT",
-                     "puType": "WEB_APP",
-                     "selectable": true,
-                     "name": "Web App",
-                     "status": "warn",
-                     "color": "black"
-                     }
-                     ],
-                     // Note: the values of the source and target attributes may be initially specified as indexes into the nodes array;
-                     // these will be replaced by references after the call to start.
-                     "edges": [
-                     {
-                     "source": 2,
-                     "target": 3,
-                     "status": "critical"
-                     },
-                     {
-                     "source": 2,
-                     "target": 4,
-                     "directed": true,
-                     "status": "warn"
-                     },
-                     {
-                     "source": 0,
-                     "target": 4,
-                     "directed": true
-                     },
-                     {
-                     "source": 5,
-                     "target": 4,
-                     "directed": true
-                     }
-                     ]
-                     };
-                     */
+
                 }
 
 
