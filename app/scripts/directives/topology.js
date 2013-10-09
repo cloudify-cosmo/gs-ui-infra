@@ -489,31 +489,47 @@ angular.module('gsUiInfra')
                         node.append('svg:rect')
                             // populate width/height properties for the first time. from now on we can reference d.width/d.height
                             .attr('width', function (d) {
-                                return d.width || (d.width = 300);
+                                return d.width || (d.width = 140);
                             })
                             .attr('height', function (d) {
-                                return d.height || (d.height = 200);
+                                return d.height || (d.height = 100);
                             })
                             .attr('rx', 8)
                             .attr('ry', 8)
-                            .style('fill', '#f2f2f2')
+                            .style('fill', '#f6f6f6')
                             .style('stroke', _nodeStrokeColorSetter(self))
                             .style('stroke-width', _nodeStrokeWidthSetter(self))
 
                         // add name label
                         node.append('svg:text')
                             .text(function (d) {
-                                var typeStr = '' + d.type;
-                                return d.name + ' (' + typeStr.substring(typeStr.lastIndexOf('.') + 1) + ')';
+                                return d.name;
                             })
                             .attr('x', function (d) {
-                                return d.width / 2 - 12;
+                                return d.width / 2;
                             })
-                            .attr('y', 15)
+                            .attr('y', 18)
                             .attr('text-anchor', 'middle')
-                            .style('fill', '#406b80')
+                            .style('fill', '#0d7acc')
                             .style('fill-opacity', 0.6)
-                            .style('font-size', '14px')
+                            .style('font-size', '15px')
+                            .style('font-family', 'Arial')
+                            .style('font-weight', 'bold')
+
+                        // add type label
+                        node.append('svg:text')
+                            .text(function (d) {
+                                var typeStr = '' + d.type;
+                                return '(' + typeStr.substring(typeStr.lastIndexOf('.') + 1) + ')';
+                            })
+                            .attr('x', function (d) {
+                                return d.width / 2;
+                            })
+                            .attr('y', 32)
+                            .attr('text-anchor', 'middle')
+                            .style('fill', '#0d7acc')
+                            .style('fill-opacity', 0.6)
+                            .style('font-size', '12px')
                             .style('font-family', 'Arial')
                             .style('font-weight', 'bold')
 
