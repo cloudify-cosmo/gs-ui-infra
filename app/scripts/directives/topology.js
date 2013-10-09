@@ -465,6 +465,7 @@ angular.module('gsUiInfra')
 
                     function _updateNodes() {
 
+/*
                         var self = this,
                             node = this.nodesSelection;
 
@@ -477,6 +478,7 @@ angular.module('gsUiInfra')
                             .attr('height', function (d) {
                                 return d.height = 200 - d.layoutPosZ * 2;
                             })
+*/
                     }
 
                     function _enterNodes() {
@@ -522,7 +524,10 @@ angular.module('gsUiInfra')
                     }
 
                     function _bindEdges() {
-                        this.edgesSelection = this.edgesSelection.data(this.data.edges);
+                        var self = this;
+                        this.edgesSelection = this.edgesSelection.data(function() {
+                            return $window.GsUtils.filter(self.data.edges, 'type', 'connected_to');
+                        });
                     }
 
                     function _updateEdges() {
