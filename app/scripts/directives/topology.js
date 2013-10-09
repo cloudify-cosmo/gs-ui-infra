@@ -954,8 +954,8 @@ angular.module('gsUiInfra')
                             depth++;
                             // sort the children according to connection relationships
                             node.children.sort(function (a, b) {
-                                if (a.id < b.id) return -1;
-                                if (a.id > b.id) return 1;
+                                if (a.dependencies && a.dependencies.indexOf(b.id) !== -1) return -1;
+                                if (b.dependencies && b.dependencies.indexOf(a.id) !== -1) return 1;
                                 return 0;
                             });
                             var i = node.children.length;
