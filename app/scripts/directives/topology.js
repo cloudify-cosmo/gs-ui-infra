@@ -115,14 +115,14 @@ angular.module('gsUiInfra')
                                     });
 
 
-                                    this.nodesSelection.selectAll('rect')
+                                    self.nodesSelection.selectAll('rect')
                                         .attr('width', function (d) {
                                             return d.width;
                                         })
                                         .attr('height', function (d) {
                                             return d.height;
                                         });
-                                    this.nodesSelection.selectAll('text')
+                                    self.nodesSelection.selectAll('text')
                                         .attr('x', function (d) {
                                             return d.width / 2;
                                         })
