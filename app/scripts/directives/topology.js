@@ -77,7 +77,7 @@ angular.module('gsUiInfra')
 
                         var start = function () {
                             self.animated = true;
-                            self.layouter && self.layouter.layout(self.data);
+                            self.layouter && self.layouter.layout(self.data, 'graph');
                         };
 
                         var end = function () {
@@ -114,7 +114,6 @@ angular.module('gsUiInfra')
                                         d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
                                     });
 
-
                                     self.nodesSelection.selectAll('rect')
                                         .attr('width', function (d) {
                                             return d.width;
@@ -126,7 +125,6 @@ angular.module('gsUiInfra')
                                         .attr('x', function (d) {
                                             return d.width / 2;
                                         })
-
                                 }
                             }
 
@@ -883,8 +881,10 @@ angular.module('gsUiInfra')
 
                     GsD3Graph.Layout.Tensor.prototype = new GsD3Graph.Layout();
 
-                    GsD3Graph.Layout.Tensor.prototype.layout = function (data) {
+                    // TODO get struct from external configuration ('tree'/'graph'). pass from outside the directive.
+                    GsD3Graph.Layout.Tensor.prototype.layout = function (data, struct) {
                         this.data = data;
+                        this.struct = struct;
                         this.layoutPrepare();
                         this.layoutCalcBounds();
                     };
@@ -905,8 +905,92 @@ angular.module('gsUiInfra')
                         //      (deepest level has fixed dimensions)
                         //      X,Y will determine the X,Y position in the layout
 
+                        var self = this,
+                            tree;
+                        if (this.struct === 'graph') {
+                            // build a tree from graph according to containment relationships
+                            tree = this._toTree(this.data);
+                        } else if (this.struct === 'tree') {
+                            tree = this.data;
+                        }
 
-                        // build a tree from graph according to containment relationships
+                        // traverse the tree, sort it, attach X,Y,Z values for each node
+                        // to represent a tensor (3 dimensional matrix)
+
+                        var depth = -1;
+                        function walk(node) { // using BFT
+                            depth++;
+                            // sort the children according to connection relationships
+                            node.children.sort(function (a, b) {
+                                if (a.dependencies && a.dependencies.indexOf(b.id) !== -1) return -1;
+                                if (b.dependencies && b.dependencies.indexOf(a.id) !== -1) return 1;
+                                return 0;
+                            });
+                            var i = node.children.length;
+                            while (i--) {
+                                var child = node.children[i];
+                                // attach properties to the original data
+
+                                var n;
+                                if (self.struct === 'graph') {
+                                    n = $window.GsUtils.findBy(self.data.nodes, 'id', child.id);
+                                } else if (self.struct === 'tree') {
+                                    n = child;
+                                }
+                                n.layoutPosX = i;
+                                n.layoutPosY = 0;
+                                n.layoutPosZ = depth;
+                                // continue with traversal
+                                child.children && child.children.length && walk(child);
+                            }
+                            depth--;
+                            return node;
+                        }
+
+                        this.tensor = walk(tree);
+
+//                        console.log('- - - after walking down the tree - - -')
+//                        console.log('> tensor:')
+//                        console.log(JSON.stringify(this.tensor, null, 4));
+//                        console.log('> data.nodes:')
+//                        console.log(JSON.stringify(this.data.nodes, null, 4));
+
+                    };
+
+                    GsD3Graph.Layout.Tensor.prototype.layoutCalcBounds = function () {
+
+                        var minx = Infinity,
+                            maxx = -Infinity,
+                            miny = Infinity,
+                            maxy = -Infinity,
+                            minz = Infinity,
+                            maxz = -Infinity;
+
+                        var nodes = this.data.nodes;
+                        for (var i in nodes) {
+                            var x = nodes[i].layoutPosX,
+                                y = nodes[i].layoutPosY,
+                                z = nodes[i].layoutPosZ;
+
+                            if (x > maxx) maxx = x;
+                            if (x < minx) minx = x;
+                            if (y > maxy) maxy = y;
+                            if (y < miny) miny = y;
+                            if (z > maxz) maxz = z;
+                            if (z < minz) minz = z;
+                        }
+
+                        if (miny == maxy) maxy++;
+
+                        this.layoutMinX = minx;
+                        this.layoutMaxX = maxx;
+                        this.layoutMinY = miny;
+                        this.layoutMaxY = maxy;
+                        this.layoutMinZ = minz;
+                        this.layoutMaxZ = maxz;
+                    };
+
+                    GsD3Graph.Layout.Tensor.prototype._toTree = function () {
 
                         var self = this,
                             forest = getInitialForest(),
@@ -945,76 +1029,8 @@ angular.module('gsUiInfra')
                             return forest;
                         }
 
-
-                        // traverse the tree to sort it and attach X,Y,Z values for each node
-                        // to represent a tensor (3 dimensional matrix)
-
-                        var depth = -1;
-
-                        function walk(node) { // using BFT
-                            depth++;
-                            // sort the children according to connection relationships
-                            node.children.sort(function (a, b) {
-                                if (a.dependencies && a.dependencies.indexOf(b.id) !== -1) return -1;
-                                if (b.dependencies && b.dependencies.indexOf(a.id) !== -1) return 1;
-                                return 0;
-                            });
-                            var i = node.children.length;
-                            while (i--) {
-                                var child = node.children[i];
-                                // attach properties to the original data
-                                var d = $window.GsUtils.findBy(self.data.nodes, 'id', child.id);
-                                d.layoutPosX = i;
-                                d.layoutPosY = 0;
-                                d.layoutPosZ = depth;
-                                // continue with traversal
-                                child.children && child.children.length && walk(child);
-                            }
-                            depth--;
-                            return node;
-                        }
-
-                        this.tensor = walk(tree);
-
-//                        console.log('- - - after walking down the tree - - -')
-//                        console.log('> tensor:')
-//                        console.log(JSON.stringify(this.tensor, null, 4));
-//                        console.log('> data.nodes:')
-//                        console.log(JSON.stringify(this.data.nodes, null, 4));
-
-                    };
-
-                    GsD3Graph.Layout.Tensor.prototype.layoutCalcBounds = function () {
-                        var minx = Infinity,
-                            maxx = -Infinity,
-                            miny = Infinity,
-                            maxy = -Infinity,
-                            minz = Infinity,
-                            maxz = -Infinity;
-
-                        var nodes = this.data.nodes;
-                        for (var i in nodes) {
-                            var x = nodes[i].layoutPosX,
-                                y = nodes[i].layoutPosY,
-                                z = nodes[i].layoutPosZ;
-
-                            if (x > maxx) maxx = x;
-                            if (x < minx) minx = x;
-                            if (y > maxy) maxy = y;
-                            if (y < miny) miny = y;
-                            if (z > maxz) maxz = z;
-                            if (z < minz) minz = z;
-                        }
-
-                        if (miny == maxy) maxy++;
-
-                        this.layoutMinX = minx;
-                        this.layoutMaxX = maxx;
-                        this.layoutMinY = miny;
-                        this.layoutMaxY = maxy;
-                        this.layoutMinZ = minz;
-                        this.layoutMaxZ = maxz;
-                    };
+                        return tree;
+                    }
 
                     GsD3Graph.Layout.Tensor.prototype.constructor = GsD3Graph.Layout.Tensor;
 
