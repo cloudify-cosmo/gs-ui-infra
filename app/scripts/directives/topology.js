@@ -87,32 +87,34 @@ angular.module('gsUiInfra')
                         var tick = function () {
 
                             if (self.layouter) {
-                                var layouter = self.layouter;
+                                var layouter = self.layouter,
+                                    rangeX = layouter.layoutMaxX - layouter.layoutMinX + 1,
+                                    rangeY = layouter.layoutMaxY - layouter.layoutMinY + 1,
+                                    segmentH = self.width / rangeX,
+                                    segmentV = self.height / rangeY;
                                 // update the nodes position data according to the layouter data
                                 if (layouter instanceof GsD3Graph.Layout.Matrix) {
-                                    var rangeX = layouter.layoutMaxX - layouter.layoutMinX + 1,
-                                        rangeY = layouter.layoutMaxY - layouter.layoutMinY + 1,
-                                        segmentH = self.width / rangeX,
-                                        segmentV = self.height / rangeY;
                                     self.data.nodes.forEach(function (d, i) {
                                         d.fixed = true;
                                         d.x = segmentH * d.layoutPosX + (segmentH - d.width) / 2;
                                         d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
                                     });
                                 } else if (layouter instanceof GsD3Graph.Layout.Tensor) {
-                                    var rangeX = layouter.layoutMaxX - layouter.layoutMinX + 1,
-                                        rangeY = layouter.layoutMaxY - layouter.layoutMinY + 1,
-                                        rangeZ = layouter.layoutMaxZ - layouter.layoutMinZ + 1,
-                                        segmentH = self.width / rangeX,
-                                        segmentV = self.height / rangeY,
-                                        pad = 30;
+                                    var pad = 38;
                                     self.data.nodes.forEach(function (d, i) {
-//                                        d.width = d.width - d.layoutPosZ * 2;
-//                                        d.height = d.height - d.layoutPosZ * 2;
+                                        // TODO WTF? how to set width and height?
+                                        if (!d.dimensionsFinalized) {
+                                            d.width = d.width - d.layoutPosZ * pad * 2;
+                                            d.height = d.height - d.layoutPosZ * pad * 2;
+                                            d.dimensionsFinalized = true;
+                                        }
                                         d.fixed = true;
-                                        d.x = segmentH * d.layoutPosX + (segmentH - d.width) / 2 + pad * d.layoutPosZ;
-                                        d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2 + pad * d.layoutPosZ;
+                                        // TODO implement differently according to the plan design
+                                        d.x = segmentH * d.layoutPosX + (segmentH - d.width) / 2;
+                                        d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
                                     });
+
+                                    _updateNodes.call(self);
                                 }
                             }
 
@@ -134,20 +136,13 @@ angular.module('gsUiInfra')
                                 return 'translate(' + d.x + ',' + d.y + ')';
                             });
 
-                            self.nodesSelection.attr('width', function (d) {
-                                console.log(d.width - d.layoutPosZ * 30 * 2)
-                                return d.width = d.width - d.layoutPosZ * 30 * 2;
-                            });
-                            self.nodesSelection.attr('height', function (d) {
-                                return d.height = d.height - d.layoutPosZ * 2;
-                            });
                         };
 
                         this.force = d3.layout.force()
                             .nodes(this.data.nodes)
                             .links(this.data.edges)
                             .charge(-1000)
-                            .linkDistance(180) // TODO determine distance by function to account for horizontal / vertical links (is that possible?)
+                            .linkDistance(180)
                             .on('tick', tick)
                             .on('start', start)
                             .on('end', end);
@@ -465,40 +460,37 @@ angular.module('gsUiInfra')
 
                     function _updateNodes() {
 
-/*
-                        var self = this,
-                            node = this.nodesSelection;
-
-                        node.select('rect')
-                            // populate width/height properties for the first time. from now on we can reference d.width/d.height
+                        this.nodesSelection.selectAll('rect')
                             .attr('width', function (d) {
-//                                console.log(' - - - - - ')
-                                return d.width = d.width - d.layoutPosZ * 30 * 2;
+                                return d.width;
                             })
                             .attr('height', function (d) {
-                                return d.height = 200 - d.layoutPosZ * 2;
+                                return d.height;
+                            });
+                        this.nodesSelection.selectAll('text')
+                            .attr('x', function (d) {
+                                return d.width / 2;
                             })
-*/
+
                     }
 
                     function _enterNodes() {
 
-                        var self = this,
-                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node');
+                        var node = this.nodesSelection.enter().append('svg:g').attr('class', 'node');
 
                         node.append('svg:rect')
                             // populate width/height properties for the first time. from now on we can reference d.width/d.height
                             .attr('width', function (d) {
-                                return d.width || (d.width = 140);
+                                return d.width || (d.width = 280);
                             })
                             .attr('height', function (d) {
-                                return d.height || (d.height = 100);
+                                return d.height || (d.height = 280);
                             })
                             .attr('rx', 8)
                             .attr('ry', 8)
                             .style('fill', '#f6f6f6')
-                            .style('stroke', _nodeStrokeColorSetter(self))
-                            .style('stroke-width', _nodeStrokeWidthSetter(self))
+                            .style('stroke', '#0d7acc')
+                            .style('stroke-width', 1)
 
                         // add name label
                         node.append('svg:text')
@@ -541,7 +533,7 @@ angular.module('gsUiInfra')
 
                     function _bindEdges() {
                         var self = this;
-                        this.edgesSelection = this.edgesSelection.data(function() {
+                        this.edgesSelection = this.edgesSelection.data(function () {
                             return $window.GsUtils.filter(self.data.edges, 'type', 'connected_to');
                         });
                     }
@@ -597,18 +589,6 @@ angular.module('gsUiInfra')
                         }
                         // return the collected edges for greedy lookup, or none as first is not found
                         return greedy ? edges : false;
-                    }
-
-                    function _nodeStrokeColorSetter() {
-                        return function () {
-                            return '#0d7acc';
-                        }
-                    }
-
-                    function _nodeStrokeWidthSetter() {
-                        return function () {
-                            return 3;
-                        }
                     }
 
                     /*
@@ -913,10 +893,9 @@ angular.module('gsUiInfra')
 
                         // TODO
                         // * consider connection relationships in the tensor sorting (for X/Y)
-                        // * extract functions to utilities
-                        // * pass configuration object to control which level (Z) spans what axis (X/Y)
-                        //   implementation details: consider that only 'tier's are laid out vertically, all other levels - horizontally
-                        // * implement layoutCalcBounds() and populate a class member
+                        // * extract functions to utilities (services)
+                        // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
+                        //   implementation details: consider that each node type might have different direction (horizontal/vertical)
 
                         // PSEUDO
                         // 1. build a tree from graph according to containment relationships
@@ -971,6 +950,7 @@ angular.module('gsUiInfra')
                         // to represent a tensor (3 dimensional matrix)
 
                         var depth = -1;
+
                         function walk(node) { // using BFT
                             depth++;
                             // sort the children according to connection relationships
