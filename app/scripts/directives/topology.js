@@ -114,7 +114,19 @@ angular.module('gsUiInfra')
                                         d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
                                     });
 
-                                    _updateNodes.call(self);
+
+                                    this.nodesSelection.selectAll('rect')
+                                        .attr('width', function (d) {
+                                            return d.width;
+                                        })
+                                        .attr('height', function (d) {
+                                            return d.height;
+                                        });
+                                    this.nodesSelection.selectAll('text')
+                                        .attr('x', function (d) {
+                                            return d.width / 2;
+                                        })
+
                                 }
                             }
 
@@ -459,18 +471,6 @@ angular.module('gsUiInfra')
                     }
 
                     function _updateNodes() {
-
-                        this.nodesSelection.selectAll('rect')
-                            .attr('width', function (d) {
-                                return d.width;
-                            })
-                            .attr('height', function (d) {
-                                return d.height;
-                            });
-                        this.nodesSelection.selectAll('text')
-                            .attr('x', function (d) {
-                                return d.width / 2;
-                            })
 
                     }
 
