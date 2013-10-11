@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .directive('topology', ['$window', function ($window) {
+    .directive('topology', ['$window', 'Layout', function ($window, Layout) {
         return {
             template: '<div id="graph"></div>',
             restrict: 'E',
@@ -65,9 +65,7 @@ angular.module('gsUiInfra')
                         this.svg = d3.select(this.el).append('svg:svg');
 
                         /** graph data structure */
-                        this.data = { nodes: [], edges: [] };
-                        /** edges added to the graph when source or target nodes don't exist yet */
-                        this.ghostEdges = [];
+                        this.graph = { nodes: [], edges: [] };
                         /** flag switched on during layout animation */
                         this.animated = false;
 
@@ -77,7 +75,8 @@ angular.module('gsUiInfra')
 
                         var start = function () {
                             self.animated = true;
-                            self.layouter && self.layouter.layout(self.data, 'graph');
+                            // TODO pass tree to the layouter
+                            self.layouter && self.layouter.layout(null, self.graph);
                         };
 
                         var end = function () {
@@ -93,39 +92,31 @@ angular.module('gsUiInfra')
                                     segmentH = self.width / rangeX,
                                     segmentV = self.height / rangeY;
                                 // update the nodes position data according to the layouter data
-                                if (layouter instanceof GsD3Graph.Layout.Matrix) {
-                                    self.data.nodes.forEach(function (d, i) {
-                                        d.fixed = true;
-                                        d.x = segmentH * d.layoutPosX + (segmentH - d.width) / 2;
-                                        d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
-                                    });
-                                } else if (layouter instanceof GsD3Graph.Layout.Tensor) {
-                                    var pad = 38;
-                                    self.data.nodes.forEach(function (d, i) {
-                                        // TODO WTF? how to set width and height?
-                                        if (!d.dimensionsFinalized) {
-                                            d.width = d.width - d.layoutPosZ * pad * 2;
-                                            d.height = d.height - d.layoutPosZ * pad * 2;
-                                            d.dimensionsFinalized = true;
-                                        }
-                                        d.fixed = true;
-                                        // TODO implement differently according to the plan design
-                                        d.x = segmentH * d.layoutPosX + (segmentH - d.width) / 2;
-                                        d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
-                                    });
+                                var pad = 38;
+                                self.graph.nodes.forEach(function (d, i) {
+                                    // TODO WTF? how to set width and height?
+                                    if (!d.dimensionsFinalized) {
+                                        d.width = d.width - d.layoutPosZ * pad * 2;
+                                        d.height = d.height - d.layoutPosZ * pad * 2;
+                                        d.dimensionsFinalized = true;
+                                    }
+                                    d.fixed = true;
+                                    // TODO implement differently according to the plan design
+                                    d.x = segmentH * d.layoutPosX + (segmentH - d.width) / 2;
+                                    d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
+                                });
 
-                                    self.nodesSelection.selectAll('rect')
-                                        .attr('width', function (d) {
-                                            return d.width;
-                                        })
-                                        .attr('height', function (d) {
-                                            return d.height;
-                                        });
-                                    self.nodesSelection.selectAll('text')
-                                        .attr('x', function (d) {
-                                            return d.width / 2;
-                                        })
-                                }
+                                self.nodesSelection.selectAll('rect')
+                                    .attr('width', function (d) {
+                                        return d.width;
+                                    })
+                                    .attr('height', function (d) {
+                                        return d.height;
+                                    });
+                                self.nodesSelection.selectAll('text')
+                                    .attr('x', function (d) {
+                                        return d.width / 2;
+                                    })
                             }
 
                             // update dom selections
@@ -149,8 +140,8 @@ angular.module('gsUiInfra')
                         };
 
                         this.force = d3.layout.force()
-                            .nodes(this.data.nodes)
-                            .links(this.data.edges)
+                            .nodes(this.graph.nodes)
+                            .links(this.graph.edges)
                             .charge(-1000)
                             .linkDistance(180)
                             .on('tick', tick)
@@ -180,218 +171,6 @@ angular.module('gsUiInfra')
                         },
 
                         /**
-                         * Adds a node to the data, and optionally refreshing the graph.
-                         *
-                         * @param node A node object to add, must have an id property.
-                         * @param refresh Optional, whether to refresh the graph.
-                         */
-                        addNode: function (node, refresh) {
-                            // sanitize
-                            if (!node || typeof node.id === 'undefined' || GsUtils.findBy(this.data.nodes, 'id', node.id)) {
-                                return;
-                            }
-
-                            // add to graph
-                            this.data.nodes.push(node);
-                            // look for related edges in logical edges array, collect them for addition,
-                            // and remove them from the logical edges array
-                            var i = this.ghostEdges.length,
-                                nodeEdges = [];
-
-                            while (i--) {
-                                var edge = this.ghostEdges[i];
-                                if (edge.source === node.id && GsUtils.findBy(this.data.nodes, 'id', edge.target) ||
-                                    edge.target === node.id && GsUtils.findBy(this.data.nodes, 'id', edge.source)) {
-                                    nodeEdges.push(edge);
-                                    this.ghostEdges.splice(i, 1);
-                                }
-                            }
-                            // add all edges found for that node
-                            i = nodeEdges.length;
-                            while (i--) {
-                                this.addEdge(nodeEdges[i]);
-                            }
-                            // refresh as necessary
-                            refresh && this.refresh();
-                        },
-
-                        /**
-                         * Removes a node from the data, and optionally refreshing the graph.
-                         *
-                         * @param node A node object or the id of the node to remove.
-                         * @param refresh Optional, whether to refresh the graph.
-                         */
-                        removeNode: function (node, refresh) {
-                            // sanitize
-                            if (!this.data.nodes.length || typeof node === 'undefined') return;
-
-                            var n, removed;
-                            // find node in the data
-                            if (typeof node === 'object') {
-                                n = node;
-                            } else {
-                                n = GsUtils.findBy(this.data.nodes, 'id', node);
-                            }
-                            // remove node from the model
-                            n && (removed = this.data.nodes.splice(this.data.nodes.indexOf(n), 1)[0]);
-                            // remove all connected edges
-                            if (removed) {
-                                var edge,
-                                    i = this.data.edges.length;
-                                // clear live edges
-                                while (i--) {
-                                    edge = this.data.edges[i];
-                                    if (edge.source.id == removed.id || edge.target.id == removed.id) {
-                                        this.data.edges.splice(i, 1);
-                                    }
-                                }
-                                // clear logical edges
-                                i = this.ghostEdges.length;
-                                while (i--) {
-                                    edge = this.ghostEdges[i];
-                                    if (edge.source == removed.id || edge.target == removed.id) {
-                                        this.ghostEdges.splice(i, 1);
-                                    }
-                                }
-                            }
-
-                            // refresh as necessary
-                            refresh && this.refresh();
-                        },
-
-                        /**
-                         * Adds an edge to the graph.
-                         *
-                         * @param edge An edge object in the form:
-                         * <pre><code>
-                         *     { source: 'nodeId', target: 'nodeId' [, directed: boolean] [, status: 'status'] }
-                         * </code></pre>
-                         * if the <code>directed</code> property is omitted, <code>directed:true</code> is assumed.
-                         * @param refresh Whether to refresh the graph.
-                         */
-                        addEdge: function (edge, refresh) {
-                            // check for undefined args, source and target may have falsey values (e.g. 0), so we need to check for undefined
-                            if (typeof edge === 'undefined' || typeof edge.source === 'undefined' || typeof edge.target === 'undefined') {
-                                return;
-                            }
-
-                            var source, target;
-                            // if source or target nodes don't exist in the graph, save for future addition, and bail
-                            if (!(source = GsUtils.findBy(this.data.nodes, 'id', edge.source)) || !(target = GsUtils.findBy(this.data.nodes, 'id', edge.target))) {
-                                this.ghostEdges.push(edge);
-                                return;
-                            }
-
-                            // construct the real edge object
-                            var e = {
-                                source: source,
-                                target: target,
-                                status: 'status' in edge ? edge.status : null,
-                                directed: 'directed' in edge ? edge.directed : true
-                            };
-                            // add to graph
-                            this.data.edges.push(e);
-                            // refresh as necessary
-                            refresh && this.refresh();
-                        },
-
-                        /**
-                         * Removes an edge from the graph.
-                         *
-                         * @param edge An edge object to remove, in the form:
-                         * <pre><code>
-                         *     { source: nodeObject, target: nodeObject [, directed: boolean] [, status: 'status'] }
-                         * </code></pre>
-                         * These objects only need to have mock node objects with only the id property mandatory.
-                         * @param refresh Whether to refresh the graph.
-                         */
-                        removeEdge: function (edge, refresh) {
-                            if (typeof edge === 'undefined') return;
-
-                            var i = _edgeLookup.call(this, 'id', edge.source.id, 'id', edge.target.id, true),
-                                removed = this.data.edges.splice(i, 1)[0];
-
-                            refresh && this.refresh();
-
-                            return removed;
-                        },
-
-                        /**
-                         * Updates an existing node.
-                         *
-                         * @param node A node object containing the properties to update in the node (may be partial).
-                         * @param refresh Whether to refresh the graph.
-                         */
-                        updateNode: function (node, refresh) {
-                            var oldNode = GsUtils.findBy(this.data.nodes, 'id', node.id);
-                            if (!oldNode || !node ||
-                                typeof oldNode.id === 'undefined' || typeof node.id === 'undefined' ||
-                                oldNode === node) {
-                                return;
-                            }
-
-                            var index = this.data.nodes.indexOf(oldNode),
-                                newNode = jQuery.extend(true, /*{}, */oldNode, node); // BEWARE of extending into a new object! this breaks functionality for some reason
-
-                            this.data.nodes.splice(index, 1, newNode)[0];
-
-                            refresh && this.refresh();
-                        },
-
-                        /**
-                         * Updates a single edge or multiple edges in the graph. The match is made either by full lookup
-                         * (source and target are both specified) or be partial lookup (only source or only target
-                         * is specified).
-                         *
-                         * @param edge An object in the form:
-                         * <pre><code>
-                         *     { source: nodeObject, target: nodeObject [, directed: boolean] [, status: 'status'] }
-                         * </code></pre>
-                         * These objects need to have mock node objects with only one property (mostly 'id'). The
-                         * behavior is unspecified for edge objects passed with multiple properties.
-                         * @param refresh Whether to refresh the graph.
-                         * @param greedy <code>true</code> to update every match according to the source/target ids,
-                         * <code>false</code> to only match the first occurrence.
-                         *
-                         * As noted, an edge passed to this method may have any property name for the source and target
-                         * objects, e.g. 'type'. This means that when using the greedy mode, this method can be used to
-                         * update all loose matches of edges, e.g. to update any edge between nodes with type of
-                         * 'PROCESSING_UNIT' and nodes with type of 'DATABASE', pass the following edge object:
-                         * <pre><code>
-                         *     { source: { type: 'PROCESSING_UNIT' }, target: { type: 'DATABASE' }, status: 'ok' }
-                         * </code></pre>
-                         */
-                        updateEdge: function (edge, refresh, greedy) {
-                            if (typeof edge === 'undefined') return;
-
-                            var source = edge.source,
-                                target = edge.target,
-                                sourceKey = source && Object.keys(source)[0],
-                                sourceValue = sourceKey && source[sourceKey],
-                                targetKey = target && Object.keys(target)[0],
-                                targetValue = targetKey && target[targetKey];
-
-                            var edgeMatch = _edgeLookup.call(this, sourceKey, sourceValue, targetKey, targetValue, false, greedy);
-                            if (!edgeMatch || edgeMatch === edge || edgeMatch instanceof Array && !edgeMatch.length) {
-                                return;
-                            }
-
-                            // when only messing with a single edge object, put it in an array to handle it further
-                            greedy || (edgeMatch = [edgeMatch]);
-
-                            // replace edges in the model with the updated edges
-                            var i = edgeMatch.length;
-                            while (i--) {
-                                var e = edgeMatch[i]
-                                this.data.edges.splice(
-                                    this.data.edges.indexOf(e), 1, jQuery.extend(true, e, edge));
-                            }
-
-                            // refresh as necessary
-                            refresh && this.refresh();
-                        },
-
-                        /**
                          * Re-render the graph, or update the graph with new data.
                          *
                          * @param newData the new data in the format { nodes: [ {} ], edges: [ {} ] }. if no data is
@@ -400,13 +179,13 @@ angular.module('gsUiInfra')
                          * and in such cases refresh must be called to update the graph.
                          */
                         refresh: function (newData) {
-                            if (newData === this.data) return;
+                            if (newData === this.graph) return;
 
-                            this.data = newData || this.data;
+                            this.graph = newData || this.graph;
 
                             this.force
-                                .nodes(this.data.nodes)
-                                .links(this.data.edges);
+                                .nodes(this.graph.nodes)
+                                .links(this.graph.edges);
 
                             // tie data to edge handles
                             _bindEdges.call(this);
@@ -441,7 +220,7 @@ angular.module('gsUiInfra')
                         },
 
                         layout: function () {
-                            if (!this.data.nodes.length) return;
+                            if (!this.graph.nodes.length) return;
                             this.force.start();
                             if (this.layouter) {
                                 this.force.tick();
@@ -464,7 +243,7 @@ angular.module('gsUiInfra')
 
                         // pu nodes group
                         this.nodesSelection = this.nodesSelection.data(function () {
-                            return self.data.nodes;
+                            return self.graph.nodes;
                         }, nodesDataKey);
                     }
 
@@ -532,7 +311,7 @@ angular.module('gsUiInfra')
                     function _bindEdges() {
                         var self = this;
                         this.edgesSelection = this.edgesSelection.data(function () {
-                            return $window.GsUtils.filter(self.data.edges, 'type', 'connected_to');
+                            return $window.GsUtils.filter(self.graph.edges, 'type', 'connected_to');
                         });
                     }
 
@@ -547,7 +326,7 @@ angular.module('gsUiInfra')
                         edge.append('svg:path')
                             .style('fill', 'none')
                             .style('stroke', function (d) {
-                                return d.source.color || self.data.nodes[d.source.id || d.source].color || '#ddd';
+                                return d.source.color || self.graph.nodes[d.source.id || d.source].color || '#ddd';
                             })
                             .style('stroke-width', 4)
                             .style('opacity', 0.6)
@@ -555,39 +334,6 @@ angular.module('gsUiInfra')
 
 
                     /* helpers */
-
-                    function _edgeLookup(sourceKey, sourceValue, targetKey, targetValue, asIndex, greedy) {
-
-                        // value can be falsey, e.g. id: 0, so we need to check for type
-                        var sourceDefined = typeof sourceValue !== 'undefined';
-                        var targetDefined = typeof targetValue !== 'undefined';
-                        if (!sourceDefined && !targetDefined) return;
-
-                        var i = this.data.edges.length,
-                        // allow for lookup only by one of sourceId or targetId
-                            lenient = sourceDefined && !targetDefined || !sourceDefined && targetDefined,
-                            edges = [];
-                        // iterate over the data edges and add relevant edges or their indexes to the returned array
-                        while (i--) {
-                            var found,
-                                e = this.data.edges[i];
-                            found = lenient ?
-                                (sourceDefined && e.source[sourceKey] == sourceValue || targetDefined && e.target[targetKey] == targetValue) :
-                                (e.source[sourceKey] == sourceValue && e.target[targetKey] == targetValue);
-                            if (found) {
-                                var val = asIndex ? i : e;
-                                // do we need all matching edges, or just the first?
-                                if (greedy) {
-                                    // add to array bottom, as we're iterating backwards
-                                    edges.unshift(val);
-                                } else {
-                                    return val;
-                                }
-                            }
-                        }
-                        // return the collected edges for greedy lookup, or none as first is not found
-                        return greedy ? edges : false;
-                    }
 
                     /*
                      * calculations of coordinates for edges in the graph.
@@ -735,305 +481,12 @@ angular.module('gsUiInfra')
 
                             var graph = graphs[id];
                             if (!graph) {
-                                graphs[id] = new GsD3Graph(target, GsD3Graph.Factory.layout(detail.layoutConfig));
+//                                graphs[id] = new GsD3Graph(target, GsD3Graph.Factory.layout(detail.layoutConfig));
+                                graphs[id] = new GsD3Graph(target, Layout.Tensor);
                             }
                         });
 
                     })();
-
-
-                    /* factories */
-
-                    GsD3Graph.Factory = (function () {
-
-                        return {
-
-                            layout: function (layoutConfig) {
-                                var type = layoutConfig.type && layoutConfig.type.toString().toLowerCase();
-                                switch (type) {
-                                    case 'matrix':
-                                        var newMatrix = Object.create(GsD3Graph.Layout.Matrix.prototype);
-                                        newMatrix = (GsD3Graph.Layout.Matrix.apply(newMatrix, layoutConfig.args) || newMatrix);
-                                        return (newMatrix);
-                                    case 'layered':
-                                        var newLayered = Object.create(GsD3Graph.Layout.Tensor.prototype);
-                                        newLayered = (GsD3Graph.Layout.Tensor.apply(newLayered, layoutConfig.args) || newLayered);
-                                        return (newLayered);
-                                    default:
-                                        return null;
-                                }
-                            }
-                        }
-                    })();
-
-
-                    /* layouters */
-
-                    // base class for all layouters
-                    // note: all layouter implementation must have a 'layout()' method.
-                    GsD3Graph.Layout = function () {
-                    };
-
-                    GsD3Graph.Layout.prototype = {
-                    };
-
-                    /* matrix layouter */
-
-                    GsD3Graph.Layout.Matrix = function (criteria, distributionMatrix) {
-                        GsD3Graph.Layout.call(this);
-
-                        this.data = [];
-                        this.criteria = criteria;
-                        this.distributionMatrix = distributionMatrix || [];
-                        this.matrix = []; // a two dimensional array
-                    };
-
-                    GsD3Graph.Layout.Matrix.prototype = new GsD3Graph.Layout();
-
-                    GsD3Graph.Layout.Matrix.prototype.layout = function (data) {
-                        this.data = data;
-                        this.layoutPrepare();
-                        this.layoutCalcBounds();
-                    };
-
-                    GsD3Graph.Layout.Matrix.prototype.layoutPrepare = function () {
-
-                        var self = this;
-
-                        function findInDistributionMatrix(val) {
-                            var dist = self.distributionMatrix;
-                            for (var i in dist) {
-                                if (dist[i].indexOf(val) !== -1) {
-                                    return i;
-                                }
-                            }
-                            return false;
-                        }
-
-                        this.matrix = [];
-
-                        for (var i in this.data.nodes) {
-
-                            var node = this.data.nodes[i];
-                            node.layoutPosX = 0;
-                            node.layoutPosY = 0;
-
-                            var criteria = node[this.criteria];
-                            var index = criteria ? findInDistributionMatrix(criteria) : this.distributionMatrix.length - 1;
-                            if (typeof this.matrix[index] === 'undefined') {
-                                this.matrix[index] = [];
-                            }
-                            this.matrix[index][i] = node;
-                        }
-
-                        var counterX = 0;
-                        for (var x in this.distributionMatrix) {
-                            var counterY = 0;
-                            for (var y in this.matrix[x]) {
-                                var node = this.matrix[x][y];
-                                node.layoutPosX = counterX;
-                                node.layoutPosY = counterY;
-                                counterY++;
-                            }
-                            counterX++;
-                        }
-                    };
-
-                    GsD3Graph.Layout.Matrix.prototype.layoutCalcBounds = function () {
-                        var minx = 0,
-                            maxx = this.distributionMatrix.length - 1,
-                            miny = Infinity,
-                            maxy = -Infinity;
-
-                        var nodes = this.data.nodes;
-                        for (var i in nodes) {
-                            var y = nodes[i].layoutPosY;
-
-                            if (y > maxy) maxy = y;
-                            if (y < miny) miny = y;
-                        }
-
-                        if (miny == maxy) maxy++;
-
-                        this.layoutMinX = minx;
-                        this.layoutMaxX = maxx;
-                        this.layoutMinY = miny;
-                        this.layoutMaxY = maxy;
-                    };
-
-                    GsD3Graph.Layout.Matrix.prototype.constructor = GsD3Graph.Layout.Matrix;
-
-
-                    /* layered layouter */
-
-                    /**
-                     * Use the layered layouter to represent a graph with containment relationships with
-                     * a tensor (3 dimensional matrix).
-                     *
-                     * @constructor
-                     */
-                    GsD3Graph.Layout.Tensor = function () {
-                        GsD3Graph.Layout.call(this);
-
-                        this.data = [];
-                        this.tensor;
-                    };
-
-                    GsD3Graph.Layout.Tensor.prototype = new GsD3Graph.Layout();
-
-                    // TODO get struct from external configuration ('tree'/'graph'). pass from outside the directive.
-                    GsD3Graph.Layout.Tensor.prototype.layout = function (data, struct) {
-                        this.data = data;
-                        this.struct = struct;
-                        this.layoutPrepare();
-                        this.layoutCalcBounds();
-                    };
-
-                    GsD3Graph.Layout.Tensor.prototype.layoutPrepare = function () {
-
-                        // TODO
-                        // * consider connection relationships in the tensor sorting (for X/Y)
-                        // * extract functions to utilities (services)
-                        // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
-                        //   implementation details: consider that each node type might have different direction (horizontal/vertical)
-
-                        // PSEUDO
-                        // 1. build a tree from graph according to containment relationships
-                        // 2. sort the tree
-                        // 3. traverse the tree, determine X,Y,Z values for each node:
-                        //      Z will determine the padding as well as the width and height for any level that's not the deepest
-                        //      (deepest level has fixed dimensions)
-                        //      X,Y will determine the X,Y position in the layout
-
-                        var self = this,
-                            tree;
-                        if (this.struct === 'graph') {
-                            // build a tree from graph according to containment relationships
-                            tree = this._toTree(this.data);
-                        } else if (this.struct === 'tree') {
-                            tree = this.data;
-                        }
-
-                        // traverse the tree, sort it, attach X,Y,Z values for each node
-                        // to represent a tensor (3 dimensional matrix)
-
-                        var depth = -1;
-                        function walk(node) { // using BFT
-                            depth++;
-                            // sort the children according to connection relationships
-                            node.children.sort(function (a, b) {
-                                if (a.dependencies && a.dependencies.indexOf(b.id) !== -1) return -1;
-                                if (b.dependencies && b.dependencies.indexOf(a.id) !== -1) return 1;
-                                return 0;
-                            });
-                            var i = node.children.length;
-                            while (i--) {
-                                var child = node.children[i];
-                                // attach properties to the original data
-
-                                var n;
-                                if (self.struct === 'graph') {
-                                    n = $window.GsUtils.findBy(self.data.nodes, 'id', child.id);
-                                } else if (self.struct === 'tree') {
-                                    n = child;
-                                }
-                                n.layoutPosX = i;
-                                n.layoutPosY = 0;
-                                n.layoutPosZ = depth;
-                                // continue with traversal
-                                child.children && child.children.length && walk(child);
-                            }
-                            depth--;
-                            return node;
-                        }
-
-                        this.tensor = walk(tree);
-
-//                        console.log('- - - after walking down the tree - - -')
-//                        console.log('> tensor:')
-//                        console.log(JSON.stringify(this.tensor, null, 4));
-//                        console.log('> data.nodes:')
-//                        console.log(JSON.stringify(this.data.nodes, null, 4));
-
-                    };
-
-                    GsD3Graph.Layout.Tensor.prototype.layoutCalcBounds = function () {
-
-                        var minx = Infinity,
-                            maxx = -Infinity,
-                            miny = Infinity,
-                            maxy = -Infinity,
-                            minz = Infinity,
-                            maxz = -Infinity;
-
-                        var nodes = this.data.nodes;
-                        for (var i in nodes) {
-                            var x = nodes[i].layoutPosX,
-                                y = nodes[i].layoutPosY,
-                                z = nodes[i].layoutPosZ;
-
-                            if (x > maxx) maxx = x;
-                            if (x < minx) minx = x;
-                            if (y > maxy) maxy = y;
-                            if (y < miny) miny = y;
-                            if (z > maxz) maxz = z;
-                            if (z < minz) minz = z;
-                        }
-
-                        if (miny == maxy) maxy++;
-
-                        this.layoutMinX = minx;
-                        this.layoutMaxX = maxx;
-                        this.layoutMinY = miny;
-                        this.layoutMaxY = maxy;
-                        this.layoutMinZ = minz;
-                        this.layoutMaxZ = maxz;
-                    };
-
-                    GsD3Graph.Layout.Tensor.prototype._toTree = function () {
-
-                        var self = this,
-                            forest = getInitialForest(),
-                            ei = this.data.edges.length;
-//                        console.log('- - - before tree built - - -');
-//                        console.log(JSON.stringify(forest, null, 4));
-
-                        // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
-                        while (ei--) {
-                            var e = this.data.edges[ei];
-                            // sort tree hierarchy
-                            var source = $window.GsUtils.findBy(forest, 'id', e.source.id),
-                                target = $window.GsUtils.findBy(forest, 'id', e.target.id);
-                            if (e.type === 'contained_in') {
-                                var removedChild = forest.splice(forest.indexOf(source), 1)[0];
-                                target.children.push(removedChild);
-                            }
-                            // attach dependency references
-                            else if (e.type === 'connected_to') {
-                                e.directed = true;
-                                source.dependencies && source.dependencies.push(target.id) || (source.dependencies = [target.id]);
-                            }
-                        }
-
-                        var tree = {id: "root", children: forest};
-//                        console.log('- - - after tree built - - -')
-//                        console.log(JSON.stringify(tree, null, 4));
-
-                        function getInitialForest() {
-                            var forest = [],
-                                i = self.data.nodes.length;
-                            while (i--) {
-                                var n = self.data.nodes[i];
-                                forest.push({id: n.id, children: []});
-                            }
-                            return forest;
-                        }
-
-                        return tree;
-                    }
-
-                    GsD3Graph.Layout.Tensor.prototype.constructor = GsD3Graph.Layout.Tensor;
-
 
                     /* export to global scope */
                     $window.GsD3Graph = GsD3Graph;
@@ -1077,58 +530,120 @@ angular.module('gsUiInfra')
 
                 // build initial graph
                 callInitialization({
-                    type: 'layered',
+                    type: 'tensor',
                     args: []
                 })
-                callInvocation('refresh', [ getMockData() ]);
+                callInvocation('refresh', [ getMockData('graph') ]); // TODO describe the flow from here - what happens? decouple the layouter from the renderer
 
-                function getMockData() {
-                    return {
-                        "nodes": [
-                            {
-                                "id": 0,
-                                "name": "vagrant_host",
-                                "type": ["cloudify.tosca.types.host"]
-                            },
-                            {
-                                "id": 1,
-                                "name": "pickle_db",
-                                "type": ["cloudify.tosca.types.db_server", "cloudify.tosca.types.middleware_server"]
-                            },
-                            {
-                                "id": 2,
-                                "name": "flask",
-                                "type": ["cloudify.tosca.types.web_server", "cloudify.tosca.types.middleware_server"]
-                            },
-                            {
-                                "id": 3,
-                                "name": "flask_app",
-                                "type": ["cloudify.tosca.types.app_module"]
-                            }
-                        ],
-                        "edges": [
-                            {
-                                "type": "contained_in",
-                                "source": 1,
-                                "target": 0
-                            },
-                            {
-                                "type": "contained_in",
-                                "source": 2,
-                                "target": 0
-                            },
-                            {
-                                "type": "contained_in",
-                                "source": 3,
-                                "target": 2
-                            },
-                            {
-                                "type": "connected_to",
-                                "source": 3,
-                                "target": 1
-                            }
-                        ]
-                    };
+                function getMockData(struct) {
+
+                    if (struct === 'tree') {
+                        return {
+                            "id": "root",
+                            "children": [
+                                {
+                                    "id": 0,
+                                    "type": [
+                                        "cloudify.tosca.types.network"
+                                    ],
+                                    "dependencies": [
+                                        3
+                                    ],
+                                    "children": [
+                                        {
+                                            "id": 2,
+                                            "type": [
+                                                "cloudify.tosca.types.tier"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "id": 3,
+                                                    "type": [
+                                                        "cloudify.tosca.types.host"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "id": 4,
+                                                            "type": [
+                                                                "cloudify.tosca.types.web_server",
+                                                                "cloudify.tosca.types.middleware_server"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "id": 5,
+                                                                    "type": [
+                                                                        "cloudify.tosca.types.app_module"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "id": 1,
+                                            "type": [
+                                                "cloudify.tosca.types.tier"
+                                            ],
+                                            "dependencies": [
+                                                4,
+                                                5
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        };
+                    }
+                    if (struct === 'graph') {
+                        return {
+                            "nodes": [
+                                {
+                                    "id": 0,
+                                    "name": "vagrant_host",
+                                    "type": ["cloudify.tosca.types.host"]
+                                },
+                                {
+                                    "id": 1,
+                                    "name": "pickle_db",
+                                    "type": ["cloudify.tosca.types.db_server", "cloudify.tosca.types.middleware_server"]
+                                },
+                                {
+                                    "id": 2,
+                                    "name": "flask",
+                                    "type": ["cloudify.tosca.types.web_server", "cloudify.tosca.types.middleware_server"]
+                                },
+                                {
+                                    "id": 3,
+                                    "name": "flask_app",
+                                    "type": ["cloudify.tosca.types.app_module"]
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "type": "contained_in",
+                                    "source": 1,
+                                    "target": 0
+                                },
+                                {
+                                    "type": "contained_in",
+                                    "source": 2,
+                                    "target": 0
+                                },
+                                {
+                                    "type": "contained_in",
+                                    "source": 3,
+                                    "target": 2
+                                },
+                                {
+                                    "type": "connected_to",
+                                    "source": 3,
+                                    "target": 1
+                                }
+                            ]
+                        };
+                    }
 
                 }
 
