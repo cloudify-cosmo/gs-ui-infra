@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .directive('gsGauge', ['$window', 'arrayUtils', function ($window, arrayUtils) {
+    .directive('gsGauge', ['$window', 'Utils', function ($window, Utils) {
         return {
             template: '',
             restrict: 'E',
@@ -64,10 +64,10 @@ angular.module('gsUiInfra')
                 if (scope.colors) {
                     _borderColor = scope.colors.border || _borderColor;
                     _tickColor = scope.colors.tick || _tickColor;
-                    _bgColors = arrayUtils.dissolve(scope.colors.background, _bgColors);
-                    _dialColors = arrayUtils.dissolve(scope.colors.dial, _dialColors);
-                    _basisColors = arrayUtils.dissolve(scope.colors.basis, _basisColors);
-                    _pointerColors = arrayUtils.dissolve(scope.colors.pointer, _pointerColors);
+                    _bgColors = Utils.dissolveArray(scope.colors.background, _bgColors);
+                    _dialColors = Utils.dissolveArray(scope.colors.dial, _dialColors);
+                    _basisColors = Utils.dissolveArray(scope.colors.basis, _basisColors);
+                    _pointerColors = Utils.dissolveArray(scope.colors.pointer, _pointerColors);
                 }
 
                 var frameBox =

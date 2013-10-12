@@ -1,15 +1,14 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .service('Layout', ['$window', function Layout($window) {
-        // AngularJS will instantiate a singleton by calling "new" on this function
+    .service('Layout', ['Utils', function Layout(Utils) {
+
         return {
 
             Tensor: {
 
-                layout: function (model, rendererData) {
-                    this.tree = model;
-                    this.graph = rendererData;
+                layout: function (graph) {
+                    this.graph = graph;
                     this.layoutPrepare();
                     this.layoutCalcBounds();
                 },
@@ -31,27 +30,14 @@ angular.module('gsUiInfra')
                     //      X,Y will determine the X,Y position in the layout
 
                     var self = this,
-                        tree;
-                    // struct is a tree
-                    if (this.graph.children) {
-                        tree = this.graph;
-                    }
-                    // it's a graph
-                    else {
-                        // build a tree from graph according to containment relationships
-                        tree = this._toTree(this.graph);
-                    }
+                        tree = this._asTree(this.graph);
 
                     // traverse the tree, sort it, attach X,Y,Z values for each node
                     // to represent a tensor (3 dimensional matrix).
-                    // build a graph for the renderer
+                    // update the graph for the renderer
 
-                    var depth = -1;
-
-                    function walk(node) {
-                        depth++;
-                        // sort the children according to connection relationships
-                        node.children.sort(function (a, b) {
+                    var sorter = function (a, b) {
+                            // sort the children according to connection relationships
                             if (a.dependencies && a.dependencies.indexOf(b.id) !== -1) {
                                 return -1;
                             }
@@ -59,36 +45,18 @@ angular.module('gsUiInfra')
                                 return 1;
                             }
                             return 0;
-                        });
-                        var i = node.children.length;
-                        while (i--) {
-                            var child = node.children[i];
+                        },
+                        action = function (child, i, depth) {
                             // attach properties to the original graph
-
                             var n;
-                            if (self.graph.children) {
-                                n = child;
-                            } else {
-                                n = $window.GsUtils.findBy(self.graph.nodes, 'id', child.id);
-                            }
+                            n = Utils.findBy(self.graph.nodes, 'id', child.id);
                             n.layoutPosX = i;
                             n.layoutPosY = 0;
                             n.layoutPosZ = depth;
+                        };
 
-                            // continue with traversal
-                            child.children && child.children.length && walk(child);
-                        }
-                        depth--;
-                        return node;
-                    }
 
-                    this.tensor = walk(tree);
-
-//                        console.log('- - - after walking down the tree - - -')
-//                        console.log('> tensor:')
-//                        console.log(JSON.stringify(this.tensor, null, 4));
-//                        console.log('> graph.nodes:')
-//                        console.log(JSON.stringify(this.graph.nodes, null, 4));
+                    Utils.walk(tree, sorter, action);
 
                 },
 
@@ -125,20 +93,18 @@ angular.module('gsUiInfra')
                     this.layoutMaxZ = maxz;
                 },
 
-                _toTree: function () {
+                _asTree: function () {
 
                     var self = this,
                         forest = getInitialForest(),
                         ei = this.graph.edges.length;
-//                        console.log('- - - before tree built - - -');
-//                        console.log(JSON.stringify(forest, null, 4));
 
                     // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                     while (ei--) {
                         var e = this.graph.edges[ei];
                         // sort tree hierarchy
-                        var source = $window.GsUtils.findBy(forest, 'id', e.source.id),
-                            target = $window.GsUtils.findBy(forest, 'id', e.target.id);
+                        var source = Utils.findBy(forest, 'id', e.source.id),
+                            target = Utils.findBy(forest, 'id', e.target.id);
                         if (e.type === 'contained_in') {
                             var removedChild = forest.splice(forest.indexOf(source), 1)[0];
                             target.children.push(removedChild);
@@ -151,8 +117,6 @@ angular.module('gsUiInfra')
                     }
 
                     var tree = {id: "root", children: forest};
-//                        console.log('- - - after tree built - - -')
-//                        console.log(JSON.stringify(tree, null, 4));
 
                     function getInitialForest() {
                         var forest = [],
