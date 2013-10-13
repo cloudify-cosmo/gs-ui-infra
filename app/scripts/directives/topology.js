@@ -3,7 +3,7 @@
 angular.module('gsUiInfra')
     .directive('topology', ['$window', 'Layout', 'Utils', function ($window, Layout, Utils) {
         return {
-            template: '<div id="graph"></div>',
+            template: '<div></div>',
             restrict: 'E',
             scope: {
                 data: '=',
@@ -11,6 +11,8 @@ angular.module('gsUiInfra')
             },
 
             link: function (scope, element, attrs) {
+
+                // TODO extract renderer implementation, add 'renderer' property to scope
 
                 function GsD3Graph(el, layouter) {
 
@@ -22,21 +24,16 @@ angular.module('gsUiInfra')
 
                     /** graph data structure */
                     this.graph = { nodes: [], edges: [] };
-                    /** flag switched on during layout animation */
-                    this.animated = false;
 
                     // handles to node and edge groups
                     this.edgesSelection = this.svg.append('svg:g').selectAll('g.edge');
                     this.nodesSelection = this.svg.append('svg:g').selectAll('g.node');
 
                     var start = function () {
-                        self.animated = true;
-                        // TODO pass tree to the layouter
                         self.layouter && self.layouter.layout(self.graph);
                     };
 
                     var end = function () {
-                        self.animated = false;
                     };
 
                     var tick = function () {
@@ -83,12 +80,6 @@ angular.module('gsUiInfra')
                             }).attr('data-target', function (d) {
                                 return d.target.id;
                             });
-                        self.edgesSelection.selectAll('image').attr('x', function (d) {
-                            return _pathCenter(d.source, d.target, d.directed).x - 10;
-                        });
-                        self.edgesSelection.selectAll('image').attr('y', function (d) {
-                            return _pathCenter(d.source, d.target, d.directed).y - 10;
-                        });
                         self.nodesSelection.attr('transform', function (d) {
                             return 'translate(' + d.x + ',' + d.y + ')';
                         });
@@ -381,17 +372,13 @@ angular.module('gsUiInfra')
                     return path;
                 }
 
-                function _pathCenter(bb1, bb2, directed) {
-                    var coords = _calcBezierCoords(bb1, bb2, directed);
-                    return {x: (coords.x1 + coords.x4) / 2, y: (coords.y1 + coords.y4) / 2};
-                }
-
 
                 var graphEl = element[0].childNodes[0],
                     graphInstance = new GsD3Graph(graphEl, scope.layouter);
 
-                // TODO put inside a function, export to scope (?)
-                graphInstance.refresh(scope.data);
+                scope.$watch('data', function(oldValue, newValue) {
+                    graphInstance.refresh(scope.data);
+                });
 
             }
         };
