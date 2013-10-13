@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .service('Layout', ['Utils', function Layout(Utils) {
+    .factory('Layout', ['Utils', function (Utils) {
 
         return {
 

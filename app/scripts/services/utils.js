@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .service('Utils', function Utils() {
+    .factory('Utils', function Utils() {
 
         var depth = -1;
 
