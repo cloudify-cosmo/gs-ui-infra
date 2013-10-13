@@ -29,28 +29,34 @@ angular.module('gsUiInfra')
                     this.edgesSelection = this.svg.append('svg:g').selectAll('g.edge');
                     this.nodesSelection = this.svg.append('svg:g').selectAll('g.node');
 
-                    var start = function () {
-                        self.layouter && self.layouter.layout(self.graph);
-                    };
-
-                    var end = function () {
-                    };
-
-                    var tick = function () {
+                    this.renderLayout = function () {
 
                         if (self.layouter) {
-                            var layouter = self.layouter,
-                                rangeX = layouter.layoutMaxX - layouter.layoutMinX + 1,
-                                rangeY = layouter.layoutMaxY - layouter.layoutMinY + 1,
+
+                            var ei = self.graph.edges.length;
+                            while (ei--) {
+                                var edge = self.graph.edges[ei],
+                                    sourceId = edge.source,
+                                    targetId = edge.target,
+                                    source = Utils.findBy(self.graph.nodes, 'id', sourceId),
+                                    target = Utils.findBy(self.graph.nodes, 'id', targetId);
+
+                                edge.source = source;
+                                edge.target = target;
+                            }
+
+                            self.layouter.layout(self.graph);
+
+                            var rangeX = self.layouter.layoutMaxX - self.layouter.layoutMinX + 1,
+                                rangeY = self.layouter.layoutMaxY - self.layouter.layoutMinY + 1,
                                 segmentH = self.width / rangeX,
                                 segmentV = self.height / rangeY;
                             // update the nodes position data according to the layouter data
                             var pad = 38;
                             self.graph.nodes.forEach(function (d, i) {
-                                // TODO WTF? how to set width and height?
                                 if (!d.dimensionsFinalized) {
-                                    d.width = d.width - d.layoutPosZ * pad * 2;
-                                    d.height = d.height - d.layoutPosZ * pad * 2;
+                                    d.width = 280 - d.layoutPosZ * pad * 2;
+                                    d.height = 280 - d.layoutPosZ * pad * 2;
                                     d.dimensionsFinalized = true;
                                 }
                                 d.fixed = true;
@@ -65,7 +71,7 @@ angular.module('gsUiInfra')
                                 })
                                 .attr('height', function (d) {
                                     return d.height;
-                                });
+                                })
                             self.nodesSelection.selectAll('text')
                                 .attr('x', function (d) {
                                     return d.width / 2;
@@ -75,25 +81,12 @@ angular.module('gsUiInfra')
                         // update dom selections
                         self.edgesSelection.selectAll('path').attr('d',function (d) {
                             return _bezierPath(d.source, d.target, d.directed);
-                        }).attr('data-source',function (d) {
-                                return d.source.id;
-                            }).attr('data-target', function (d) {
-                                return d.target.id;
-                            });
+                        });
                         self.nodesSelection.attr('transform', function (d) {
                             return 'translate(' + d.x + ',' + d.y + ')';
                         });
 
                     };
-
-                    this.force = d3.layout.force()
-                        .nodes(this.graph.nodes)
-                        .links(this.graph.edges)
-                        .charge(-1000)
-                        .linkDistance(180)
-                        .on('tick', tick)
-                        .on('start', start)
-                        .on('end', end);
 
                     // tie resize behavior
                     $window.addEventListener('resize', function () {
@@ -113,7 +106,6 @@ angular.module('gsUiInfra')
                         this.width = this.el.clientWidth || 1000;
                         this.height = this.el.clientHeight || 600;
                         this.svg.attr('width', this.width).attr('height', this.height);
-                        this.layouter || this.force.size([this.width, this.height]);
                         this.layout();
                     },
 
@@ -129,10 +121,6 @@ angular.module('gsUiInfra')
                         if (newData === this.graph) return;
 
                         this.graph = newData || this.graph;
-
-                        this.force
-                            .nodes(this.graph.nodes)
-                            .links(this.graph.edges);
 
                         // tie data to edge handles
                         _bindEdges.call(this);
@@ -167,11 +155,11 @@ angular.module('gsUiInfra')
                     },
 
                     layout: function () {
-                        if (!this.graph.nodes.length) return;
-                        this.force.start();
+                        if (!this.graph.nodes.length || !this.graph.edges.length) {
+                            return;
+                        }
                         if (this.layouter) {
-                            this.force.tick();
-                            this.force.stop();
+                            this.renderLayout();
                         }
                     }
 
@@ -203,15 +191,20 @@ angular.module('gsUiInfra')
                     var node = this.nodesSelection.enter().append('svg:g').attr('class', 'node');
 
                     node.append('svg:rect')
-                        // populate width/height properties for the first time. from now on we can reference d.width/d.height
                         .attr('width', function (d) {
-                            return d.width || (d.width = 280);
+                            return d.width;
                         })
                         .attr('height', function (d) {
-                            return d.height || (d.height = 280);
+                            return d.height;
                         })
-                        .attr('rx', 8)
-                        .attr('ry', 8)
+                        .attr('x', function (d) {
+                            return d.x;
+                        })
+                        .attr('y', function (d) {
+                            return d.y;
+                        })
+                        .attr('rx', 6)
+                        .attr('ry', 6)
                         .style('fill', '#f6f6f6')
                         .style('stroke', '#0d7acc')
                         .style('stroke-width', 1)

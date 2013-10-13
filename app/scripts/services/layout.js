@@ -7,7 +7,12 @@ angular.module('gsUiInfra')
 
             Tensor: {
 
-                layout: function (graph) {
+                // mock, should come from outside
+                order: {
+
+                },
+
+                layout: function (graph, order) {
                     this.graph = graph;
                     this.layoutPrepare();
                     this.layoutCalcBounds();
@@ -17,7 +22,6 @@ angular.module('gsUiInfra')
 
                     // TODO
                     // * consider connection relationships in the tensor sorting (for X/Y)
-                    // * extract functions to utilities (services)
                     // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
                     //   implementation details: consider that each node type might have different direction (horizontal/vertical)
 
