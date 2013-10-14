@@ -19,8 +19,8 @@ angular.module('gsUiInfra')
                     this.graph = { nodes: [], edges: [] };
 
                     // handles to node and edge groups
-                    this.edgesSelection = this.svg.append('svg:g').selectAll('g.edge');
                     this.nodesSelection = this.svg.append('svg:g').selectAll('g.node');
+                    this.edgesSelection = this.svg.append('svg:g').selectAll('g.edge');
 
                     // tie resize behavior
                     $window.addEventListener('resize', function () {
@@ -99,59 +99,75 @@ angular.module('gsUiInfra')
 
                     var self = this;
 
-                    if (this.layouter) {
-
-                        var ei = this.graph.edges.length;
-                        while (ei--) {
-                            var edge = this.graph.edges[ei],
-                                sourceId = edge.source,
-                                targetId = edge.target,
-                                source = Utils.findBy(this.graph.nodes, 'id', sourceId),
-                                target = Utils.findBy(this.graph.nodes, 'id', targetId);
-
-                            edge.source = source;
-                            edge.target = target;
-                        }
-
-                        this.layouter.layout(this.graph);
-
-                        var rangeX = this.layouter.layoutMaxX - this.layouter.layoutMinX + 1,
-                            rangeY = this.layouter.layoutMaxY - this.layouter.layoutMinY + 1,
-                            segmentH = this.width / rangeX,
-                            segmentV = this.height / rangeY;
-                        // update the nodes position data according to the layouter data
-                        var pad = 38;
-                        this.graph.nodes.forEach(function (d, i) {
-                            if (!d.dimensionsFinalized) {
-                                d.width = 280 - d.layoutPosZ * pad * 2;
-                                d.height = 280 - d.layoutPosZ * pad * 2;
-                                d.dimensionsFinalized = true;
-                            }
-                            d.fixed = true;
-                            // TODO implement differently according to the plan design
-                            d.x = segmentH * d.layoutPosX + (segmentH - d.width) / 2;
-                            d.y = segmentV * d.layoutPosY + (segmentV - d.height) / 2;
-                        });
-
-                        this.nodesSelection.selectAll('rect')
-                            .attr('width', function (d) {
-                                return d.width;
-                            })
-                            .attr('height', function (d) {
-                                return d.height;
-                            })
-                        this.nodesSelection.selectAll('text')
-                            .attr('x', function (d) {
-                                return d.width / 2;
-                            })
+                    if (!this.layouter) {
+                        return;
                     }
 
-                    // update dom selections
-                    this.edgesSelection.selectAll('path').attr('d', function (d) {
-                        return self._bezierPath(d.source, d.target, d.directed);
+                    // turn all IDs in the edges sources/targets to object references
+                    var ei = this.graph.edges.length;
+                    while (ei--) {
+                        var edge = this.graph.edges[ei],
+                            sourceId = edge.source,
+                            targetId = edge.target,
+                            source = Utils.findBy(this.graph.nodes, 'id', sourceId),
+                            target = Utils.findBy(this.graph.nodes, 'id', targetId);
+
+                        edge.source = source;
+                        edge.target = target;
+                    }
+
+                    // call the layouter to attach positioning data to nodes
+                    this.layouter.layout(this.graph);
+
+                    // use this data to paint
+                    var rangeX = this.layouter.layoutMaxX - this.layouter.layoutMinX + 1,
+                        rangeY = this.layouter.layoutMaxY - this.layouter.layoutMinY + 1,
+                        segmentH = this.width / rangeX,
+                        segmentV = this.height / rangeY,
+                        strokeWidth = 2,
+                        pad = [47, 30, 30, 30]
+                    pad.forEach(function (v, i) {
+                        pad[i] = v + strokeWidth * 2;
+                    })
+
+                    // update the nodes position data according to the layouter data
+                    this.graph.nodes.forEach(function (v, i) {
+                        v.fixed = true;
+                        if (!v.dimensionsFinalized) {
+                            v.width = segmentH - v.layoutPosZ * (pad[1] + pad[3]) - strokeWidth * 2;
+                            v.height = segmentV - v.layoutPosZ * (pad[0] + pad[2]) - strokeWidth * 2;
+                            v.dimensionsFinalized = true;
+                        }
+//                        v.x = segmentH * v.layoutPosX + (segmentH - v.width) / 2;
+//                        v.y = segmentV * v.layoutPosY + (segmentV - v.height) / 2;
+                        v.x = segmentH * v.layoutPosX + pad[3] * v.layoutPosZ + strokeWidth;
+                        v.y = segmentV * v.layoutPosY + pad[0] * v.layoutPosZ + strokeWidth;
                     });
+
+                    // update dom selections
                     this.nodesSelection.attr('transform', function (d) {
                         return 'translate(' + d.x + ',' + d.y + ')';
+                    });
+                    this.nodesSelection.selectAll('rect.container')
+                        .attr('width', function (d) {
+                            return d.width;
+                        })
+                        .attr('height', function (d) {
+                            return d.height;
+                        })
+                    this.nodesSelection.selectAll('rect.heading')
+                        .attr('width', function (d) {
+                            return d.width - 6;
+                        })
+                        .attr('height', function (d) {
+                            return 33;
+                        })
+                    this.nodesSelection.selectAll('text')
+                        .attr('x', function (d) {
+                            return d.width / 2;
+                        })
+                    this.edgesSelection.selectAll('path').attr('d', function (d) {
+                        return self._bezierPath(d.source, d.target, d.directed);
                     });
 
                 },
@@ -176,26 +192,44 @@ angular.module('gsUiInfra')
 
                 _enterNodes: function () {
 
-                    var node = this.nodesSelection.enter().append('svg:g').attr('class', 'node');
+                    var self = this,
+                        node = this.nodesSelection.enter().append('svg:g').attr('class', 'node');
 
+                    // outer container
                     node.append('svg:rect')
+                        .attr('class', 'container')
                         .attr('width', function (d) {
                             return d.width;
                         })
                         .attr('height', function (d) {
                             return d.height;
                         })
-                        .attr('x', function (d) {
-                            return d.x;
-                        })
-                        .attr('y', function (d) {
-                            return d.y;
-                        })
                         .attr('rx', 6)
                         .attr('ry', 6)
-                        .style('fill', '#f6f6f6')
-                        .style('stroke', '#0d7acc')
-                        .style('stroke-width', 1)
+
+                    // heading box
+                    node
+/*
+                        .data(function () {
+                            var arr = Utils.filter(self.graph.nodes, 'type', ["cloudify.tosca.types.app_module"]);
+                            return arr;
+                        })
+*/
+                        .append('svg:rect')
+                        .attr('class', 'heading')
+                        .attr('width', function (d) {
+                            return d.width - 6;
+                        })
+                        .attr('height', function (d) {
+                            return 33;
+                        })
+                        .attr('x', 3)
+                        .attr('y', 3)
+                        .attr('rx', 1)
+                        .attr('ry', 1)
+                        .style('fill', '#136e9d')
+                        .style('stroke', 'white')
+                        .style('stroke-width', 2)
 
                     // add name label
                     node.append('svg:text')

@@ -41,11 +41,33 @@ angular.module('gsUiInfra')
                 var i = arr.length;
                 while (i--) {
                     var item = arr[i];
-                    if (item.hasOwnProperty(propName) && item[propName] === propValue) {
+                    if (item.hasOwnProperty(propName) && this.equals(item[propName], propValue)) {
                         filtered.push(item);
                     }
                 }
                 return filtered;
+            },
+
+            /**
+             * Used for comparisons, including array comparisons (only for sorted arrays).
+             */
+            equals: function (a, b) {
+                if (a === b) {
+                    return true;
+                }
+                if (a == null || b == null) {
+                    return false;
+                }
+                if (a.length != b.length) {
+                    return false;
+                }
+
+                for (var i = 0; i < a.length; ++i) {
+                    if (a[i] !== b[i]) {
+                        return false;
+                    }
+                }
+                return true;
             },
 
             /**

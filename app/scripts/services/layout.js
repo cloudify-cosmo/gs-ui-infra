@@ -7,18 +7,20 @@ angular.module('gsUiInfra')
 
             Tensor: {
 
-                // mock, should come from outside
+                // TODO possible allow to limit the axis bounds, e.g. X should only span up to 3, and the Y should be used to flow nodes.
+
+                // TODO mock for the order argument, should come from outside
                 order: {
 
                 },
 
                 layout: function (graph, order) {
                     this.graph = graph;
-                    this.layoutPrepare();
-                    this.layoutCalcBounds();
+                    this._layoutPrepare();
+                    this._layoutCalcBounds();
                 },
 
-                layoutPrepare: function () {
+                _layoutPrepare: function () {
 
                     // TODO
                     // * consider connection relationships in the tensor sorting (for X/Y)
@@ -64,7 +66,7 @@ angular.module('gsUiInfra')
 
                 },
 
-                layoutCalcBounds: function () {
+                _layoutCalcBounds: function () {
 
                     var minx = Infinity,
                         maxx = -Infinity,
@@ -86,8 +88,6 @@ angular.module('gsUiInfra')
                         if (z > maxz) maxz = z;
                         if (z < minz) minz = z;
                     }
-
-                    if (miny == maxy) maxy++;
 
                     this.layoutMinX = minx;
                     this.layoutMaxX = maxx;
