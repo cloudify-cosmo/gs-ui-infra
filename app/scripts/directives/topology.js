@@ -11,11 +11,11 @@ angular.module('gsUiInfra')
                 renderer: '='
             },
 
-            link: function (scope, element, attrs) {
+            link: function (scope, element/*, attrs*/) {
 
                 scope.renderer.init(element[0].childNodes[0], scope.layouter);
 
-                scope.$watch('data', function(oldValue, newValue) {
+                scope.$watch('data', function(/*oldValue, newValue*/) {
                     scope.renderer.refresh(scope.data);
                 });
 
