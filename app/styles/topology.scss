@@ -1,29 +1,25 @@
-@font-face {
-  font-family: 'OpenSansRegular';
-  src: url('../../assets/fonts/open-sans/OpenSans-Regular.ttf') format('truetype');
-}
 
-$svgColor1: #136e9d;
+$topologyColor1: #136e9d;
 
 svg {
   .container {
     fill: #f6f6f6;
-    stroke: $svgColor1;
+    stroke: $topologyColor1;
     stroke-width: 2;
   }
   .heading {
-    fill: $svgColor1;
+    fill: $topologyColor1;
     stroke-width: 0;
   }
   .circle {
-    fill: $svgColor1;
+    fill: $topologyColor1;
     stroke: white;
     stroke-width: 2;
   }
   .circle-text {
     fill: white;
     font-size: 40px;
-    font-family: Topology, Arial, sans-serif;
+    font-family: Topology;
   }
   .heading-text {
     fill: white;

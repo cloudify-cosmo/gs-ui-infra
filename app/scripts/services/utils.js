@@ -118,6 +118,7 @@ angular.module('gsUiInfra')
                 var i = tree.children.length;
                 while (i--) {
                     var child = tree.children[i];
+                    // TODO move this outside 'while'?
                     // act on each child node
                     action && action(child, i, depth);
                     // continue with traversal

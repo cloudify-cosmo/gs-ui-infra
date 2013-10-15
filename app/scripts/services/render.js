@@ -141,34 +141,39 @@ angular.module('gsUiInfra')
                         this.graph.nodes.forEach(function (v, i) {
                             v.fixed = true;
                             if (!v.dimensionsFinalized) {
-                                v.width = segmentH - v.layoutPosZ * (pad[1] + pad[3]) - strokeWidth * 2;
-                                v.height = segmentV - v.layoutPosZ * (pad[0] + pad[2]) - strokeWidth * 2;
+                                v.width = (segmentH - v.layoutPosZ * (pad[1] + pad[3]) - strokeWidth * 2) * v.layoutSpanX;
+                                v.height = (segmentV - v.layoutPosZ * (pad[0] + pad[2]) - strokeWidth * 2) * v.layoutSpanY;
                                 v.dimensionsFinalized = true;
                             }
-//                        v.x = segmentH * v.layoutPosX + (segmentH - v.width) / 2;
-//                        v.y = segmentV * v.layoutPosY + (segmentV - v.height) / 2;
-                            v.x = segmentH * v.layoutPosX + pad[3] * v.layoutPosZ + strokeWidth;
-                            v.y = segmentV * v.layoutPosY + pad[0] * v.layoutPosZ + strokeWidth;
+                            v.x = segmentH * (v.layoutPosX - 1) + pad[3] * v.layoutPosZ + strokeWidth;
+                            v.y = segmentV * (v.layoutPosY - 1) + pad[0] * v.layoutPosZ + strokeWidth;
                         });
 
-                        // update dom selections
+                        // make sure the DOM elements are sorted according to Z index.
+                        // SVG determines the paint layers by it.
+                        this.nodesSelection.sort(function(a, b) {
+                            if (a.layoutPosZ > b.layoutPosZ) {
+                                return 1;
+                            }
+                            if (a.layoutPosZ < b.layoutPosZ) {
+                                return -1;
+                            }
+                            return 0;
+                        });
+
                         this.nodesSelection.attr('transform', function (d) {
                             return 'translate(' + d.x + ',' + d.y + ')';
                         });
                         this.nodesSelection.selectAll('rect.container')
                             .attr('width', function (d) {
-                                return d.width;
+                                return d.width - self.constants.circleRadius;
                             })
                             .attr('height', function (d) {
                                 return d.height;
                             })
                         this.nodesSelection.selectAll('rect.heading')
                             .attr('width', function (d) {
-                                return d.width - 6;
-                            })
-                        this.nodesSelection.selectAll('text.heading-text')
-                            .attr('width', function (d) {
-                                return d.width;
+                                return d.width - 6 - self.constants.circleRadius;
                             })
                         this.edgesSelection.selectAll('path').attr('d', function (d) {
                             return self._bezierPath(d.source, d.target, d.directed);
@@ -197,11 +202,13 @@ angular.module('gsUiInfra')
                     _enterNodes: function () {
 
                         var self = this,
-                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node');
+                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node')
 
                         // outer container
                         node.append('svg:rect')
                             .attr('class', 'container')
+                            .attr('x', self.constants.circleRadius)
+                            .attr('y', 0)
                             .attr('width', function (d) {
                                 return d.width;
                             })
@@ -223,7 +230,7 @@ angular.module('gsUiInfra')
                             .append('svg:rect')
                             .attr('class', 'heading')
                             .attr('height', self.constants.headingHeight)
-                            .attr('x', 3)
+                            .attr('x', 3 + self.constants.circleRadius)
                             .attr('y', 3)
 
                         // heading text
@@ -232,14 +239,14 @@ angular.module('gsUiInfra')
                             .text(function (d) {
                                 return d.name;
                             })
-                            .attr('x', 28)
+                            .attr('x', 28 + self.constants.circleRadius)
                             .attr('y', 26)
 
                         // circle
                         var circleGroup = node.append('svg:g')
                         circleGroup.append('svg:circle')
                             .attr('class', 'circle')
-                            .attr('cx', 0)
+                            .attr('cx', self.constants.circleRadius)
                             .attr('cy', self.constants.circleRadius + 1)
                             .attr('r', self.constants.circleRadius)
 
@@ -247,10 +254,11 @@ angular.module('gsUiInfra')
                         circleGroup.append('svg:text')
                             .attr('class', 'circle-text')
                             .text(function (d) {
-                                return 'c';
+                                return 'l';
                             })
-                            .attr('x', -10)
-                            .attr('y', 28)
+                            .attr('x', self.constants.circleRadius)
+                            .attr('y', 29)
+                            .attr('text-anchor', 'middle')
 
                     },
 

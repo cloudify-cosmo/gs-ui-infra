@@ -25,7 +25,6 @@ angular.module('gsUiInfra')
                     _layoutPrepare: function () {
 
                         // TODO
-                        // * consider connection relationships in the tensor sorting (for X/Y)
                         // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
                         //   implementation details: consider that each node type might have different direction (horizontal/vertical)
 
@@ -56,11 +55,12 @@ angular.module('gsUiInfra')
                             },
                             action = function (child, i, depth) {
                                 // attach properties to the original graph
-                                var n;
-                                n = Utils.findBy(self.graph.nodes, 'id', child.id);
-                                n.layoutPosX = i;
-                                n.layoutPosY = 0;
+                                var n = Utils.findBy(self.graph.nodes, 'id', child.id);
+                                n.layoutPosX = i + 1;
+                                n.layoutPosY = 1; // TODO get from config
                                 n.layoutPosZ = depth;
+                                n.layoutSpanX = child.children.length || 1;
+                                n.layoutSpanY = 1; // TODO get from config
                             };
 
 
@@ -107,13 +107,15 @@ angular.module('gsUiInfra')
 
                         // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                         while (ei--) {
-                            var e = this.graph.edges[ei];
-                            // sort tree hierarchy
-                            var source = Utils.findBy(forest, 'id', e.source.id),
+                            var e = this.graph.edges[ei],
+                                source = Utils.findBy(forest, 'id', e.source.id),
                                 target = Utils.findBy(forest, 'id', e.target.id);
+                            console.log(e.target.id)
+                            // sort tree hierarchy
                             if (e.type === 'contained_in') {
-                                var removedChild = forest.splice(forest.indexOf(source), 1)[0];
-                                target.children.push(removedChild);
+                                target.children && target.children.push(forest.splice(forest.indexOf(source), 1)[0]);
+// TODO resolve bug: tree not build correctly because forest is scanned as an ARRAY note that at this point it can be a TREE
+//                                Utils.walk(target.children)
                             }
                             // attach dependency references
                             else if (e.type === 'connected_to') {
