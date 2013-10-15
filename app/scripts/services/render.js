@@ -27,7 +27,7 @@ angular.module('gsUiInfra')
                         this.constants = {
                             headingHeight: 33,
                             circleRadius: 18
-                        }
+                        };
 
                         // tie resize behavior
                         $window.addEventListener('resize', function () {
@@ -57,7 +57,7 @@ angular.module('gsUiInfra')
                      * and in such cases refresh must be called to update the graph.
                      */
                     refresh: function (newData) {
-                        if (newData === this.graph) return;
+                        if (newData === this.graph){ return; }
 
                         this.graph = newData || this.graph;
 
@@ -132,13 +132,13 @@ angular.module('gsUiInfra')
                             segmentH = this.width / rangeX,
                             segmentV = this.height / rangeY,
                             strokeWidth = 2,
-                            pad = [47, 30, 30, 30]
+                            pad = [47, 30, 30, 30];
                         pad.forEach(function (v, i) {
                             pad[i] = v + strokeWidth * 2;
-                        })
+                        });
 
                         // update the nodes position data according to the layouter data
-                        this.graph.nodes.forEach(function (v, i) {
+                        this.graph.nodes.forEach(function (v/*, i*/) {
                             v.fixed = true;
                             if (!v.dimensionsFinalized) {
                                 v.width = (segmentH - v.layoutPosZ * (pad[1] + pad[3]) - strokeWidth * 2) * v.layoutSpanX;
@@ -170,11 +170,11 @@ angular.module('gsUiInfra')
                             })
                             .attr('height', function (d) {
                                 return d.height;
-                            })
+                            });
                         this.nodesSelection.selectAll('rect.heading')
                             .attr('width', function (d) {
                                 return d.width - 6 - self.constants.circleRadius;
-                            })
+                            });
                         this.edgesSelection.selectAll('path').attr('d', function (d) {
                             return self._bezierPath(d.source, d.target, d.directed);
                         });
@@ -186,8 +186,8 @@ angular.module('gsUiInfra')
                         var self = this,
                             nodesDataKey = function (d) {
                                 // return all property values as the data key
-                                return Utils.propValues(d)
-                            }
+                                return Utils.propValues(d);
+                            };
 
                         // pu nodes group
                         this.nodesSelection = this.nodesSelection.data(function () {
@@ -202,7 +202,7 @@ angular.module('gsUiInfra')
                     _enterNodes: function () {
 
                         var self = this,
-                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node')
+                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node');
 
                         // outer container
                         node.append('svg:rect')
@@ -216,7 +216,7 @@ angular.module('gsUiInfra')
                                 return d.height;
                             })
                             .attr('rx', 6)
-                            .attr('ry', 6)
+                            .attr('ry', 6);
 
                         // heading box
                         node
@@ -231,7 +231,7 @@ angular.module('gsUiInfra')
                             .attr('class', 'heading')
                             .attr('height', self.constants.headingHeight)
                             .attr('x', 3 + self.constants.circleRadius)
-                            .attr('y', 3)
+                            .attr('y', 3);
 
                         // heading text
                         node.append('svg:text')
@@ -240,25 +240,25 @@ angular.module('gsUiInfra')
                                 return d.name;
                             })
                             .attr('x', 28 + self.constants.circleRadius)
-                            .attr('y', 26)
+                            .attr('y', 26);
 
                         // circle
-                        var circleGroup = node.append('svg:g')
+                        var circleGroup = node.append('svg:g');
                         circleGroup.append('svg:circle')
                             .attr('class', 'circle')
                             .attr('cx', self.constants.circleRadius)
                             .attr('cy', self.constants.circleRadius + 1)
-                            .attr('r', self.constants.circleRadius)
+                            .attr('r', self.constants.circleRadius);
 
                         // circle icon
                         circleGroup.append('svg:text')
                             .attr('class', 'circle-text')
-                            .text(function (d) {
+                            .text(function (/*d*/) {
                                 return 'l';
                             })
                             .attr('x', self.constants.circleRadius)
                             .attr('y', 29)
-                            .attr('text-anchor', 'middle')
+                            .attr('text-anchor', 'middle');
 
                     },
 
@@ -287,7 +287,7 @@ angular.module('gsUiInfra')
                                 return d.source.color || self.graph.nodes[d.source.id || d.source].color || '#ddd';
                             })
                             .style('stroke-width', 4)
-                            .style('opacity', 0.6)
+                            .style('opacity', 0.6);
                     },
 
 
@@ -325,15 +325,15 @@ angular.module('gsUiInfra')
                         for (var i = 0; i < 4; i++) {
                             /* loop the seond object's connection coordinates */
                             for (var j = 4; j < 8; j++) {
-                                var dx = Math.abs(p[i].x - p[j].x),
-                                    dy = Math.abs(p[i].y - p[j].y);
-                                if ((i == j - 4) || (((i != 3 && j != 6) || p[i].x < p[j].x) && ((i != 2 && j != 7) || p[i].x > p[j].x) && ((i != 0 && j != 5) || p[i].y > p[j].y) && ((i != 1 && j != 4) || p[i].y < p[j].y))) {
-                                    dis.push(dx + dy);
+                                var _dx = Math.abs(p[i].x - p[j].x),
+                                    _dy = Math.abs(p[i].y - p[j].y);
+                                if ((i === j - 4) || (((i !== 3 && j !== 6) || p[i].x < p[j].x) && ((i !== 2 && j !== 7) || p[i].x > p[j].x) && ((i !== 0 && j !== 5) || p[i].y > p[j].y) && ((i !== 1 && j !== 4) || p[i].y < p[j].y))) {
+                                    dis.push(_dx + _dy);
                                     d[dis[dis.length - 1].toFixed(3)] = [i, j];
                                 }
                             }
                         }
-                        var res = dis.length == 0 ? [0, 4] : d[Math.min.apply(Math, dis).toFixed(3)];
+                        var res = dis.length === 0 ? [0, 4] : d[Math.min.apply(Math, dis).toFixed(3)];
                         /* bezier path */
                         var x1 = p[res[0]].x,
                             y1 = p[res[0]].y,
@@ -391,5 +391,5 @@ angular.module('gsUiInfra')
 
                 }
             }
-        }
+        };
     }]);
