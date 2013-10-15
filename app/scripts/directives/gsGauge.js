@@ -11,7 +11,7 @@ angular.module('gsUiInfra')
                 colors:'='
             },
 
-            link: function(scope, element, attrs) {
+            link: function(scope, element/*, attrs */) {
 
                 var getPointerRotation = function(angle) {
                     return 'R' + angle + ',41.986123,120';
@@ -36,14 +36,14 @@ angular.module('gsUiInfra')
                         classNames = (dom.getAttribute('class') || '').split(' ');
                     classNames.push(className);
                     dom.setAttribute('class',  classNames.join(' '));
-                }
+                };
 
                 var removeClassRaphael = function(el, className) {
                     var dom = el.node,
                         classNames = dom.getAttribute('class').split(' ');
                     classNames.splice(classNames.indexOf(className), 1);
                     dom.setAttribute('class', classNames.join(' '));
-                }
+                };
 
                 var _basis,
                     _pointer,
