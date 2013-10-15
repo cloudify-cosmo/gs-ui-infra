@@ -16,7 +16,7 @@ angular.module('gsUiInfra')
 
                     },
 
-                    layout: function (graph, order) {
+                    layout: function (graph/*, order*/) {
                         this.graph = graph;
                         this._layoutPrepare();
                         this._layoutCalcBounds();
@@ -83,12 +83,12 @@ angular.module('gsUiInfra')
                                 y = nodes[i].layoutPosY,
                                 z = nodes[i].layoutPosZ;
 
-                            if (x > maxx) maxx = x;
-                            if (x < minx) minx = x;
-                            if (y > maxy) maxy = y;
-                            if (y < miny) miny = y;
-                            if (z > maxz) maxz = z;
-                            if (z < minz) minz = z;
+                            if (x > maxx){ maxx = x;}
+                            if (x < minx){ minx = x;}
+                            if (y > maxy){ maxy = y;}
+                            if (y < miny){ miny = y;}
+                            if (z > maxz){ maxz = z;}
+                            if (z < minz){ minz = z;}
                         }
 
                         this.layoutMinX = minx;
@@ -101,16 +101,28 @@ angular.module('gsUiInfra')
 
                     _asTree: function () {
 
-                        var self = this,
-                            forest = getInitialForest(),
-                            ei = this.graph.edges.length;
+                        var self = this;
+
+
+                        function getInitialForest() {
+                            var forest = [],
+                                i = self.graph.nodes.length;
+                            while (i--) {
+                                var n = self.graph.nodes[i];
+                                forest.push({id: n.id, children: []});
+                            }
+                            return forest;
+                        }
+
+                        var forest = getInitialForest();
+                        var ei = this.graph.edges.length;
 
                         // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                         while (ei--) {
                             var e = this.graph.edges[ei],
                                 source = Utils.findBy(forest, 'id', e.source.id),
                                 target = Utils.findBy(forest, 'id', e.target.id);
-                            console.log(e.target.id)
+                            console.log(e.target.id);
                             // sort tree hierarchy
                             if (e.type === 'contained_in') {
                                 target.children && target.children.push(forest.splice(forest.indexOf(source), 1)[0]);
@@ -124,22 +136,14 @@ angular.module('gsUiInfra')
                             }
                         }
 
-                        var tree = {id: "root", children: forest};
+                        var tree = {id: 'root', children: forest};
 
-                        function getInitialForest() {
-                            var forest = [],
-                                i = self.graph.nodes.length;
-                            while (i--) {
-                                var n = self.graph.nodes[i];
-                                forest.push({id: n.id, children: []});
-                            }
-                            return forest;
-                        }
+
 
                         return tree;
                     }
 
                 }
             }
-        }
+        };
     }]);
