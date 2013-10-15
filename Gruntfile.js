@@ -295,7 +295,7 @@ module.exports = function (grunt) {
         'karma'
     ]);
 
-    grunt.registerTask('build', [
+    grunt.registerTask('buildAll', [
         'clean:dist',
         'jshint',
         'test',
@@ -314,5 +314,23 @@ module.exports = function (grunt) {
         'usemin'
     ]);
 
-    grunt.registerTask('default', ['build']);
+    grunt.registerTask('build', [
+        'clean:dist',
+        'jshint',
+        'coffee',
+        'compass:dist',
+        'useminPrepare',
+        'concat',
+        'imagemin',
+        'cssmin',
+        'htmlmin',
+        'copy',
+//    'cdnify', //-- guy - we do not want google CDN resources.
+        'ngmin',
+        'uglify',
+        'rev',
+        'usemin'
+    ]);
+
+    grunt.registerTask('default', ['buildAll']);
 };
