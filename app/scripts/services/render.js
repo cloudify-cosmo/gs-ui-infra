@@ -26,7 +26,26 @@ angular.module('gsUiInfra')
 
                         this.constants = {
                             headingHeight: 33,
-                            circleRadius: 18
+                            circleRadius: 18,
+                            // TODO clean up types list - what's unnecessary?
+                            types: {
+                                "cloudify.tosca.types.tier":                { classname: "tier",              icon: "k"},
+                                "cloudify.tosca.types.host":                { classname: "host",              icon: "e"},
+                                "cloudify.tosca.types.volume":              { classname: "volume",            icon: ""},
+                                "cloudify.tosca.types.object_container":    { classname: "object-container",  icon: ""},
+                                "cloudify.tosca.types.network":             { classname: "network",           icon: "g"},
+                                "cloudify.tosca.types.load_balancer":       { classname: "load-balancer",     icon: ""},
+                                "cloudify.tosca.types.virtual_ip":          { classname: "virtual-ip",        icon: ""},
+                                "cloudify.tosca.types.security_group":      { classname: "security-group",    icon: "i"},
+                                "cloudify.tosca.types.middleware_server":   { classname: "middleware-server", icon: ""},
+                                "cloudify.tosca.types.db_server":           { classname: "db-server",         icon: "c"},
+                                "cloudify.tosca.types.web_server":          { classname: "web-server",        icon: "l"},
+                                "cloudify.tosca.types.app_server":          { classname: "app-server",        icon: ""},
+                                "cloudify.tosca.types.message_bus_server":  { classname: "message-bus-server",icon: ""},
+                                "cloudify.tosca.types.app_module":          { classname: "app-module",        icon: "a"}
+                            }
+
+
                         }
 
                         // tie resize behavior
@@ -202,7 +221,11 @@ angular.module('gsUiInfra')
                     _enterNodes: function () {
 
                         var self = this,
-                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node')
+                            node = this.nodesSelection.enter().append('svg:g')
+
+                        node.attr('class', function (d) {
+                            return 'node ' + self.constants.types[d.type[0]].classname;
+                        })
 
                         // outer container
                         node.append('svg:rect')
@@ -254,7 +277,7 @@ angular.module('gsUiInfra')
                         circleGroup.append('svg:text')
                             .attr('class', 'circle-text')
                             .text(function (d) {
-                                return 'l';
+                                return self.constants.types[d.type[0]].icon;
                             })
                             .attr('x', self.constants.circleRadius)
                             .attr('y', 29)
@@ -284,7 +307,7 @@ angular.module('gsUiInfra')
                         edge.append('svg:path')
                             .style('fill', 'none')
                             .style('stroke', function (d) {
-                                return d.source.color || self.graph.nodes[d.source.id || d.source].color || '#ddd';
+                                return '#ddd';
                             })
                             .style('stroke-width', 4)
                             .style('opacity', 0.6)

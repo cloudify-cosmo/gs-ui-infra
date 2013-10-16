@@ -55,12 +55,17 @@ angular.module('gsUiInfra')
                             },
                             action = function (child, i, depth) {
                                 // attach properties to the original graph
-                                var n = Utils.findBy(self.graph.nodes, 'id', child.id);
+                                var n = Utils.findBy(self.graph.nodes, 'id', child.id),
+                                    nodeBreadth = 0;
+                                Utils.walk(child, null, function(cn) {
+                                    nodeBreadth += cn.children.length;
+                                })
                                 n.layoutPosX = i + 1;
                                 n.layoutPosY = 1; // TODO get from config
                                 n.layoutPosZ = depth;
-                                n.layoutSpanX = child.children.length || 1;
+                                n.layoutSpanX = nodeBreadth || 1;
                                 n.layoutSpanY = 1; // TODO get from config
+//                                console.log('nodeBreadth: ', nodeBreadth)
                             };
 
 
@@ -105,17 +110,40 @@ angular.module('gsUiInfra')
                             forest = getInitialForest(),
                             ei = this.graph.edges.length;
 
-                        // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                         while (ei--) {
                             var e = this.graph.edges[ei],
                                 source = Utils.findBy(forest, 'id', e.source.id),
                                 target = Utils.findBy(forest, 'id', e.target.id);
-                            console.log(e.target.id)
+
+/*
+                            console.log('e.source.id: ', e.source.id)
+                            console.log(JSON.stringify(forest))
+                            if (!source) {
+                                forest.length &&
+                                forest.forEach(function(fn) {
+                                    Utils.walk(fn, null, function(cn) {
+                                        source = cn.children.splice(cn.children.indexOf(source), 1)[0];
+                                    })
+                                });
+//                                source && target.children && target.children.push(source);
+                            }
+//                            console.log('source, target: ', source, target)
+*/
+
                             // sort tree hierarchy
                             if (e.type === 'contained_in') {
-                                target.children && target.children.push(forest.splice(forest.indexOf(source), 1)[0]);
-// TODO resolve bug: tree not build correctly because forest is scanned as an ARRAY note that at this point it can be a TREE
-//                                Utils.walk(target.children)
+                                /*target.children && */
+                                target.children.push(forest.splice(forest.indexOf(source), 1)[0]);
+// TODO resolve bug: tree not build correctly because forest is scanned as an ARRAY. note that at this point it can be a TREE
+                                // walk the tree built so far, look for the source node, remove it, and attach it as a child of the target
+/*
+                                var found;
+                                forest.children && Utils.walk(forest, null, function(cn) {
+                                    console.log('!')
+                                    found = cn.children.splice(cn.children.indexOf(source), 1)[0];
+                                });
+                                found && target.children && target.children.push(found);
+*/
                             }
                             // attach dependency references
                             else if (e.type === 'connected_to') {

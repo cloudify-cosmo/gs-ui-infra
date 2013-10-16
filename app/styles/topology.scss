@@ -1,29 +1,71 @@
-
 $topologyColor1: #136e9d;
+$topologyColor2: #3aaeda;
 
 svg {
-  .container {
-    fill: #f6f6f6;
-    stroke: $topologyColor1;
-    stroke-width: 2;
-  }
-  .heading {
-    fill: $topologyColor1;
-    stroke-width: 0;
-  }
-  .circle {
-    fill: $topologyColor1;
-    stroke: white;
-    stroke-width: 2;
-  }
-  .circle-text {
-    fill: white;
-    font-size: 40px;
-    font-family: Topology;
-  }
-  .heading-text {
-    fill: white;
-    font-size: 18px;
-    font-family: OpenSansRegular, Arial, sans-serif;
+  .node {
+    .container {
+      fill: none;
+      stroke-width: 2;
+    }
+    .heading {
+      stroke-width: 0;
+    }
+    .circle {
+      stroke: white;
+      stroke-width: 2;
+    }
+    .circle-text {
+      fill: white;
+      font-size: 40px;
+      font-family: Topology;
+    }
+    .heading-text {
+      fill: white;
+      font-size: 18px;
+      font-family: OpenSansRegular, Arial, sans-serif;
+    }
+    &.network {
+      .container,
+      .heading {
+        fill: #f1f1f1;
+      }
+      .heading-text {
+        fill: #9f9d9d;
+      }
+      .circle {
+        fill: #dddddd;
+      }
+    }
+    &.tier {
+      .container,
+      .heading {
+        fill: #eaeaea;
+      }
+      .heading-text {
+        fill: #939393;
+      }
+      .circle {
+        fill: #bebebe;
+      }
+    }
+    &.host {
+      .container {
+        stroke: $topologyColor1;
+      }
+      .heading,
+      .circle {
+        fill: $topologyColor1;
+      }
+    }
+    &.db-server,
+    &.web-server {
+      .container {
+        stroke: $topologyColor2;
+      }
+      .heading,
+      .circle {
+        fill: $topologyColor2;
+      }
+    }
   }
 }
