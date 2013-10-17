@@ -4,7 +4,7 @@ angular.module('gsUiInfra')
     .directive('topology', function () {
         return {
             template: '<div></div>',
-            restrict: 'E',
+            restrict: 'EAC',
             scope: {
                 data: '=',
                 layouter: '=',
@@ -12,7 +12,13 @@ angular.module('gsUiInfra')
             },
 
             link: function (scope, element/*, attrs*/) {
+                if ( !scope.renderer ){
+                    console.log('missing a renderer');
+                }
 
+                if ( !scope.layouter ){
+                    console.log('missing a layouter');
+                }
                 scope.renderer.init(element[0].childNodes[0], scope.layouter);
 
                 scope.$watch('data', function(/*oldValue, newValue*/) {

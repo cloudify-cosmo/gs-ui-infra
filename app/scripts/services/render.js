@@ -219,7 +219,6 @@ angular.module('gsUiInfra')
                     },
 
                     _enterNodes: function () {
-
                         var self = this,
                             node = this.nodesSelection.enter().append('svg:g').attr('class', 'node')
 
