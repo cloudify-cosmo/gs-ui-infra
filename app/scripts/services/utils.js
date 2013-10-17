@@ -55,10 +55,10 @@ angular.module('gsUiInfra')
                 if (a === b) {
                     return true;
                 }
-                if (a == null || b == null) {
+                if (a === null || b === null) {
                     return false;
                 }
-                if (a.length != b.length) {
+                if (a.length !== b.length) {
                     return false;
                 }
 

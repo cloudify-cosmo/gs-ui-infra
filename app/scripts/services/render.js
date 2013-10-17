@@ -76,7 +76,7 @@ angular.module('gsUiInfra')
                      * and in such cases refresh must be called to update the graph.
                      */
                     refresh: function (newData) {
-                        if (newData === this.graph) return;
+                        if (newData === this.graph){ return; }
 
                         this.graph = newData || this.graph;
 
@@ -151,13 +151,13 @@ angular.module('gsUiInfra')
                             segmentH = this.width / rangeX,
                             segmentV = this.height / rangeY,
                             strokeWidth = 2,
-                            pad = [47, 30, 30, 30]
+                            pad = [47, 30, 30, 30];
                         pad.forEach(function (v, i) {
                             pad[i] = v + strokeWidth * 2;
-                        })
+                        });
 
                         // update the nodes position data according to the layouter data
-                        this.graph.nodes.forEach(function (v, i) {
+                        this.graph.nodes.forEach(function (v/*, i*/) {
                             v.fixed = true;
                             if (!v.dimensionsFinalized) {
                                 v.width = (segmentH - v.layoutPosZ * (pad[1] + pad[3]) - strokeWidth * 2) * v.layoutSpanX;
@@ -221,11 +221,7 @@ angular.module('gsUiInfra')
                     _enterNodes: function () {
 
                         var self = this,
-                            node = this.nodesSelection.enter().append('svg:g')
-
-                        node.attr('class', function (d) {
-                            return 'node ' + self.constants.types[d.type[0]].classname;
-                        })
+                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node')
 
                         // outer container
                         node.append('svg:rect')
@@ -277,7 +273,7 @@ angular.module('gsUiInfra')
                         circleGroup.append('svg:text')
                             .attr('class', 'circle-text')
                             .text(function (d) {
-                                return self.constants.types[d.type[0]].icon;
+                                return 'l';
                             })
                             .attr('x', self.constants.circleRadius)
                             .attr('y', 29)
@@ -307,7 +303,7 @@ angular.module('gsUiInfra')
                         edge.append('svg:path')
                             .style('fill', 'none')
                             .style('stroke', function (d) {
-                                return '#ddd';
+                                return d.source.color || self.graph.nodes[d.source.id || d.source].color || '#ddd';
                             })
                             .style('stroke-width', 4)
                             .style('opacity', 0.6)
