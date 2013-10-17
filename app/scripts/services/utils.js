@@ -37,15 +37,20 @@ angular.module('gsUiInfra')
              * @returns {Array} A new filtered array.
              */
             filter: function (arr, propName, propValue) {
-                var filtered = [];
-                var i = arr.length;
-                while (i--) {
-                    var item = arr[i];
-                    if (item.hasOwnProperty(propName) && this.equals(item[propName], propValue)) {
-                        filtered.push(item);
+                try {
+                    var filtered = [];
+                    var i = arr.length;
+                    while (i--) {
+                        var item = arr[i];
+                        if (item.hasOwnProperty(propName) && this.equals(item[propName], propValue)) {
+                            filtered.push(item);
+                        }
                     }
+                    return filtered;
+                } catch (e) {
+                    console.log([arr, propName, propValue]);
+                    throw e;
                 }
-                return filtered;
             },
 
             /**
