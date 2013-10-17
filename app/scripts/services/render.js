@@ -220,7 +220,11 @@ angular.module('gsUiInfra')
 
                     _enterNodes: function () {
                         var self = this,
-                            node = this.nodesSelection.enter().append('svg:g').attr('class', 'node')
+                            node = this.nodesSelection.enter().append('svg:g')
+
+                        node.attr('class', function (d) {
+                            return 'node ' + self.constants.types[d.type[0]].classname;
+                        })
 
                         // outer container
                         node.append('svg:rect')
@@ -272,7 +276,7 @@ angular.module('gsUiInfra')
                         circleGroup.append('svg:text')
                             .attr('class', 'circle-text')
                             .text(function (d) {
-                                return 'l';
+                                return self.constants.types[d.type[0]].icon;
                             })
                             .attr('x', self.constants.circleRadius)
                             .attr('y', 29)
@@ -302,7 +306,7 @@ angular.module('gsUiInfra')
                         edge.append('svg:path')
                             .style('fill', 'none')
                             .style('stroke', function (d) {
-                                return d.source.color || self.graph.nodes[d.source.id || d.source].color || '#ddd';
+                                return '#ddd';
                             })
                             .style('stroke-width', 4)
                             .style('opacity', 0.6)

@@ -53,24 +53,23 @@ angular.module('gsUiInfra')
                                 }
                                 return 0;
                             },
-                            action = function (child, i, depth) {
-                                // attach properties to the original graph
-                                var n = Utils.findBy(self.graph.nodes, 'id', child.id),
-                                    nodeBreadth = 0;
-                                Utils.walk(child, null, function(cn) {
-                                    nodeBreadth += cn.children.length;
-                                })
+                            downHandler = function (node, i, depth) {
+                                // attach properties to the original graph nodes
+                                var n = Utils.findBy(self.graph.nodes, 'id', node.id);
                                 n.layoutPosX = i + 1;
                                 n.layoutPosY = 1; // TODO get from config
                                 n.layoutPosZ = depth;
-                                n.layoutSpanX = nodeBreadth || 1;
+                                // initialize span values, increment when traversing up
+                                n.layoutSpanX = 1;
+                                n.layoutSpanY = 1;
+                            },
+                            upHandler = function (node/*, depth*/) {
+                                var n = Utils.findBy(self.graph.nodes, 'id', node.id);
+                                n.layoutSpanX++;
                                 n.layoutSpanY = 1; // TODO get from config
-//                                console.log('nodeBreadth: ', nodeBreadth)
                             };
 
-
-                        Utils.walk(tree, sorter, action);
-
+                        Utils.walk(tree, sorter, downHandler, upHandler);
                     },
 
                     _layoutCalcBounds: function () {
@@ -82,18 +81,19 @@ angular.module('gsUiInfra')
                             minz = Infinity,
                             maxz = -Infinity;
 
-                        var nodes = this.graph.nodes;
-                        for (var i in nodes) {
+                        var nodes = this.graph.nodes,
+                            i = nodes.length;
+                        while (i--) {
                             var x = nodes[i].layoutPosX,
                                 y = nodes[i].layoutPosY,
                                 z = nodes[i].layoutPosZ;
 
-                            if (x > maxx){ maxx = x;}
-                            if (x < minx){ minx = x;}
-                            if (y > maxy){ maxy = y;}
-                            if (y < miny){ miny = y;}
-                            if (z > maxz){ maxz = z;}
-                            if (z < minz){ minz = z;}
+                            if (x > maxx) { maxx = x; }
+                            if (x < minx) { minx = x; }
+                            if (y > maxy) { maxy = y; }
+                            if (y < miny) { miny = y; }
+                            if (z > maxz) { maxz = z; }
+                            if (z < minz) { minz = z; }
                         }
 
                         this.layoutMinX = minx;
@@ -106,58 +106,31 @@ angular.module('gsUiInfra')
 
                     _asTree: function () {
 
-                        var self = this;
-
-
-                        function getInitialForest() {
-                            var forest = [],
-                                i = self.graph.nodes.length;
-                            while (i--) {
-                                var n = self.graph.nodes[i];
-                                forest.push({id: n.id, children: []});
-                            }
-                            return forest;
-                        }
-
-                        var forest = getInitialForest();
-                        var ei = this.graph.edges.length;
+                        var self = this,
+                            getInitialForest = function () {
+                                var forest = [],
+                                    i = self.graph.nodes.length;
+                                while (i--) {
+                                    var n = self.graph.nodes[i];
+                                    forest.push({id: n.id, children: [], parent: null});
+                                }
+                                return forest;
+                            },
+                            forest = getInitialForest(),
+                            ei = this.graph.edges.length;
 
                         // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                         while (ei--) {
                             var e = this.graph.edges[ei],
                                 source = Utils.findBy(forest, 'id', e.source.id),
                                 target = Utils.findBy(forest, 'id', e.target.id);
-                            console.log(e.target.id);
-
-/*
-                            console.log('e.source.id: ', e.source.id)
-                            console.log(JSON.stringify(forest))
-                            if (!source) {
-                                forest.length &&
-                                forest.forEach(function(fn) {
-                                    Utils.walk(fn, null, function(cn) {
-                                        source = cn.children.splice(cn.children.indexOf(source), 1)[0];
-                                    })
-                                });
-//                                source && target.children && target.children.push(source);
-                            }
-//                            console.log('source, target: ', source, target)
-*/
 
                             // sort tree hierarchy
                             if (e.type === 'contained_in') {
-                                /*target.children && */
-                                target.children.push(forest.splice(forest.indexOf(source), 1)[0]);
-// TODO resolve bug: tree not build correctly because forest is scanned as an ARRAY. note that at this point it can be a TREE
-                                // walk the tree built so far, look for the source node, remove it, and attach it as a child of the target
-/*
-                                var found;
-                                forest.children && Utils.walk(forest, null, function(cn) {
-                                    console.log('!')
-                                    found = cn.children.splice(cn.children.indexOf(source), 1)[0];
-                                });
-                                found && target.children && target.children.push(found);
-*/
+                                /*target.children &&*/
+                                var ch = forest.splice(forest.indexOf(source), 1)[0];
+                                target.children.push(ch);
+                                ch.parent = target.id;
                             }
                             // attach dependency references
                             else if (e.type === 'connected_to') {
@@ -166,11 +139,7 @@ angular.module('gsUiInfra')
                             }
                         }
 
-                        var tree = {id: 'root', children: forest};
-
-
-
-                        return tree;
+                        return {id: 'root', children: forest};
                     }
 
                 }
