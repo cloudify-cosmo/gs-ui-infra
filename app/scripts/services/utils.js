@@ -125,12 +125,12 @@ angular.module('gsUiInfra')
                 while (i--) {
                     var child = node.children[i];
                     // act on each child node, traversing down
-                    downHandler && downHandler(child, i, depth);
+                    downHandler && downHandler(child, node, i, depth);
                     // continue with traversal
                     child.children && child.children.length && this.walk(child, sorter, downHandler, upHandler);
+                    // act on each parent node, traversing up
+                    upHandler && upHandler(child, node, i, depth);
                 }
-                // act on each parent node, traversing up
-                upHandler && upHandler(node, depth);
                 depth--;
                 return node;
             }

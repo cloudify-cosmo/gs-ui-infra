@@ -28,15 +28,8 @@ angular.module('gsUiInfra')
                         // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
                         //   implementation details: consider that each node type might have different direction (horizontal/vertical)
 
-                        // PSEUDO
-                        // 1. build a tree from graph according to containment relationships
-                        // 2. sort the tree
-                        // 3. traverse the tree, determine X,Y,Z values for each node:
-                        //      Z will determine the padding as well as the width and height for any level that's not the deepest
-                        //      (deepest level has fixed dimensions)
-                        //      X,Y will determine the X,Y position in the layout
-
                         var self = this,
+                        // build a tree from graph according to containment relationships
                             tree = this._asTree(this.graph);
 
                         // traverse the tree, sort it, attach X,Y,Z values for each node
@@ -51,25 +44,48 @@ angular.module('gsUiInfra')
                                 if (b.dependencies && b.dependencies.indexOf(a.id) !== -1) {
                                     return 1;
                                 }
-                                return 0;
+                                return 1;
                             },
-                            downHandler = function (node, i, depth) {
+                            downHandler = function (node, parent, i, depth) {
+//                                console.log('- - - DOWN: ', node.id, ' ', node.children)
+                                node.layoutSpanX = 0;
+                                node.layoutSpanY = 0;
+                            },
+                            upHandler = function (node, parent, i, depth) {
+//                                console.log('- - - UP: ', node.id, ' ', node.children)
+
+                                // if we reached the bottom (a leaf node)
+                                if (!node.children || !node.children.length) {
+                                    parent.layoutSpanX++;
+                                } else {
+                                    // add from child
+                                    parent.layoutSpanX += node.layoutSpanX;
+                                }
+
                                 // attach properties to the original graph nodes
                                 var n = Utils.findBy(self.graph.nodes, 'id', node.id);
                                 n.layoutPosX = i + 1;
                                 n.layoutPosY = 1; // TODO get from config
                                 n.layoutPosZ = depth;
                                 // initialize span values, increment when traversing up
-                                n.layoutSpanX = 1;
-                                n.layoutSpanY = 1;
-                            },
-                            upHandler = function (node/*, depth*/) {
-                                var n = Utils.findBy(self.graph.nodes, 'id', node.id);
-                                n.layoutSpanX++;
-                                n.layoutSpanY = 1; // TODO get from config
+                                n.layoutSpanX = node.layoutSpanX === 0 ? 1 : node.layoutSpanX;
+                                n.layoutSpanY = node.layoutSpanY === 0 ? 1 : node.layoutSpanY;
+
                             };
 
                         Utils.walk(tree, sorter, downHandler, upHandler);
+
+                        console.log(JSON.stringify(this.graph, function (k, v) {
+                            if (k === 'layoutPosY' ||
+                                k === 'layoutPosZ' ||
+                                k === 'layoutSpanY' ||
+//                                k === 'id' ||
+                                k === 'type' ||
+                                k === 'edges') {
+                                return undefined;
+                            }
+                            return v;
+                        }, 2))
                     },
 
                     _layoutCalcBounds: function () {
@@ -88,12 +104,24 @@ angular.module('gsUiInfra')
                                 y = nodes[i].layoutPosY,
                                 z = nodes[i].layoutPosZ;
 
-                            if (x > maxx) { maxx = x; }
-                            if (x < minx) { minx = x; }
-                            if (y > maxy) { maxy = y; }
-                            if (y < miny) { miny = y; }
-                            if (z > maxz) { maxz = z; }
-                            if (z < minz) { minz = z; }
+                            if (x > maxx) {
+                                maxx = x;
+                            }
+                            if (x < minx) {
+                                minx = x;
+                            }
+                            if (y > maxy) {
+                                maxy = y;
+                            }
+                            if (y < miny) {
+                                miny = y;
+                            }
+                            if (z > maxz) {
+                                maxz = z;
+                            }
+                            if (z < minz) {
+                                minz = z;
+                            }
                         }
 
                         this.layoutMinX = minx;
