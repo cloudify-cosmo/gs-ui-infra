@@ -17,6 +17,10 @@ angular.module('gsUiInfra')
                         var self = this;
                         this.svg = d3.select(this.el).append('svg:svg');
 
+
+                        this.vis = d3.select('body').append('svg')
+                            .attr({ width: 900, height: 900});
+
                         /** graph data structure */
                         this.graph = { nodes: [], edges: [] };
 
@@ -29,20 +33,20 @@ angular.module('gsUiInfra')
                             circleRadius: 18,
                             // TODO clean up types list - what's unnecessary?
                             types: {
-                                "cloudify.tosca.types.tier":                { classname: "tier",              icon: "k"},
-                                "cloudify.tosca.types.host":                { classname: "host",              icon: "e"},
-                                "cloudify.tosca.types.volume":              { classname: "volume",            icon: ""},
-                                "cloudify.tosca.types.object_container":    { classname: "object-container",  icon: ""},
-                                "cloudify.tosca.types.network":             { classname: "network",           icon: "g"},
-                                "cloudify.tosca.types.load_balancer":       { classname: "load-balancer",     icon: ""},
-                                "cloudify.tosca.types.virtual_ip":          { classname: "virtual-ip",        icon: ""},
-                                "cloudify.tosca.types.security_group":      { classname: "security-group",    icon: "i"},
-                                "cloudify.tosca.types.middleware_server":   { classname: "middleware-server", icon: ""},
-                                "cloudify.tosca.types.db_server":           { classname: "db-server",         icon: "c"},
-                                "cloudify.tosca.types.web_server":          { classname: "web-server",        icon: "l"},
-                                "cloudify.tosca.types.app_server":          { classname: "app-server",        icon: ""},
-                                "cloudify.tosca.types.message_bus_server":  { classname: "message-bus-server",icon: ""},
-                                "cloudify.tosca.types.app_module":          { classname: "app-module",        icon: "a"}
+                                'cloudify.tosca.types.tier': { classname: 'tier', icon: 'k'},
+                                'cloudify.tosca.types.host': { classname: 'host', icon: 'e'},
+                                'cloudify.tosca.types.volume': { classname: 'volume', icon: ''},
+                                'cloudify.tosca.types.object_container': { classname: 'object-container', icon: ''},
+                                'cloudify.tosca.types.network': { classname: 'network', icon: 'g'},
+                                'cloudify.tosca.types.load_balancer': { classname: 'load-balancer', icon: ''},
+                                'cloudify.tosca.types.virtual_ip': { classname: 'virtual-ip', icon: ''},
+                                'cloudify.tosca.types.security_group': { classname: 'security-group', icon: 'i'},
+                                'cloudify.tosca.types.middleware_server': { classname: 'middleware-server', icon: ''},
+                                'cloudify.tosca.types.db_server': { classname: 'db-server', icon: 'c'},
+                                'cloudify.tosca.types.web_server': { classname: 'web-server', icon: 'l'},
+                                'cloudify.tosca.types.app_server': { classname: 'app-server', icon: ''},
+                                'cloudify.tosca.types.message_bus_server': { classname: 'message-bus-server', icon: ''},
+                                'cloudify.tosca.types.app_module': { classname: 'app-module', icon: 'a'}
                             }
 
 
@@ -76,36 +80,156 @@ angular.module('gsUiInfra')
                      * and in such cases refresh must be called to update the graph.
                      */
                     refresh: function (newData) {
-                        if (newData === this.graph){ return; }
+
+                        if (newData === this.graph) {
+                            return;
+                        }
 
                         this.graph = newData || this.graph;
 
                         // tie data to edge handles
                         this._bindEdges.call(this);
 
-                        // update existing edges
-                        this._updateEdges.call(this);
-
                         // add new edges
                         this._enterEdges.call(this);
-
-                        // remove old edges
-                        this.edgesSelection.exit().remove();
 
                         // tie data to node handles
                         this._bindNodes.call(this);
 
-                        // update existing nodes
-                        this._updateNodes.call(this);
-
                         // add new nodes
                         this._enterNodes.call(this);
 
-                        // remove old nodes
-                        this._exitNodes.call(this);
-
                         // apply layout
                         this.layout();
+
+
+                        ////////////////////////////////////////////////////////////////////////////////////////////
+
+
+                        var self = this;
+
+                        function addNode(selection, depth) {
+
+                            var nodeGroup = selection.selectAll('g.node')
+                                .data(function (d) {
+                                    return d.children;
+                                })
+                                .enter()
+                                .append('g')
+
+                            nodeGroup.attr('class', function (d) {
+                                if (d.type) {
+                                    return 'node ' + self.constants.types[d.type[0]].classname;
+                                }
+                                return 'node'; // TODO solve otherwise for root node
+                            })
+
+                            // outer container
+                            nodeGroup.append('svg:rect')
+                                .attr('class', 'container')
+                                .attr('x', self.constants.circleRadius)
+                                .attr('y', 0)
+                                .attr('width', function (d) {
+                                    return d.width;
+                                })
+                                .attr('height', function (d) {
+                                    return d.height;
+                                })
+                                .attr('rx', 6)
+                                .attr('ry', 6)
+
+                            // heading box
+                            nodeGroup.append('svg:rect')
+                                .attr('class', 'heading')
+                                .attr('height', self.constants.headingHeight)
+                                .attr('x', 3 + self.constants.circleRadius)
+                                .attr('y', 3)
+
+                            // heading text
+                            nodeGroup.append('svg:text')
+                                .attr('class', 'heading-text')
+                                .text(function (d) {
+                                    return d.name;
+                                })
+                                .attr('x', 28 + self.constants.circleRadius)
+                                .attr('y', 26)
+
+                            // status icon
+                            var statusGroup = nodeGroup.append('svg:g').attr('class', 'status')
+                            statusGroup.append('svg:circle')
+                                .attr('class', 'circle')
+                                .attr('cx', self.constants.circleRadius)
+                                .attr('cy', self.constants.circleRadius + 1)
+                                .attr('r', self.constants.circleRadius)
+
+                            // circle icon
+                            statusGroup.append('svg:text')
+                                .attr('class', 'circle-text')
+                                .text(function (d) {
+                                    if (d.type) {
+                                        return self.constants.types[d.type[0]].icon;
+                                    }
+                                    return 'a'; // TODO solve otherwise for root node
+                                })
+                                .attr('x', self.constants.circleRadius)
+                                .attr('y', 29)
+                                .attr('text-anchor', 'middle')
+
+
+
+                            nodeGroup.sort(function (a, b) {
+                                if (a.layoutPosZ > b.layoutPosZ) {
+                                    return 1;
+                                }
+                                if (a.layoutPosZ < b.layoutPosZ) {
+                                    return -1;
+                                }
+                                return 0;
+                            });
+
+                            nodeGroup.attr('transform', function (d) {
+                                return 'translate(' + d.x + ',' + d.y + ')';
+                            });
+                            nodeGroup.selectAll('rect.container')
+                                .attr('width', function (d) {
+                                    return d.width - self.constants.circleRadius;
+                                })
+                                .attr('height', function (d) {
+                                    return d.height;
+                                })
+                            nodeGroup.selectAll('rect.heading')
+                                .attr('width', function (d) {
+                                    return d.width - 6 - self.constants.circleRadius;
+                                })
+
+
+
+                            // recurse - there might be a way to ditch the conditional here
+                            nodeGroup.each(function (d) {
+                                d.children && nodeGroup.call(addNode, depth + 1);
+                            });
+
+                        }
+
+                        // kick off the recursive append
+//                        this.vis.call(addNode, 0);
+
+                        function update(root) {
+                            // kick off the recursive append
+                            self.vis
+                                .datum({ children: [root] })
+                                .call(addNode, 0);
+                        }
+
+                        var tree = self.layouter._asTree(self.graph, true);
+                        console.log(JSON.stringify(tree, null, 2))
+                        update(tree);
+
+
+
+                        //////////////////////////////////////////////////////////////////////////////////////////////
+
+
                     },
 
                     clear: function () {
@@ -123,12 +247,11 @@ angular.module('gsUiInfra')
 
                     renderLayout: function () {
 
-                        var self = this;
-
                         if (!this.layouter) {
                             return;
                         }
 
+                        var self = this;
                         // turn all IDs in the edges sources/targets to object references
                         var ei = this.graph.edges.length;
                         while (ei--) {
@@ -170,7 +293,7 @@ angular.module('gsUiInfra')
 
                         // make sure the DOM elements are sorted according to Z index.
                         // SVG determines the paint layers by it.
-                        this.nodesSelection.sort(function(a, b) {
+                        this.nodesSelection.sort(function (a, b) {
                             if (a.layoutPosZ > b.layoutPosZ) {
                                 return 1;
                             }
@@ -198,6 +321,62 @@ angular.module('gsUiInfra')
                             return self._bezierPath(d.source, d.target, d.directed);
                         });
 
+
+
+                        //////////////////////////////////////////////////////////////////////////////////////////////
+
+
+                        function positionNode(selection, depth) {
+
+                            var nodeGroup = selection.selectAll('g.node')
+                                .data(function () {
+                                    return Utils.filter(self.graph.nodes, 'layoutPosZ', depth);
+                                })
+
+                            console.log(nodeGroup)
+
+                            nodeGroup.sort(function (a, b) {
+                                if (a.layoutPosZ > b.layoutPosZ) {
+                                    return 1;
+                                }
+                                if (a.layoutPosZ < b.layoutPosZ) {
+                                    return -1;
+                                }
+                                return 0;
+                            });
+
+                            nodeGroup.attr('transform', function (d) {
+                                return 'translate(' + d.x + ',' + d.y + ')';
+                            });
+                            nodeGroup.selectAll('rect.container')
+                                .attr('width', function (d) {
+                                    return d.width - self.constants.circleRadius;
+                                })
+                                .attr('height', function (d) {
+                                    return d.height;
+                                })
+                            nodeGroup.selectAll('rect.heading')
+                                .attr('width', function (d) {
+                                    return d.width - 6 - self.constants.circleRadius;
+                                })
+/*
+                            this.edgesSelection.selectAll('path').attr('d', function (d) {
+                                return self._bezierPath(d.source, d.target, d.directed);
+                            });
+*/
+                            // recurse - there might be a way to ditch the conditional here
+                            nodeGroup.each(function (/*d*/) {
+                                if (depth < 3) {
+                                    nodeGroup.call(positionNode, depth + 1);
+                                }
+                            });
+
+                        }
+
+//                        this.vis.call(positionNode, 0);
+
+
+
                     },
 
                     _bindNodes: function () {
@@ -212,10 +391,6 @@ angular.module('gsUiInfra')
                         this.nodesSelection = this.nodesSelection.data(function () {
                             return self.graph.nodes;
                         }, nodesDataKey);
-                    },
-
-                    _updateNodes: function () {
-
                     },
 
                     _enterNodes: function () {
@@ -241,15 +416,7 @@ angular.module('gsUiInfra')
                             .attr('ry', 6)
 
                         // heading box
-                        node
-                            // TODO how to render heading only for certain types?
-                            /*
-                             .data(function () {
-                             var arr = Utils.filter(self.graph.nodes, 'type', ["cloudify.tosca.types.app_module"]);
-                             return arr;
-                             })
-                             */
-                            .append('svg:rect')
+                        node.append('svg:rect')
                             .attr('class', 'heading')
                             .attr('height', self.constants.headingHeight)
                             .attr('x', 3 + self.constants.circleRadius)
@@ -284,19 +451,11 @@ angular.module('gsUiInfra')
 
                     },
 
-                    _exitNodes: function () {
-                        this.nodesSelection.exit().remove();
-                    },
-
                     _bindEdges: function () {
                         var self = this;
                         this.edgesSelection = this.edgesSelection.data(function () {
                             return Utils.filter(self.graph.edges, 'type', 'connected_to');
                         });
-                    },
-
-                    _updateEdges: function () {
-
                     },
 
                     _enterEdges: function () {
@@ -312,14 +471,10 @@ angular.module('gsUiInfra')
                             .style('opacity', 0.6)
                     },
 
-
-                    /* helpers */
-
-                    /*
+                    /**
                      * calculations of coordinates for edges in the graph.
                      * this code was ported from graffle and adapted to our needs
                      */
-
                     _calcBezierCoords: function (bb1, bb2, directed) {
 
                         /* get bounding boxes of target and source */
@@ -404,12 +559,6 @@ angular.module('gsUiInfra')
 
                         return path;
                     }
-
-                    /*
-                     return function (el, layouter) {
-                     return $injector.instantiate(D3Renderer, { el: el, layouter: layouter })
-                     };
-                     */
 
                 }
             }

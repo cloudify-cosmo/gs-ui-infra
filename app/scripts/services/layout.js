@@ -9,33 +9,35 @@ angular.module('gsUiInfra')
 
                 Tensor: {
 
+                    // TODO
+                    // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
+                    //   implementation details: consider that each node type might have different direction (horizontal/vertical)
                     // TODO possibly allow to limit the axis bounds, e.g. X should only span up to 3, and the Y should be used to flow nodes.
 
-                    // TODO mock for the order argument, should come from outside
-                    order: {
-
+                    init: function (config) {
+                        this.config = config || {
+                            xyPositioning: 'relative'
+                        };
+                        this.initialized = true;
+                        return this;
                     },
 
-                    layout: function (graph/*, order*/) {
+                    layout: function (graph) {
+                        this.initialized || init();
                         this.graph = graph;
                         this._layoutPrepare();
                         this._layoutCalcBounds();
+                        return this;
                     },
 
                     _layoutPrepare: function () {
 
-                        // TODO
-                        // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
-                        //   implementation details: consider that each node type might have different direction (horizontal/vertical)
 
                         var self = this,
                         // build a tree from graph according to containment relationships
                             tree = this._asTree(this.graph);
 
-                        // traverse the tree, sort it, attach X,Y,Z values for each node
-                        // to represent a tensor (3 dimensional matrix).
-                        // update the graph for the renderer
-
+                        // traverse the tree, sort it, attach X,Y,Z values for each node to represent a tensor (3 dimensional matrix).
                         var sorter = function (a, b) {
                                 // sort the children according to connection relationships
                                 if (a.dependencies && a.dependencies.indexOf(b.id) !== -1) {
@@ -47,34 +49,36 @@ angular.module('gsUiInfra')
                                 return 1;
                             },
                             downHandler = function (node, parent, i, depth) {
-//                                console.log('- - - DOWN: ', node.id, ' ', node.children)
-                                node.layoutSpanX = 0;
-                                node.layoutSpanY = 0;
+                                node.spanX = 0;
+                                node.spanY = 0;
                             },
                             upHandler = function (node, parent, i, depth) {
-//                                console.log('- - - UP: ', node.id, ' ', node.children)
-
-                                // if we reached the bottom (a leaf node)
+                                // this is a leaf node
                                 if (!node.children || !node.children.length) {
-                                    parent.layoutSpanX++;
-                                } else {
-                                    // add from child
-                                    parent.layoutSpanX += node.layoutSpanX;
+                                    parent.spanX++;
+                                } else { // it's a branch node
+                                    // sum spans from child
+                                    parent.spanX += node.spanX;
                                 }
 
                                 // attach properties to the original graph nodes
                                 var n = Utils.findBy(self.graph.nodes, 'id', node.id);
-                                n.layoutPosX = i + 1;
-                                n.layoutPosY = 1; // TODO get from config
+                                if (self.config.xyPositioning === 'relative') {
+                                    n.layoutPosX = i + 1;
+                                    n.layoutPosY = 1; // TODO calculate according to bounds (get from config)
+                                } else if (self.config.xyPositioning === 'absolute') {
+                                    // TODO
+                                }
                                 n.layoutPosZ = depth;
                                 // initialize span values, increment when traversing up
-                                n.layoutSpanX = node.layoutSpanX === 0 ? 1 : node.layoutSpanX;
-                                n.layoutSpanY = node.layoutSpanY === 0 ? 1 : node.layoutSpanY;
-
+                                n.layoutSpanX = node.spanX === 0 ? 1 : node.spanX;
+                                n.layoutSpanY = node.spanY === 0 ? 1 : node.spanY;
                             };
 
                         Utils.walk(tree, sorter, downHandler, upHandler);
 
+
+/*
                         console.log(JSON.stringify(this.graph, function (k, v) {
                             if (k === 'layoutPosY' ||
                                 k === 'layoutPosZ' ||
@@ -86,6 +90,7 @@ angular.module('gsUiInfra')
                             }
                             return v;
                         }, 2))
+*/
                     },
 
                     _layoutCalcBounds: function () {
@@ -132,24 +137,29 @@ angular.module('gsUiInfra')
                         this.layoutMaxZ = maxz;
                     },
 
-                    _asTree: function () {
+                    _asTree: function (graph, copy) {
 
-                        var self = this,
-                            getInitialForest = function () {
+                        var getInitialForest = function () {
                                 var forest = [],
-                                    i = self.graph.nodes.length;
+                                    i = graph.nodes.length;
                                 while (i--) {
-                                    var n = self.graph.nodes[i];
-                                    forest.push({id: n.id, children: [], parent: null});
+                                    var n = graph.nodes[i];
+                                    if (copy) {
+                                        n.children = [];
+                                        n.parent = null;
+                                        forest.push(n);
+                                    } else {
+                                        forest.push({id: n.id, children: [], parent: null});
+                                    }
                                 }
                                 return forest;
                             },
                             forest = getInitialForest(),
-                            ei = this.graph.edges.length;
+                            ei = graph.edges.length;
 
                         // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                         while (ei--) {
-                            var e = this.graph.edges[ei],
+                            var e = graph.edges[ei],
                                 source = Utils.findBy(forest, 'id', e.source.id),
                                 target = Utils.findBy(forest, 'id', e.target.id);
 
