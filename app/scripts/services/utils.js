@@ -57,8 +57,8 @@ angular.module('gsUiInfra')
              * Used for comparisons, including array comparisons (only for sorted arrays).
              */
             equals: function (a, b) {
-                if (a === b) {
-                    return true;
+                if (a !== b) {
+                    return false;
                 }
                 if (a === null || b === null) {
                     return false;
@@ -66,7 +66,7 @@ angular.module('gsUiInfra')
                 if (a.length !== b.length) {
                     return false;
                 }
-
+                // handles sorted arrays only
                 for (var i = 0; i < a.length; ++i) {
                     if (a[i] !== b[i]) {
                         return false;
