@@ -35,7 +35,7 @@ angular.module('gsUiInfra')
 
                         var self = this,
                         // build a tree from graph according to containment relationships
-                            tree = this._asTree(this.graph);
+                            tree = this._asTree(this.graph, true, true);
 
                         // traverse the tree, sort it, attach X,Y,Z values for each node to represent a tensor (3 dimensional matrix).
                         var sorter = function (a, b) {
@@ -49,6 +49,7 @@ angular.module('gsUiInfra')
                                 return 1;
                             },
                             downHandler = function (node, parent, i, depth) {
+                                // initialize span values, increment when traversing up
                                 node.spanX = 0;
                                 node.spanY = 0;
                             },
@@ -61,21 +62,40 @@ angular.module('gsUiInfra')
                                     parent.spanX += node.spanX;
                                 }
 
-                                // attach properties to the original graph nodes
                                 var n = Utils.findBy(self.graph.nodes, 'id', node.id);
+
+                                // populate span values
+                                n.layoutSpanX = node.spanX === 0 ? 1 : node.spanX;
+                                n.layoutSpanY = node.spanY === 0 ? 1 : node.spanY;
+
+                                // populate position values
                                 if (self.config.xyPositioning === 'relative') {
                                     n.layoutPosX = i + 1;
                                     n.layoutPosY = 1; // TODO calculate according to bounds (get from config)
-                                } else if (self.config.xyPositioning === 'absolute') {
-                                    // TODO
                                 }
                                 n.layoutPosZ = depth;
-                                // initialize span values, increment when traversing up
-                                n.layoutSpanX = node.spanX === 0 ? 1 : node.spanX;
-                                n.layoutSpanY = node.spanY === 0 ? 1 : node.spanY;
                             };
 
                         Utils.walk(tree, sorter, downHandler, upHandler);
+
+                        // increment x/y position values according to span values
+                        Utils.walk(tree, null, null, function (node, parent, i, depth) {
+                            var temp = 0;
+                            for (var j = 0; j < parent.children.length; j++) {
+                                var n = Utils.findBy(self.graph.nodes, 'id', parent.children[j].id);
+                                if (!n.layoutPosXIncremented) {
+                                    n.layoutPosX += temp;
+                                    n.layoutPosXIncremented = true;
+                                    temp = parent.children[j].layoutSpanX - 1;
+                                }
+                                if (j === parent.children.length - 1) {
+                                    n.last = true;
+                                }
+                                if (j === 0) {
+                                    n.first = true;
+                                }
+                            }
+                        });
 
 
 /*
@@ -137,7 +157,7 @@ angular.module('gsUiInfra')
                         this.layoutMaxZ = maxz;
                     },
 
-                    _asTree: function (graph, copy) {
+                    _asTree: function (graph, addRoot, copy) {
 
                         var getInitialForest = function () {
                                 var forest = [],
@@ -177,7 +197,10 @@ angular.module('gsUiInfra')
                             }
                         }
 
-                        return {id: 'root', children: forest};
+                        if (addRoot) {
+                            return {id: 'root', children: forest};
+                        }
+                        return forest[0];
                     }
 
                 }

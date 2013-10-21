@@ -118,10 +118,7 @@ angular.module('gsUiInfra')
                                 .append('g')
 
                             nodeGroup.attr('class', function (d) {
-                                if (d.type) {
-                                    return 'node ' + self.constants.types[d.type[0]].classname;
-                                }
-                                return 'node'; // TODO solve otherwise for root node
+                                return 'node ' + self.constants.types[d.type[0]].classname;
                             })
 
                             // outer container
@@ -166,17 +163,14 @@ angular.module('gsUiInfra')
                             statusGroup.append('svg:text')
                                 .attr('class', 'circle-text')
                                 .text(function (d) {
-                                    if (d.type) {
-                                        return self.constants.types[d.type[0]].icon;
-                                    }
-                                    return 'a'; // TODO solve otherwise for root node
+                                    return self.constants.types[d.type[0]].icon;
                                 })
                                 .attr('x', self.constants.circleRadius)
                                 .attr('y', 29)
                                 .attr('text-anchor', 'middle')
 
 
-
+                            // prepare z-index for svg paint order
                             nodeGroup.sort(function (a, b) {
                                 if (a.layoutPosZ > b.layoutPosZ) {
                                     return 1;
@@ -187,6 +181,7 @@ angular.module('gsUiInfra')
                                 return 0;
                             });
 
+                            // render positioning
                             nodeGroup.attr('transform', function (d) {
                                 return 'translate(' + d.x + ',' + d.y + ')';
                             });
@@ -203,16 +198,12 @@ angular.module('gsUiInfra')
                                 })
 
 
-
                             // recurse - there might be a way to ditch the conditional here
                             nodeGroup.each(function (d) {
                                 d.children && nodeGroup.call(addNode, depth + 1);
                             });
 
                         }
-
-                        // kick off the recursive append
-//                        this.vis.call(addNode, 0);
 
                         function update(root) {
                             // kick off the recursive append
@@ -221,8 +212,8 @@ angular.module('gsUiInfra')
                                 .call(addNode, 0);
                         }
 
-                        var tree = self.layouter._asTree(self.graph, true);
-                        console.log(JSON.stringify(tree, null, 2))
+                        var tree = self.layouter._asTree(self.graph, false, true);
+//                        console.log(JSON.stringify(tree, null, 2))
                         update(tree);
 
 
@@ -252,7 +243,7 @@ angular.module('gsUiInfra')
                         }
 
                         var self = this;
-                        // turn all IDs in the edges sources/targets to object references
+                        // replace id's in the edges sources/targets to object references
                         var ei = this.graph.edges.length;
                         while (ei--) {
                             var edge = this.graph.edges[ei],
@@ -279,9 +270,13 @@ angular.module('gsUiInfra')
                             pad[i] = v + strokeWidth * 2;
                         });
 
+
+                        // TODO take this code to the new rendering function, figure out how to calculate x/y
+                        // TODO separate rendering for the original and the new canvas
+                        // TODO this will be done before or after the layout / paint? test both.
+
                         // update the nodes position data according to the layouter data
-                        this.graph.nodes.forEach(function (v/*, i*/) {
-                            v.fixed = true;
+                        this.graph.nodes.forEach(function (v, i) {
                             if (!v.dimensionsFinalized) {
                                 v.width = (segmentH - v.layoutPosZ * (pad[1] + pad[3]) - strokeWidth * 2) * v.layoutSpanX;
                                 v.height = (segmentV - v.layoutPosZ * (pad[0] + pad[2]) - strokeWidth * 2) * v.layoutSpanY;
@@ -289,6 +284,38 @@ angular.module('gsUiInfra')
                             }
                             v.x = segmentH * (v.layoutPosX - 1) + pad[3] * v.layoutPosZ + strokeWidth;
                             v.y = segmentV * (v.layoutPosY - 1) + pad[0] * v.layoutPosZ + strokeWidth;
+
+
+
+
+                            ////////////////////////////////////////////////////////////////////////////////////////
+
+
+                            var parent = Utils.findBy(self.graph.nodes, 'id', v.parent);
+                            if (!parent) {
+                                parent = {
+                                    width: self.vis.attr('width'),
+                                    height: self.vis.attr('height'),
+                                    layoutSpanX: 4,
+                                    layoutSpanY: 1
+                                }
+                            }
+
+                            v.width = parent.width / parent.layoutSpanX * v.layoutSpanX - pad[3];
+                            // TODO determine height
+                            v.x = parent.width / parent.layoutSpanX * (v.layoutPosX - 1) + pad[3];
+                            v.y = parent.height / parent.layoutSpanY * (v.layoutPosY - 1) + pad[0];
+                            if (v.last) {
+                                v.width -= pad[1];
+                            }
+                            if (!v.first) {
+                                v.width += self.constants.circleRadius;
+                                v.x -= self.constants.circleRadius;
+                            }
+
+
+                            ////////////////////////////////////////////////////////////////////////////////////////
+
                         });
 
                         // make sure the DOM elements are sorted according to Z index.
@@ -320,62 +347,6 @@ angular.module('gsUiInfra')
                         this.edgesSelection.selectAll('path').attr('d', function (d) {
                             return self._bezierPath(d.source, d.target, d.directed);
                         });
-
-
-
-                        //////////////////////////////////////////////////////////////////////////////////////////////
-
-
-                        function positionNode(selection, depth) {
-
-                            var nodeGroup = selection.selectAll('g.node')
-                                .data(function () {
-                                    return Utils.filter(self.graph.nodes, 'layoutPosZ', depth);
-                                })
-
-                            console.log(nodeGroup)
-
-                            nodeGroup.sort(function (a, b) {
-                                if (a.layoutPosZ > b.layoutPosZ) {
-                                    return 1;
-                                }
-                                if (a.layoutPosZ < b.layoutPosZ) {
-                                    return -1;
-                                }
-                                return 0;
-                            });
-
-                            nodeGroup.attr('transform', function (d) {
-                                return 'translate(' + d.x + ',' + d.y + ')';
-                            });
-                            nodeGroup.selectAll('rect.container')
-                                .attr('width', function (d) {
-                                    return d.width - self.constants.circleRadius;
-                                })
-                                .attr('height', function (d) {
-                                    return d.height;
-                                })
-                            nodeGroup.selectAll('rect.heading')
-                                .attr('width', function (d) {
-                                    return d.width - 6 - self.constants.circleRadius;
-                                })
-/*
-                            this.edgesSelection.selectAll('path').attr('d', function (d) {
-                                return self._bezierPath(d.source, d.target, d.directed);
-                            });
-*/
-                            // recurse - there might be a way to ditch the conditional here
-                            nodeGroup.each(function (/*d*/) {
-                                if (depth < 3) {
-                                    nodeGroup.call(positionNode, depth + 1);
-                                }
-                            });
-
-                        }
-
-//                        this.vis.call(positionNode, 0);
-
-
 
                     },
 
