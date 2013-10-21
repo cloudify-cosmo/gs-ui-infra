@@ -15,11 +15,8 @@ angular.module('gsUiInfra')
                         this.layouter = layouter;
 
                         var self = this;
-                        this.svg = d3.select(this.el).append('svg:svg');
-
-
-                        this.vis = d3.select('body').append('svg')
-                            .attr({ width: 900, height: 900});
+                        this.vis = d3.select(this.el).append('svg:svg');
+                        this.svg = d3.select('body').append('svg');
 
                         /** graph data structure */
                         this.graph = { nodes: [], edges: [] };
@@ -67,7 +64,8 @@ angular.module('gsUiInfra')
                     resize: function () {
                         this.width = this.el.clientWidth || 1000;
                         this.height = this.el.clientHeight || 600;
-                        this.svg.attr('width', this.width).attr('height', this.height);
+                        this.vis.attr({width: this.width, height: this.height});
+                        this.svg.attr({width: this.width, height: this.height});
                         this.layout();
                     },
 
@@ -274,6 +272,7 @@ angular.module('gsUiInfra')
                         // TODO take this code to the new rendering function, figure out how to calculate x/y
                         // TODO separate rendering for the original and the new canvas
                         // TODO this will be done before or after the layout / paint? test both.
+                        // TODO abstract away data structure implementation (getRoot(), getChildren(node), etc.)
 
                         // update the nodes position data according to the layouter data
                         this.graph.nodes.forEach(function (v, i) {
@@ -302,6 +301,7 @@ angular.module('gsUiInfra')
                             }
 
                             v.width = parent.width / parent.layoutSpanX * v.layoutSpanX - pad[3];
+                            v.height = parent.height / parent.layoutSpanY * v.layoutSpanY - pad[0] - pad[2];
                             // TODO determine height
                             v.x = parent.width / parent.layoutSpanX * (v.layoutPosX - 1) + pad[3];
                             v.y = parent.height / parent.layoutSpanY * (v.layoutPosY - 1) + pad[0];
