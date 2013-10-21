@@ -78,6 +78,7 @@ angular.module('gsUiInfra')
 
                         Utils.walk(tree, sorter, downHandler, upHandler);
 
+                        // TODO how to avoid a second traversal?
                         // increment x/y position values according to span values
                         Utils.walk(tree, null, null, function (node, parent, i, depth) {
                             var temp = 0;

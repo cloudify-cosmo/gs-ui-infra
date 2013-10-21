@@ -1,5 +1,7 @@
 $topologyColor1: #136e9d;
 $topologyColor2: #3aaeda;
+$topologyColor3: #66a2c5;
+$topologyColor4: #555869;
 
 svg {
   .node {
@@ -19,7 +21,7 @@ svg {
       font-size: 40px;
       font-family: Topology;
     }
-    .heading-text {
+    .node-label {
       font-size: 18px;
       font-family: OpenSansRegular, Arial, sans-serif;
     }
@@ -28,7 +30,7 @@ svg {
       .heading {
         fill: #f1f1f1;
       }
-      .heading-text {
+      .node-label {
         fill: #9f9d9d;
       }
       .circle {
@@ -40,7 +42,7 @@ svg {
       .heading {
         fill: #eaeaea;
       }
-      .heading-text {
+      .node-label {
         fill: #939393;
       }
       .circle {
@@ -55,7 +57,7 @@ svg {
       .circle {
         fill: $topologyColor1;
       }
-      .heading-text {
+      .node-label {
         fill: white;
       }
     }
@@ -68,8 +70,16 @@ svg {
       .circle {
         fill: $topologyColor2;
       }
-      .heading-text {
+      .node-label {
         fill: white;
+      }
+    }
+    &.app-module {
+      .circle {
+        fill: $topologyColor3;
+      }
+      .node-label {
+        fill: $topologyColor4;
       }
     }
   }

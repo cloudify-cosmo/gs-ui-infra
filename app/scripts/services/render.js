@@ -106,6 +106,10 @@ angular.module('gsUiInfra')
 
                         var self = this;
 
+                        function isAppModule(d) {
+                            return d.type[0] === 'cloudify.tosca.types.app_module';
+                        }
+
                         function addNode(selection, depth) {
 
                             var nodeGroup = selection.selectAll('g.node')
@@ -125,9 +129,15 @@ angular.module('gsUiInfra')
                                 .attr('x', self.constants.circleRadius)
                                 .attr('y', 0)
                                 .attr('width', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 0;
+                                    }
                                     return d.width;
                                 })
                                 .attr('height', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 0;
+                                    }
                                     return d.height;
                                 })
                                 .attr('rx', 6)
@@ -136,24 +146,50 @@ angular.module('gsUiInfra')
                             // heading box
                             nodeGroup.append('svg:rect')
                                 .attr('class', 'heading')
-                                .attr('height', self.constants.headingHeight)
-                                .attr('x', 3 + self.constants.circleRadius)
+                                .attr('height', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 0;
+                                    }
+                                    return self.constants.headingHeight;
+                                })
+                                .attr('x', self.constants.circleRadius)
                                 .attr('y', 3)
 
                             // heading text
                             nodeGroup.append('svg:text')
-                                .attr('class', 'heading-text')
+                                .attr('class', 'node-label')
                                 .text(function (d) {
                                     return d.name;
                                 })
-                                .attr('x', 28 + self.constants.circleRadius)
-                                .attr('y', 26)
+                                .attr('x', function (d) {
+                                    if (isAppModule(d)) {
+                                        return self.constants.circleRadius + 10;
+                                    }
+                                    return 28 + self.constants.circleRadius;
+                                })
+                                .attr('y', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 60;
+                                    }
+                                    return 26;
+                                })
+                                .attr('text-anchor', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 'middle';
+                                    }
+                                    return 'start';
+                                })
 
                             // status icon
                             var statusGroup = nodeGroup.append('svg:g').attr('class', 'status')
                             statusGroup.append('svg:circle')
                                 .attr('class', 'circle')
-                                .attr('cx', self.constants.circleRadius)
+                                .attr('cx', function (d) {
+                                    if (isAppModule(d)) {
+                                        return self.constants.circleRadius + 10;
+                                    }
+                                    return self.constants.circleRadius;
+                                })
                                 .attr('cy', self.constants.circleRadius + 1)
                                 .attr('r', self.constants.circleRadius)
 
@@ -163,7 +199,12 @@ angular.module('gsUiInfra')
                                 .text(function (d) {
                                     return self.constants.types[d.type[0]].icon;
                                 })
-                                .attr('x', self.constants.circleRadius)
+                                .attr('x', function (d) {
+                                    if (isAppModule(d)) {
+                                        return self.constants.circleRadius + 10;
+                                    }
+                                    return self.constants.circleRadius;
+                                })
                                 .attr('y', 29)
                                 .attr('text-anchor', 'middle')
 
@@ -179,19 +220,29 @@ angular.module('gsUiInfra')
                                 return 0;
                             });
 
+                            // TODO move this earlier (inline with the attribute initialization above)
                             // render positioning
                             nodeGroup.attr('transform', function (d) {
                                 return 'translate(' + d.x + ',' + d.y + ')';
                             });
                             nodeGroup.selectAll('rect.container')
                                 .attr('width', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 0;
+                                    }
                                     return d.width - self.constants.circleRadius;
                                 })
                                 .attr('height', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 0;
+                                    }
                                     return d.height;
                                 })
                             nodeGroup.selectAll('rect.heading')
                                 .attr('width', function (d) {
+                                    if (isAppModule(d)) {
+                                        return 0;
+                                    }
                                     return d.width - 6 - self.constants.circleRadius;
                                 })
 
@@ -395,7 +446,7 @@ angular.module('gsUiInfra')
 
                         // heading text
                         node.append('svg:text')
-                            .attr('class', 'heading-text')
+                            .attr('class', 'node-label')
                             .text(function (d) {
                                 return d.name;
                             })
