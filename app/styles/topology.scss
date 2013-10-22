@@ -83,4 +83,12 @@ svg {
       }
     }
   }
+  .edge {
+    path {
+      fill: none;
+      stroke: $topologyColor1;
+      stroke-width: 4;
+      opacity: 0.3;
+    }
+  }
 }

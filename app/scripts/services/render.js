@@ -16,14 +16,22 @@ angular.module('gsUiInfra')
 
                         var self = this;
                         this.vis = d3.select(this.el).append('svg:svg');
-                        this.svg = d3.select('body').append('svg');
 
                         /** graph data structure */
                         this.graph = { nodes: [], edges: [] };
 
-                        // handles to node and edge groups
-                        this.nodesSelection = this.svg.append('svg:g').selectAll('g.node');
-                        this.edgesSelection = this.svg.append('svg:g').selectAll('g.edge');
+                        // handles for nodes/edges selections
+                        this.nodesGroup = self.vis.append('g').attr('class', 'nodes');
+                        this.edgesGroup = self.vis.append('g').attr('class', 'edges');
+
+                        this.lineFunction = d3.svg.line()
+                            .x(function (d) {
+                                return d.x;
+                            })
+                            .y(function (d) {
+                                return d.y;
+                            })
+                            .interpolate("step-after");
 
                         this.constants = {
                             headingHeight: 33,
@@ -46,7 +54,6 @@ angular.module('gsUiInfra')
                                 'cloudify.tosca.types.app_module': { classname: 'app-module', icon: 'a'}
                             }
 
-
                         }
 
                         // tie resize behavior
@@ -65,7 +72,6 @@ angular.module('gsUiInfra')
                         this.width = this.el.clientWidth || 1000;
                         this.height = this.el.clientHeight || 600;
                         this.vis.attr({width: this.width, height: this.height});
-                        this.svg.attr({width: this.width, height: this.height});
                         this.layout();
                     },
 
@@ -85,190 +91,13 @@ angular.module('gsUiInfra')
 
                         this.graph = newData || this.graph;
 
-                        // tie data to edge handles
-                        this._bindEdges.call(this);
-
-                        // add new edges
-                        this._enterEdges.call(this);
-
-                        // tie data to node handles
-                        this._bindNodes.call(this);
-
-                        // add new nodes
-                        this._enterNodes.call(this);
-
                         // apply layout
                         this.layout();
 
-
-                        ////////////////////////////////////////////////////////////////////////////////////////////
-
-
-                        var self = this;
-
-                        function isAppModule(d) {
-                            return d.type[0] === 'cloudify.tosca.types.app_module';
-                        }
-
-                        function addNode(selection, depth) {
-
-                            var nodeGroup = selection.selectAll('g.node')
-                                .data(function (d) {
-                                    return d.children;
-                                })
-                                .enter()
-                                .append('g')
-
-                            nodeGroup.attr('class', function (d) {
-                                return 'node ' + self.constants.types[d.type[0]].classname;
-                            })
-
-                            // outer container
-                            nodeGroup.append('svg:rect')
-                                .attr('class', 'container')
-                                .attr('x', self.constants.circleRadius)
-                                .attr('y', 0)
-                                .attr('width', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 0;
-                                    }
-                                    return d.width;
-                                })
-                                .attr('height', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 0;
-                                    }
-                                    return d.height;
-                                })
-                                .attr('rx', 6)
-                                .attr('ry', 6)
-
-                            // heading box
-                            nodeGroup.append('svg:rect')
-                                .attr('class', 'heading')
-                                .attr('height', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 0;
-                                    }
-                                    return self.constants.headingHeight;
-                                })
-                                .attr('x', self.constants.circleRadius)
-                                .attr('y', 3)
-
-                            // heading text
-                            nodeGroup.append('svg:text')
-                                .attr('class', 'node-label')
-                                .text(function (d) {
-                                    return d.name;
-                                })
-                                .attr('x', function (d) {
-                                    if (isAppModule(d)) {
-                                        return self.constants.circleRadius + 10;
-                                    }
-                                    return 28 + self.constants.circleRadius;
-                                })
-                                .attr('y', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 60;
-                                    }
-                                    return 26;
-                                })
-                                .attr('text-anchor', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 'middle';
-                                    }
-                                    return 'start';
-                                })
-
-                            // status icon
-                            var statusGroup = nodeGroup.append('svg:g').attr('class', 'status')
-                            statusGroup.append('svg:circle')
-                                .attr('class', 'circle')
-                                .attr('cx', function (d) {
-                                    if (isAppModule(d)) {
-                                        return self.constants.circleRadius + 10;
-                                    }
-                                    return self.constants.circleRadius;
-                                })
-                                .attr('cy', self.constants.circleRadius + 1)
-                                .attr('r', self.constants.circleRadius)
-
-                            // circle icon
-                            statusGroup.append('svg:text')
-                                .attr('class', 'circle-text')
-                                .text(function (d) {
-                                    return self.constants.types[d.type[0]].icon;
-                                })
-                                .attr('x', function (d) {
-                                    if (isAppModule(d)) {
-                                        return self.constants.circleRadius + 10;
-                                    }
-                                    return self.constants.circleRadius;
-                                })
-                                .attr('y', 29)
-                                .attr('text-anchor', 'middle')
-
-
-                            // prepare z-index for svg paint order
-                            nodeGroup.sort(function (a, b) {
-                                if (a.layoutPosZ > b.layoutPosZ) {
-                                    return 1;
-                                }
-                                if (a.layoutPosZ < b.layoutPosZ) {
-                                    return -1;
-                                }
-                                return 0;
-                            });
-
-                            // TODO move this earlier (inline with the attribute initialization above)
-                            // render positioning
-                            nodeGroup.attr('transform', function (d) {
-                                return 'translate(' + d.x + ',' + d.y + ')';
-                            });
-                            nodeGroup.selectAll('rect.container')
-                                .attr('width', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 0;
-                                    }
-                                    return d.width - self.constants.circleRadius;
-                                })
-                                .attr('height', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 0;
-                                    }
-                                    return d.height;
-                                })
-                            nodeGroup.selectAll('rect.heading')
-                                .attr('width', function (d) {
-                                    if (isAppModule(d)) {
-                                        return 0;
-                                    }
-                                    return d.width - 6 - self.constants.circleRadius;
-                                })
-
-
-                            // recurse - there might be a way to ditch the conditional here
-                            nodeGroup.each(function (d) {
-                                d.children && nodeGroup.call(addNode, depth + 1);
-                            });
-
-                        }
-
-                        function update(root) {
-                            // kick off the recursive append
-                            self.vis
-                                .datum({ children: [root] })
-                                .call(addNode, 0);
-                        }
-
-                        var tree = self.layouter._asTree(self.graph, false, true);
+                        // trigger rendering a tree-like dom structure by recursion traversal
+                        var tree = this.layouter._asTree(this.graph, false, true);
 //                        console.log(JSON.stringify(tree, null, 2))
-                        update(tree);
-
-
-
-                        //////////////////////////////////////////////////////////////////////////////////////////////
-
+                        this._update(tree);
 
                     },
 
@@ -336,8 +165,6 @@ angular.module('gsUiInfra')
                             v.y = segmentV * (v.layoutPosY - 1) + pad[0] * v.layoutPosZ + strokeWidth;
 
 
-
-
                             ////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -364,14 +191,120 @@ angular.module('gsUiInfra')
                                 v.x -= self.constants.circleRadius;
                             }
 
-
-                            ////////////////////////////////////////////////////////////////////////////////////////
-
                         });
 
-                        // make sure the DOM elements are sorted according to Z index.
-                        // SVG determines the paint layers by it.
-                        this.nodesSelection.sort(function (a, b) {
+                    },
+
+                    _isAppModule: function (d) {
+                        return d.type[0] === 'cloudify.tosca.types.app_module';
+                    },
+
+                    _addNode: function (selection, depth, self) {
+
+                        var nodeGroup = selection.selectAll('g.node')
+                            .data(function (d) {
+                                return d.children;
+                            })
+                            .enter()
+                            .append('g');
+
+                        nodeGroup.attr('class', function (d) {
+                            return 'node ' + self.constants.types[d.type[0]].classname;
+                        });
+
+                        // outer container
+                        nodeGroup.append('svg:rect')
+                            .attr('class', 'container')
+                            .attr('x', self.constants.circleRadius)
+                            .attr('y', 0)
+                            .attr('width', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return 0;
+                                }
+                                return d.width - self.constants.circleRadius;
+                            })
+                            .attr('height',function (d) {
+                                if (self._isAppModule(d)) {
+                                    return 0;
+                                }
+                                return d.height;
+                            }).attr('rx', 6)
+                            .attr('ry', 6);
+
+                        // heading box
+                        nodeGroup.append('svg:rect')
+                            .attr('class', 'heading')
+                            .attr('height', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return 0;
+                                }
+                                return self.constants.headingHeight;
+                            })
+                            .attr('x', self.constants.circleRadius + 2)
+                            .attr('y', 3)
+                            .attr('width', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return 0;
+                                }
+                                return d.width - 6 - self.constants.circleRadius;
+                            });
+
+                        // heading text
+                        nodeGroup.append('svg:text')
+                            .attr('class', 'node-label')
+                            .text(function (d) {
+                                return d.name;
+                            })
+                            .attr('x', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return self.constants.circleRadius + 10;
+                                }
+                                return 28 + self.constants.circleRadius;
+                            })
+                            .attr('y', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return 60;
+                                }
+                                return 26;
+                            })
+                            .attr('text-anchor', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return 'middle';
+                                }
+                                return 'start';
+                            });
+
+                        // status icon
+                        var nodeStatusGroup = nodeGroup.append('svg:g').attr('class', 'status')
+                        nodeStatusGroup.append('svg:circle')
+                            .attr('class', 'circle')
+                            .attr('cx', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return self.constants.circleRadius + 10;
+                                }
+                                return self.constants.circleRadius;
+                            })
+                            .attr('cy', self.constants.circleRadius + 1)
+                            .attr('r', self.constants.circleRadius);
+
+                        // circle icon
+                        nodeStatusGroup.append('svg:text')
+                            .attr('class', 'circle-text')
+                            .text(function (d) {
+                                return self.constants.types[d.type[0]].icon;
+                            })
+                            .attr('x', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return self.constants.circleRadius + 10;
+                                }
+                                return self.constants.circleRadius;
+                            })
+                            .attr('y', 29)
+                            .attr('text-anchor', 'middle');
+
+
+                        // prepare z-index for svg paint order
+                        nodeGroup.sort(function (a, b) {
                             if (a.layoutPosZ > b.layoutPosZ) {
                                 return 1;
                             }
@@ -381,137 +314,106 @@ angular.module('gsUiInfra')
                             return 0;
                         });
 
-                        this.nodesSelection.attr('transform', function (d) {
+                        // render positioning
+                        nodeGroup.attr('transform', function (d) {
                             return 'translate(' + d.x + ',' + d.y + ')';
                         });
-                        this.nodesSelection.selectAll('rect.container')
-                            .attr('width', function (d) {
-                                return d.width - self.constants.circleRadius;
+
+
+                        var edgeGroup = self.edgesGroup
+                            .selectAll('g.edge')
+                            .data(function () {
+                                if (nodeGroup.empty()) {
+                                    return [];
+                                }
+                                var data = nodeGroup.data(),
+                                    arr = [],
+                                    i = data.length,
+                                    dep,
+                                    j;
+                                while (i--) {
+                                    if (dep = data[i].dependencies) {
+                                        j = dep.length;
+                                        while (j--) {
+                                            arr.push({
+                                                source: data[i],
+                                                target: Utils.findBy(self.graph.nodes, 'id', dep[j]),
+                                                directed: true
+                                            });
+                                        }
+                                    }
+                                }
+                                return arr;
                             })
-                            .attr('height', function (d) {
-                                return d.height;
-                            })
-                        this.nodesSelection.selectAll('rect.heading')
-                            .attr('width', function (d) {
-                                return d.width - 6 - self.constants.circleRadius;
-                            })
-                        this.edgesSelection.selectAll('path').attr('d', function (d) {
-                            return self._bezierPath(d.source, d.target, d.directed);
+                            .enter()
+                            .append('g')
+                            .attr('class', 'edge')
+
+
+                        var edgePath = edgeGroup
+                            .append('path')
+
+                            .attr('d', function (d) {
+                                var co = self._calcBezierCoords(d.source, d.target, d.directed);
+                                co.x1,
+                                    co.y1,
+                                    co.x2.toFixed(3),
+                                    co.y2.toFixed(3),
+                                    co.x3.toFixed(3),
+                                    co.y3.toFixed(3),
+                                    co.x4,
+                                    co.y4;
+
+                                return self.lineFunction([
+                                    {x: co.x1, y: co.y1},
+                                    {x: co.x2, y: co.y2},
+//                                        {x: co.x3, y: co.y3},
+                                    {x: co.x4, y: co.y4}
+                                ]);
+                            });
+
+
+                        // recurse - there might be a way to ditch the conditional here
+                        nodeGroup.each(function (d) {
+                            d.children && nodeGroup.call(self._addNode, depth + 1, self);
                         });
 
                     },
 
-                    _bindNodes: function () {
-
-                        var self = this,
-                            nodesDataKey = function (d) {
-                                // return all property values as the data key
-                                return Utils.propValues(d)
-                            }
-
-                        // pu nodes group
-                        this.nodesSelection = this.nodesSelection.data(function () {
-                            return self.graph.nodes;
-                        }, nodesDataKey);
+                    _update: function (root) {
+                        // kick off the recursive append
+                        this.nodesGroup
+                            .datum({ children: [root] })
+                            .call(this._addNode, 0, this);
                     },
 
-                    _enterNodes: function () {
-                        var self = this,
-                            node = this.nodesSelection.enter().append('svg:g')
-
-                        node.attr('class', function (d) {
-                            return 'node ' + self.constants.types[d.type[0]].classname;
-                        })
-
-                        // outer container
-                        node.append('svg:rect')
-                            .attr('class', 'container')
-                            .attr('x', self.constants.circleRadius)
-                            .attr('y', 0)
-                            .attr('width', function (d) {
-                                return d.width;
-                            })
-                            .attr('height', function (d) {
-                                return d.height;
-                            })
-                            .attr('rx', 6)
-                            .attr('ry', 6)
-
-                        // heading box
-                        node.append('svg:rect')
-                            .attr('class', 'heading')
-                            .attr('height', self.constants.headingHeight)
-                            .attr('x', 3 + self.constants.circleRadius)
-                            .attr('y', 3)
-
-                        // heading text
-                        node.append('svg:text')
-                            .attr('class', 'node-label')
-                            .text(function (d) {
-                                return d.name;
-                            })
-                            .attr('x', 28 + self.constants.circleRadius)
-                            .attr('y', 26)
-
-                        // circle
-                        var circleGroup = node.append('svg:g')
-                        circleGroup.append('svg:circle')
-                            .attr('class', 'circle')
-                            .attr('cx', self.constants.circleRadius)
-                            .attr('cy', self.constants.circleRadius + 1)
-                            .attr('r', self.constants.circleRadius)
-
-                        // circle icon
-                        circleGroup.append('svg:text')
-                            .attr('class', 'circle-text')
-                            .text(function (d) {
-                                return self.constants.types[d.type[0]].icon;
-                            })
-                            .attr('x', self.constants.circleRadius)
-                            .attr('y', 29)
-                            .attr('text-anchor', 'middle')
-
-                    },
-
-                    _bindEdges: function () {
-                        var self = this;
-                        this.edgesSelection = this.edgesSelection.data(function () {
-                            return Utils.filter(self.graph.edges, 'type', 'connected_to');
-                        });
-                    },
-
-                    _enterEdges: function () {
-                        var self = this;
-                        var edge = self.edgesSelection.enter().append('svg:g').attr('class', 'edge');
-
-                        edge.append('svg:path')
-                            .style('fill', 'none')
-                            .style('stroke', function (d) {
-                                return '#ddd';
-                            })
-                            .style('stroke-width', 4)
-                            .style('opacity', 0.6)
+                    _nodeAbsolutePosition: function (n) {
+                        var pos = {x: 0, y: 0};
+                        pos.x = n.x + n.layoutPosZ * (33 + 1);
+                        pos.y = n.y + n.layoutPosZ * (47 + 4);
+                        return pos;
                     },
 
                     /**
                      * calculations of coordinates for edges in the graph.
                      * this code was ported from graffle and adapted to our needs
                      */
-                    _calcBezierCoords: function (bb1, bb2, directed) {
+                    _calcBezierCoords: function (n1, n2, directed) {
 
-                        /* get bounding boxes of target and source */
-                        var off1 = 0;
-                        var off2 = directed ? 3 : 0;
+//                        var arrowMargin = directed ? 3 : 0;
+                        var n1AbsPos = this._nodeAbsolutePosition(n1);
+                        var n2AbsPos = this._nodeAbsolutePosition(n2);
+                        var cR = this.constants.circleRadius;
                         /* coordinates for potential connection coordinates from/to the objects */
                         var p = [
-                            {x: bb1.x + bb1.width / 2, y: bb1.y - off1},                // NORTH 1
-                            {x: bb1.x + bb1.width / 2, y: bb1.y + bb1.height + off1},   // SOUTH 1
-                            {x: bb1.x - off1, y: bb1.y + bb1.height / 2},               // WEST  1
-                            {x: bb1.x + bb1.width + off1, y: bb1.y + bb1.height / 2},   // EAST  1
-                            {x: bb2.x + bb2.width / 2, y: bb2.y - off2},                // NORTH 2
-                            {x: bb2.x + bb2.width / 2, y: bb2.y + bb2.height + off2},   // SOUTH 2
-                            {x: bb2.x - off2, y: bb2.y + bb2.height / 2},               // WEST  2
-                            {x: bb2.x + bb2.width + off2, y: bb2.y + bb2.height / 2}    // EAST  2
+                            /* NORTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y},
+                            /* SOUTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y + n1.height},
+                            /* WEST  1 */    {x: n1AbsPos.x, y: n1AbsPos.y + cR},
+                            /* EAST  1 */    {x: n1AbsPos.x + n1.width, y: n1AbsPos.y + cR},
+                            /* NORTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y},
+                            /* SOUTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y + n2.height},
+                            /* WEST  2 */    {x: n2AbsPos.x, y: n2AbsPos.y + cR},
+                            /* EAST  2 */    {x: n2AbsPos.x + n2.width, y: n2AbsPos.y + cR}
                         ];
 
                         /* distances between objects and according coordinates connection */
@@ -522,16 +424,26 @@ angular.module('gsUiInfra')
                          */
                         /* loop the first object's connection coordinates */
                         for (var i = 0; i < 4; i++) {
-                            /* loop the seond object's connection coordinates */
+                            /* loop the second object's connection coordinates */
                             for (var j = 4; j < 8; j++) {
                                 var dx = Math.abs(p[i].x - p[j].x),
                                     dy = Math.abs(p[i].y - p[j].y);
-                                if ((i == j - 4) || (((i != 3 && j != 6) || p[i].x < p[j].x) && ((i != 2 && j != 7) || p[i].x > p[j].x) && ((i != 0 && j != 5) || p[i].y > p[j].y) && ((i != 1 && j != 4) || p[i].y < p[j].y))) {
+                                if (
+                                    (i == j - 4) ||
+                                        (
+                                            ((i != 3 && j != 6) || p[i].x < p[j].x) &&
+                                                ((i != 2 && j != 7) || p[i].x > p[j].x) &&
+                                                ((i != 0 && j != 5) || p[i].y > p[j].y) &&
+                                                ((i != 1 && j != 4) || p[i].y < p[j].y)
+                                            )
+                                    ) {
+//                                    console.log('id1, id2, dx, dy: ', n1.id, '->', n2.id, ':', dx, '/', dy)
                                     dis.push(dx + dy);
                                     d[dis[dis.length - 1].toFixed(3)] = [i, j];
                                 }
                             }
                         }
+
                         var res = dis.length == 0 ? [0, 4] : d[Math.min.apply(Math, dis).toFixed(3)];
                         /* bezier path */
                         var x1 = p[res[0]].x,
@@ -585,4 +497,5 @@ angular.module('gsUiInfra')
                 }
             }
         }
-    }]);
+    }])
+;
