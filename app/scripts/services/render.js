@@ -355,14 +355,6 @@ angular.module('gsUiInfra')
 
                             .attr('d', function (d) {
                                 var co = self._calcBezierCoords(d.source, d.target, d.directed);
-                                co.x1,
-                                    co.y1,
-                                    co.x2.toFixed(3),
-                                    co.y2.toFixed(3),
-                                    co.x3.toFixed(3),
-                                    co.y3.toFixed(3),
-                                    co.x4,
-                                    co.y4;
 
                                 return self.lineFunction([
                                     {x: co.x1, y: co.y1},
