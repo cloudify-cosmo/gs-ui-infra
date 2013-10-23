@@ -141,36 +141,20 @@ angular.module('gsUiInfra')
                         // call the layouter to attach positioning data to nodes
                         this.layouter.layout(this.graph);
 
+
+                        // TODO extract the following code to the new rendering function (_addNode)
+                        // TODO this will be done before or after the layout / paint? test both.
+                        // TODO abstract away data structure implementation (getRoot(), getChildren(node), etc.)
+
                         // use this data to paint
-                        var rangeX = this.layouter.layoutMaxX - this.layouter.layoutMinX + 1,
-                            rangeY = this.layouter.layoutMaxY - this.layouter.layoutMinY + 1,
-                            segmentH = this.width / rangeX,
-                            segmentV = this.height / rangeY,
-                            strokeWidth = 2,
+                        var strokeWidth = 2,
                             pad = [47, 30, 30, 30];
                         pad.forEach(function (v, i) {
                             pad[i] = v + strokeWidth * 2;
                         });
 
-
-                        // TODO take this code to the new rendering function, figure out how to calculate x/y
-                        // TODO separate rendering for the original and the new canvas
-                        // TODO this will be done before or after the layout / paint? test both.
-                        // TODO abstract away data structure implementation (getRoot(), getChildren(node), etc.)
-
                         // update the nodes position data according to the layouter data
                         this.graph.nodes.forEach(function (v, i) {
-                            if (!v.dimensionsFinalized) {
-                                v.width = (segmentH - v.layoutPosZ * (pad[1] + pad[3]) - strokeWidth * 2) * v.layoutSpanX;
-                                v.height = (segmentV - v.layoutPosZ * (pad[0] + pad[2]) - strokeWidth * 2) * v.layoutSpanY;
-                                v.dimensionsFinalized = true;
-                            }
-                            v.x = segmentH * (v.layoutPosX - 1) + pad[3] * v.layoutPosZ + strokeWidth;
-                            v.y = segmentV * (v.layoutPosY - 1) + pad[0] * v.layoutPosZ + strokeWidth;
-
-
-                            ////////////////////////////////////////////////////////////////////////////////////////
-
 
                             var parent = Utils.findBy(self.graph.nodes, 'id', v.parent);
                             if (!parent) {
