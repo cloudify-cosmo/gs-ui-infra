@@ -36,7 +36,7 @@ angular.module('gsUiInfra')
                             .y(function (d) {
                                 return d.y;
                             })
-                            .interpolate("step-after");
+                            .interpolate("linear");
 
                         this.constants = {
                             headingHeight: 33,
@@ -392,6 +392,7 @@ angular.module('gsUiInfra')
                         var n1AbsPos = this._nodeAbsolutePosition(n1);
                         var n2AbsPos = this._nodeAbsolutePosition(n2);
                         var cR = this.constants.circleRadius;
+                        console.log(n1AbsPos, n2AbsPos)
                         /* coordinates for potential connection coordinates from/to the objects */
                         var p = [
                             /* NORTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y},
@@ -427,7 +428,7 @@ angular.module('gsUiInfra')
                                     ) {
 //                                    console.log('id1, id2, dx, dy: ', n1.id, '->', n2.id, ':', dx, '/', dy)
                                     dis.push(dx + dy);
-                                    d[dis[dis.length - 1].toFixed(3)] = [i, j];
+                                    d[dis[dis.length - 1].toFixed(3)] = [i, /*j*/6];
                                 }
                             }
                         }
@@ -448,15 +449,17 @@ angular.module('gsUiInfra')
                         return { x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4 };
                     },
 
-                    _renderPath: function (bb1, bb2, directed, lineRenderer) {
+                    _renderPath: function (n1, n2, directed, lineRenderer) {
 
-                        var coords = this._calcBezierCoords(bb1, bb2, directed),
+                        var coords = this._calcBezierCoords(n1, n2, directed),
                             x1 = coords.x1,
                             y1 = coords.y1,
                             x2 = coords.x2.toFixed(3),
                             y2 = coords.y2.toFixed(3),
-                            x3 = coords.x3.toFixed(3),
-                            y3 = coords.y3.toFixed(3),
+//                            x3 = coords.x3.toFixed(3),
+//                            y3 = coords.y3.toFixed(3),
+                            x3 = coords.x4 - 32,
+                            y3 = coords.y4,
                             x4 = coords.x4,
                             y4 = coords.y4;
 
@@ -465,8 +468,8 @@ angular.module('gsUiInfra')
                         if (lineRenderer) {
                             path = lineRenderer([
                                 {x: x1, y: y1},
-                                {x: x2, y: y2},
-//                                {x: x3, y: y3},
+//                                {x: x2, y: y2},
+                                {x: x3, y: y3},
                                 {x: x4, y: y4}
                             ]);
                         } else {
@@ -479,12 +482,12 @@ angular.module('gsUiInfra')
                             var mag = Math.sqrt((y4 - y3) * (y4 - y3) + (x4 - x3) * (x4 - x3));
                             /* vector normalisation to specified length  */
                             var norm = function (x, l) {
-                                return (-x * (l || 5) / mag);
+                                return (-x * (l || 15) / mag);
                             };
                             /* calculate array coordinates (two lines orthogonal to the path vector) */
                             var arr = [
-                                {x: (norm(x4 - x3, 5) + norm(y4 - y3, 15) + x4).toFixed(3), y: (norm(y4 - y3, 15) + norm(x4 - x3, 2) + y4).toFixed(3)},
-                                {x: (norm(x4 - x3, 5) - norm(y4 - y3, 15) + x4).toFixed(3), y: (norm(y4 - y3, 15) - norm(x4 - x3, 2) + y4).toFixed(3)}
+                                {x: (norm(x4 - x3, 12) + norm(y4 - y3, 12) + x4).toFixed(3), y: (norm(y4 - y3, 12) + norm(x4 - x3, 12) + y4).toFixed(3)},
+                                {x: (norm(x4 - x3, 12) - norm(y4 - y3, 12) + x4).toFixed(3), y: (norm(y4 - y3, 12) - norm(x4 - x3, 12) + y4).toFixed(3)}
                             ];
                             path = path + 'M' + arr[0].x + ',' + arr[0].y + 'L' + x4 + ',' + y4 + 'L' + arr[1].x + ',' + arr[1].y;
                         }
