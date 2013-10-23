@@ -18,6 +18,12 @@ angular.module('gsUiInfra')
                         this.config = config || {
                             xyPositioning: 'relative'
                         };
+                        this.constants = {
+                            relationshipTypes: {
+                                connectedTo: 'cloudify.relationships.connected_to',
+                                containedIn: 'cloudify.relationships.contained_in'
+                            }
+                        }
                         this.initialized = true;
                         return this;
                     },
@@ -178,23 +184,32 @@ angular.module('gsUiInfra')
                             forest = getInitialForest(),
                             ei = graph.edges.length;
 
-                        // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                         while (ei--) {
                             var e = graph.edges[ei],
-                                source = Utils.findBy(forest, 'id', e.source.id),
-                                target = Utils.findBy(forest, 'id', e.target.id);
+                                source = Utils.findBy(graph.nodes, 'id', e.source.id),
+                                target = Utils.findBy(graph.nodes, 'id', e.target.id);
+
+                            // attach dependency references
+                            if (e.type === this.constants.relationshipTypes.connectedTo) {
+//                                console.log('connected_to: ', e.source.id)
+                                e.directed = true;
+                                source.dependencies && source.dependencies.push(target.id) || (source.dependencies = [target.id]);
+//                                console.log('dependencies: ', source.dependencies)
+                            }
+                        }
+
+                        ei = graph.edges.length;
+                        while (ei--) {
+                            var e = graph.edges[ei],
+                                source = Utils.findBy(graph.nodes, 'id', e.source.id),
+                                target = Utils.findBy(graph.nodes, 'id', e.target.id);
 
                             // sort tree hierarchy
-                            if (e.type === 'contained_in') {
+                            if (e.type === this.constants.relationshipTypes.containedIn) {
                                 /*target.children &&*/
                                 var ch = forest.splice(forest.indexOf(source), 1)[0];
                                 target.children.push(ch);
                                 ch.parent = target.id;
-                            }
-                            // attach dependency references
-                            else if (e.type === 'connected_to') {
-                                e.directed = true;
-                                source.dependencies && source.dependencies.push(target.id) || (source.dependencies = [target.id]);
                             }
                         }
 

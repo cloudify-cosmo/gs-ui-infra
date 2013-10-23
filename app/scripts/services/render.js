@@ -42,20 +42,20 @@ angular.module('gsUiInfra')
                             headingHeight: 33,
                             circleRadius: 18,
                             types: {
-                                'cloudify.tosca.types.tier': { classname: 'tier', icon: 'k'},
-                                'cloudify.tosca.types.host': { classname: 'host', icon: 'e'},
-                                'cloudify.tosca.types.volume': { classname: 'volume', icon: ''},
-                                'cloudify.tosca.types.object_container': { classname: 'object-container', icon: ''},
-                                'cloudify.tosca.types.network': { classname: 'network', icon: 'g'},
-                                'cloudify.tosca.types.load_balancer': { classname: 'load-balancer', icon: ''},
-                                'cloudify.tosca.types.virtual_ip': { classname: 'virtual-ip', icon: ''},
-                                'cloudify.tosca.types.security_group': { classname: 'security-group', icon: 'i'},
-                                'cloudify.tosca.types.middleware_server': { classname: 'middleware-server', icon: ''},
-                                'cloudify.tosca.types.db_server': { classname: 'db-server', icon: 'c'},
-                                'cloudify.tosca.types.web_server': { classname: 'web-server', icon: 'l'},
-                                'cloudify.tosca.types.app_server': { classname: 'app-server', icon: ''},
-                                'cloudify.tosca.types.message_bus_server': { classname: 'message-bus-server', icon: ''},
-                                'cloudify.tosca.types.app_module': { classname: 'app-module', icon: 'a'}
+                                'cloudify.types.tier': { classname: 'tier', icon: 'k'},
+                                'cloudify.types.host': { classname: 'host', icon: 'e'},
+                                'cloudify.types.volume': { classname: 'volume', icon: ''},
+                                'cloudify.types.object_container': { classname: 'object-container', icon: ''},
+                                'cloudify.types.network': { classname: 'network', icon: 'g'},
+                                'cloudify.types.load_balancer': { classname: 'load-balancer', icon: ''},
+                                'cloudify.types.virtual_ip': { classname: 'virtual-ip', icon: ''},
+                                'cloudify.types.security_group': { classname: 'security-group', icon: 'i'},
+                                'cloudify.types.middleware_server': { classname: 'middleware-server', icon: ''},
+                                'cloudify.types.db_server': { classname: 'db-server', icon: 'c'},
+                                'cloudify.types.web_server': { classname: 'web-server', icon: 'l'},
+                                'cloudify.types.app_server': { classname: 'app-server', icon: ''},
+                                'cloudify.types.message_bus_server': { classname: 'message-bus-server', icon: ''},
+                                'cloudify.types.app_module': { classname: 'app-module', icon: 'a'}
                             }
 
                         }
@@ -199,21 +199,32 @@ angular.module('gsUiInfra')
 
                     },
 
+                    _getFirstKnownType: function (d) {
+                        var type, i;
+                        for (i = 0; i < d.type.length; i++) {
+                            if ((type = this.constants.types[d.type[i]]) !== undefined) {
+                                return type;
+                            }
+                        }
+                        return '';
+                    },
+
                     _isAppModule: function (d) {
-                        return d.type[0] === 'cloudify.tosca.types.app_module';
+                        return d.type.indexOf('cloudify.types.app_module') !== -1;
                     },
 
                     _addNode: function (selection, depth, self) {
 
                         var nodeGroup = selection.selectAll('g.node')
                             .data(function (d) {
+                                console.log('d.children: ', d.children)
                                 return d.children;
                             })
                             .enter()
                             .append('g');
 
                         nodeGroup.attr('class', function (d) {
-                            return 'node ' + self.constants.types[d.type[0]].classname;
+                            return 'node ' + self._getFirstKnownType(d).classname;
                         });
 
                         // outer container
@@ -295,7 +306,7 @@ angular.module('gsUiInfra')
                         nodeStatusGroup.append('svg:text')
                             .attr('class', 'circle-text')
                             .text(function (d) {
-                                return self.constants.types[d.type[0]].icon;
+                                return self._getFirstKnownType(d).icon;
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
@@ -323,43 +334,43 @@ angular.module('gsUiInfra')
                             return 'translate(' + d.x + ',' + d.y + ')';
                         });
 
+                        nodeGroup.each(function(datum) {
 
-                        var edgeGroup = self.edgesGroup
-                            .selectAll('g.edge')
-                            .data(function () {
-                                if (nodeGroup.empty()) {
-                                    return [];
-                                }
-                                var data = nodeGroup.data(),
-                                    arr = [],
-                                    i = data.length,
-                                    dep,
-                                    j;
-                                while (i--) {
-                                    if (dep = data[i].dependencies) {
+                            var edgeGroup = self.edgesGroup
+                                .selectAll('g.edge')
+                                .data(function () {
+                                    console.log('each data: ', datum)
+                                    if (!datum) {
+                                        return [];
+                                    }
+                                    var arr = [],
+                                        dep,
+                                        j;
+                                    if (dep = datum.dependencies) {
+                                        console.log('data[i].id (looping dependencies): ', datum.id)
                                         j = dep.length;
                                         while (j--) {
                                             arr.push({
-                                                source: data[i],
+                                                source: datum,
                                                 target: Utils.findBy(self.graph.nodes, 'id', dep[j]),
                                                 directed: true
                                             });
                                         }
                                     }
-                                }
-                                return arr;
-                            })
-                            .enter()
-                            .append('g')
-                            .attr('class', 'edge')
+                                    return arr;
+                                })
+                                .enter()
+                                .append('g')
+                                .attr('class', 'edge')
 
 
-                        edgeGroup
-                            .append('path')
-                            .attr('d', function (d) {
-                                return self._renderPath(d.source, d.target, d.directed, self.lineFunction);
-                            });
+                            edgeGroup
+                                .append('path')
+                                .attr('d', function (d) {
+                                    return self._renderPath(d.source, d.target, d.directed, self.lineFunction);
+                                });
 
+                        });
 
                         // recurse - there might be a way to ditch the conditional here
                         nodeGroup.each(function (d) {
@@ -376,28 +387,37 @@ angular.module('gsUiInfra')
                     },
 
                     _nodeAbsolutePosition: function (n) {
-                        var pos = {x: 0, y: 0};
-                        pos.x = n.x + n.layoutPosZ * (33 + 1);
-                        pos.y = n.y + n.layoutPosZ * (47 + 4);
-                        return pos;
+//                        var pos = {x: 0, y: 0};
+//                        pos.x = n.x + n.layoutPosZ * (33 + 1);
+//                        pos.y = n.y + n.layoutPosZ * (47 + 4);
+//                        return pos;
+                        n.absX -= n.x;
+                        n.absY -= n.y;
+                        n.parent && this._nodeAbsolutePosition(n.parent);
                     },
 
                     /**
                      * calculations of coordinates for edges in the graph.
                      * this code was ported from graffle and adapted to our needs
                      */
-                    _calcBezierCoords: function (n1, n2, directed) {
+                    _calcBezierCoords: function (n1, n2/*, directed*/) {
 
 //                        var arrowMargin = directed ? 3 : 0;
-                        var n1AbsPos = this._nodeAbsolutePosition(n1);
-                        var n2AbsPos = this._nodeAbsolutePosition(n2);
-                        var cR = this.constants.circleRadius;
-                        console.log(n1AbsPos, n2AbsPos)
+                        this._nodeAbsolutePosition(n1);
+                        this._nodeAbsolutePosition(n2);
+                        var n1AbsPos = {x: n1.absX, y: n1.absY},
+                            n2AbsPos = {x: n2.absX, y: n2.absY},
+
+/*
+                        var n1AbsPos = this._nodeAbsolutePosition(n1),
+                            n2AbsPos = this._nodeAbsolutePosition(n2),
+*/
+                            cR = this.constants.circleRadius;
                         /* coordinates for potential connection coordinates from/to the objects */
                         var p = [
                             /* NORTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y},
                             /* SOUTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y + n1.height},
-                            /* WEST  1 */    {x: n1AbsPos.x, y: n1AbsPos.y + cR},
+                            /* WEST  1 */    {x: n1AbsPos.x + 2, y: n1AbsPos.y + cR},
                             /* EAST  1 */    {x: n1AbsPos.x + n1.width, y: n1AbsPos.y + cR},
                             /* NORTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y},
                             /* SOUTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y + n2.height},
