@@ -189,27 +189,15 @@ angular.module('gsUiInfra')
                                 source = Utils.findBy(graph.nodes, 'id', e.source.id),
                                 target = Utils.findBy(graph.nodes, 'id', e.target.id);
 
-                            // attach dependency references
-                            if (e.type === this.constants.relationshipTypes.connectedTo) {
-//                                console.log('connected_to: ', e.source.id)
-                                e.directed = true;
-                                source.dependencies && source.dependencies.push(target.id) || (source.dependencies = [target.id]);
-//                                console.log('dependencies: ', source.dependencies)
-                            }
-                        }
-
-                        ei = graph.edges.length;
-                        while (ei--) {
-                            var e = graph.edges[ei],
-                                source = Utils.findBy(graph.nodes, 'id', e.source.id),
-                                target = Utils.findBy(graph.nodes, 'id', e.target.id);
-
                             // sort tree hierarchy
                             if (e.type === this.constants.relationshipTypes.containedIn) {
-                                /*target.children &&*/
                                 var ch = forest.splice(forest.indexOf(source), 1)[0];
                                 target.children.push(ch);
                                 ch.parent = target.id;
+                            }
+                            // attach dependency references
+                            else if (e.type === this.constants.relationshipTypes.connectedTo) {
+                                source.dependencies && source.dependencies.indexOf(target.id) === -1 && source.dependencies.push(target.id) || (source.dependencies = [target.id]);
                             }
                         }
 

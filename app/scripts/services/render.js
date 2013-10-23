@@ -338,7 +338,6 @@ angular.module('gsUiInfra')
                             var edgeGroup = self.edgesGroup
                                 .selectAll('g.edge')
                                 .data(function () {
-                                    console.log('each data: ', datum)
                                     if (!datum) {
                                         return [];
                                     }
@@ -346,13 +345,11 @@ angular.module('gsUiInfra')
                                         dep,
                                         j;
                                     if (dep = datum.dependencies) {
-                                        console.log('data[i].id (looping dependencies): ', datum.id)
                                         j = dep.length;
                                         while (j--) {
                                             arr.push({
                                                 source: datum,
-                                                target: Utils.findBy(self.graph.nodes, 'id', dep[j]),
-                                                directed: true
+                                                target: Utils.findBy(self.graph.nodes, 'id', dep[j])
                                             });
                                         }
                                     }
@@ -366,7 +363,7 @@ angular.module('gsUiInfra')
                             edgeGroup
                                 .append('path')
                                 .attr('d', function (d) {
-                                    return self._renderPath(d.source, d.target, d.directed, self.lineFunction);
+                                    return self._renderPath(d.source, d.target, self.lineFunction);
                                 });
 
                         });
@@ -411,19 +408,12 @@ angular.module('gsUiInfra')
                      * calculations of coordinates for edges in the graph.
                      * this code was ported from graffle and adapted to our needs
                      */
-                    _calcBezierCoords: function (n1, n2/*, directed*/) {
+                    _calcBezierCoords: function (n1, n2) {
 
-//                        var arrowMargin = directed ? 3 : 0;
                         this._nodeAbsolutePosition(n1);
-                        console.log('- n1 abs pos - ', n1.id, ': ', n1.absX, '/', n1.absY)
                         this._nodeAbsolutePosition(n2);
-                        console.log('- n2 abs pos - ', n2.id, ': ', n2.absX, '/', n2.absY)
                         var n1AbsPos = {x: n1.absX, y: n1.absY},
                             n2AbsPos = {x: n2.absX, y: n2.absY},
-/*
-                        var n1AbsPos = this._nodeAbsolutePosition(n1),
-                            n2AbsPos = this._nodeAbsolutePosition(n2),
-*/
                             cR = this.constants.circleRadius;
 
                         /* coordinates for potential connection coordinates from/to the objects */
@@ -482,9 +472,9 @@ angular.module('gsUiInfra')
                         return { x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4 };
                     },
 
-                    _renderPath: function (n1, n2, directed, lineRenderer) {
+                    _renderPath: function (n1, n2, lineRenderer) {
 
-                        var coords = this._calcBezierCoords(n1, n2, directed),
+                        var coords = this._calcBezierCoords(n1, n2),
                             x1 = coords.x1,
                             y1 = coords.y1,
                             x2 = coords.x2.toFixed(3),
@@ -510,20 +500,18 @@ angular.module('gsUiInfra')
                         }
 
                         /* arrow */
-                        if (directed) {
-                            /* magnitude, length of the last path vector */
-                            var mag = Math.sqrt((y4 - y3) * (y4 - y3) + (x4 - x3) * (x4 - x3));
-                            /* vector normalisation to specified length  */
-                            var norm = function (x, l) {
-                                return (-x * (l || 15) / mag);
-                            };
-                            /* calculate array coordinates (two lines orthogonal to the path vector) */
-                            var arr = [
-                                {x: (norm(x4 - x3, 12) + norm(y4 - y3, 12) + x4).toFixed(3), y: (norm(y4 - y3, 12) + norm(x4 - x3, 12) + y4).toFixed(3)},
-                                {x: (norm(x4 - x3, 12) - norm(y4 - y3, 12) + x4).toFixed(3), y: (norm(y4 - y3, 12) - norm(x4 - x3, 12) + y4).toFixed(3)}
-                            ];
-                            path = path + 'M' + arr[0].x + ',' + arr[0].y + 'L' + x4 + ',' + y4 + 'L' + arr[1].x + ',' + arr[1].y;
-                        }
+                        /* magnitude, length of the last path vector */
+                        var mag = Math.sqrt((y4 - y3) * (y4 - y3) + (x4 - x3) * (x4 - x3));
+                        /* vector normalisation to specified length  */
+                        var norm = function (x, l) {
+                            return (-x * (l || 15) / mag);
+                        };
+                        /* calculate array coordinates (two lines orthogonal to the path vector) */
+                        var arr = [
+                            {x: (norm(x4 - x3, 12) + norm(y4 - y3, 12) + x4).toFixed(3), y: (norm(y4 - y3, 12) + norm(x4 - x3, 12) + y4).toFixed(3)},
+                            {x: (norm(x4 - x3, 12) - norm(y4 - y3, 12) + x4).toFixed(3), y: (norm(y4 - y3, 12) - norm(x4 - x3, 12) + y4).toFixed(3)}
+                        ];
+                        path = path + 'M' + arr[0].x + ',' + arr[0].y + 'L' + x4 + ',' + y4 + 'L' + arr[1].x + ',' + arr[1].y;
 
                         return path;
                     }
