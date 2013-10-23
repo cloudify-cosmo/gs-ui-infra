@@ -7,6 +7,11 @@ angular.module('gsUiInfra')
 
             Topology: {
 
+                // TODO
+                // add hover icons for nodes and attach click handler to send external events
+                // add missing icons to types map
+                // clean up code
+
                 D3: {
 
                     init: function (el, layouter) {
@@ -36,7 +41,6 @@ angular.module('gsUiInfra')
                         this.constants = {
                             headingHeight: 33,
                             circleRadius: 18,
-                            // TODO clean up types list - what's unnecessary?
                             types: {
                                 'cloudify.tosca.types.tier': { classname: 'tier', icon: 'k'},
                                 'cloudify.tosca.types.host': { classname: 'host', icon: 'e'},
@@ -350,18 +354,18 @@ angular.module('gsUiInfra')
                             .attr('class', 'edge')
 
 
-                        var edgePath = edgeGroup
+                        edgeGroup
                             .append('path')
-
                             .attr('d', function (d) {
-                                var co = self._calcBezierCoords(d.source, d.target, d.directed);
-
+                                return self._bezierPath(d.source, d.target, d.directed, self.lineFunction);
+/*
                                 return self.lineFunction([
                                     {x: co.x1, y: co.y1},
                                     {x: co.x2, y: co.y2},
 //                                        {x: co.x3, y: co.y3},
                                     {x: co.x4, y: co.y4}
                                 ]);
+*/
                             });
 
 
@@ -452,7 +456,7 @@ angular.module('gsUiInfra')
                         return { x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4 };
                     },
 
-                    _bezierPath: function (bb1, bb2, directed) {
+                    _bezierPath: function (bb1, bb2, directed, lineRenderer) {
 
                         var coords = this._calcBezierCoords(bb1, bb2, directed),
                             x1 = coords.x1,
@@ -465,7 +469,17 @@ angular.module('gsUiInfra')
                             y4 = coords.y4;
 
                         /* assemble path and arrow */
-                        var path = 'M' + x1.toFixed(3) + ',' + y1.toFixed(3) + 'C' + x2 + ',' + y2 + ',' + x3 + ',' + y3 + ',' + x4.toFixed(3) + ',' + y4.toFixed(3);
+                        var path;
+                        if (lineRenderer) {
+                            path = lineRenderer([
+                                {x: x1, y: y1},
+                                {x: x2, y: y2},
+//                                {x: x3, y: y3},
+                                {x: x4, y: y4}
+                            ]);
+                        } else {
+                            path = 'M' + x1.toFixed(3) + ',' + y1.toFixed(3) + 'C' + x2 + ',' + y2 + ',' + x3 + ',' + y3 + ',' + x4.toFixed(3) + ',' + y4.toFixed(3);
+                        }
 
                         /* arrow */
                         if (directed) {
@@ -477,10 +491,10 @@ angular.module('gsUiInfra')
                             };
                             /* calculate array coordinates (two lines orthogonal to the path vector) */
                             var arr = [
-                                {x: (norm(x4 - x3, 5) + norm(y4 - y3, 2) + x4).toFixed(3), y: (norm(y4 - y3, 5) + norm(x4 - x3, 2) + y4).toFixed(3)},
-                                {x: (norm(x4 - x3, 5) - norm(y4 - y3, 2) + x4).toFixed(3), y: (norm(y4 - y3, 5) - norm(x4 - x3, 2) + y4).toFixed(3)}
+                                {x: (norm(x4 - x3, 5) + norm(y4 - y3, 15) + x4).toFixed(3), y: (norm(y4 - y3, 15) + norm(x4 - x3, 2) + y4).toFixed(3)},
+                                {x: (norm(x4 - x3, 5) - norm(y4 - y3, 15) + x4).toFixed(3), y: (norm(y4 - y3, 15) - norm(x4 - x3, 2) + y4).toFixed(3)}
                             ];
-                            path = path + 'M' + arr[0].x + ',' + arr[0].y + 'L' + x4 + ',' + y4 + 'L' + arr[1].x + ',' + arr[1].y + 'Z';
+                            path = path + 'M' + arr[0].x + ',' + arr[0].y + 'L' + x4 + ',' + y4 + 'L' + arr[1].x + ',' + arr[1].y;
                         }
 
                         return path;
