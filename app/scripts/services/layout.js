@@ -201,6 +201,7 @@ angular.module('gsUiInfra')
                             }
                         }
 
+                        // TODO should we add root first of all? (yaml model bug)
                         if (addRoot) {
                             return {id: 'root', children: forest};
                         }

@@ -99,7 +99,7 @@ angular.module('gsUiInfra')
                         this.layout();
 
                         // trigger rendering a tree-like dom structure by recursion traversal
-                        var tree = this.layouter._asTree(this.graph, false, true);
+                        var tree = this.layouter._asTree(this.graph, true, true);
 //                        console.log(JSON.stringify(tree, null, 2))
                         this._update(tree);
 
@@ -184,6 +184,9 @@ angular.module('gsUiInfra')
                     },
 
                     _getFirstKnownType: function (d) {
+                        if (!d.type) {
+                            return;
+                        }
                         var type, i;
                         for (i = 0; i < d.type.length; i++) {
                             if ((type = this.constants.types[d.type[i]]) !== undefined) {
@@ -194,7 +197,14 @@ angular.module('gsUiInfra')
                     },
 
                     _isAppModule: function (d) {
+                        if (!d.type) {
+                            return false;
+                        }
                         return d.type.indexOf('cloudify.types.app_module') !== -1;
+                    },
+
+                    _isRootNode: function (d) {
+                        return d.id === 'root';
                     },
 
                     _addNode: function (selection, depth, self) {
@@ -204,10 +214,17 @@ angular.module('gsUiInfra')
                                 return d.children;
                             })
                             .enter()
-                            .append('g');
+                            .append('svg:g');
 
                         nodeGroup.attr('class', function (d) {
-                            return 'node ' + self._getFirstKnownType(d).classname;
+                            var classname = 'node';
+                            if (self._isRootNode(d)) {
+                                classname += ' root';
+                            }
+                            if (self._getFirstKnownType(d)) {
+                                classname += ' ' + self._getFirstKnownType(d).classname;
+                            }
+                            return classname;
                         });
 
                         // outer container
@@ -218,22 +235,27 @@ angular.module('gsUiInfra')
                             .attr('width', function (d) {
                                 if (self._isAppModule(d)) {
                                     return 0;
+                                } else if (self._isRootNode(d)) {
+                                    return self.width;
                                 }
                                 return d.width - self.constants.circleRadius;
                             })
                             .attr('height',function (d) {
                                 if (self._isAppModule(d)) {
                                     return 0;
+                                } else if (self._isRootNode(d)) {
+                                    return self.height;
                                 }
                                 return d.height;
-                            }).attr('rx', 6)
+                            })
+                            .attr('rx', 6)
                             .attr('ry', 6);
 
                         // heading box
                         nodeGroup.append('svg:rect')
                             .attr('class', 'heading')
                             .attr('height', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModule(d) || self._isRootNode(d)) {
                                     return 0;
                                 }
                                 return self.constants.headingHeight;
@@ -241,7 +263,7 @@ angular.module('gsUiInfra')
                             .attr('x', self.constants.circleRadius + 2)
                             .attr('y', 3)
                             .attr('width', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModule(d) || self._isRootNode(d)) {
                                     return 0;
                                 }
                                 return d.width - 6 - self.constants.circleRadius;
@@ -251,7 +273,7 @@ angular.module('gsUiInfra')
                         nodeGroup.append('svg:text')
                             .attr('class', 'node-label')
                             .text(function (d) {
-                                return d.name;
+                                return d.name || '';
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
@@ -289,7 +311,7 @@ angular.module('gsUiInfra')
                         nodeStatusGroup.append('svg:text')
                             .attr('class', 'circle-text')
                             .text(function (d) {
-                                return self._getFirstKnownType(d).icon;
+                                return self._getFirstKnownType(d) ? self._getFirstKnownType(d).icon : '';
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
