@@ -44,13 +44,13 @@ angular.module('gsUiInfra')
                             types: {
                                 'cloudify.types.tier': { classname: 'tier', icon: 'k'},
                                 'cloudify.types.host': { classname: 'host', icon: 'e'},
-                                'cloudify.types.volume': { classname: 'volume', icon: ''},
+                                'cloudify.types.volume': { classname: 'volume', icon: 'j'},
                                 'cloudify.types.object_container': { classname: 'object-container', icon: ''},
                                 'cloudify.types.network': { classname: 'network', icon: 'g'},
-                                'cloudify.types.load_balancer': { classname: 'load-balancer', icon: ''},
+                                'cloudify.types.load_balancer': { classname: 'load-balancer', icon: 'b'},
                                 'cloudify.types.virtual_ip': { classname: 'virtual-ip', icon: ''},
                                 'cloudify.types.security_group': { classname: 'security-group', icon: 'i'},
-                                'cloudify.types.middleware_server': { classname: 'middleware-server', icon: ''},
+                                'cloudify.types.middleware_server': { classname: 'middleware-server', icon: 'h'},
                                 'cloudify.types.db_server': { classname: 'db-server', icon: 'c'},
                                 'cloudify.types.web_server': { classname: 'web-server', icon: 'l'},
                                 'cloudify.types.app_server': { classname: 'app-server', icon: ''},
@@ -217,7 +217,6 @@ angular.module('gsUiInfra')
 
                         var nodeGroup = selection.selectAll('g.node')
                             .data(function (d) {
-                                console.log('d.children: ', d.children)
                                 return d.children;
                             })
                             .enter()
@@ -386,14 +385,26 @@ angular.module('gsUiInfra')
                             .call(this._addNode, 0, this);
                     },
 
-                    _nodeAbsolutePosition: function (n) {
-//                        var pos = {x: 0, y: 0};
-//                        pos.x = n.x + n.layoutPosZ * (33 + 1);
-//                        pos.y = n.y + n.layoutPosZ * (47 + 4);
-//                        return pos;
-                        n.absX -= n.x;
-                        n.absY -= n.y;
-                        n.parent && this._nodeAbsolutePosition(n.parent);
+                    /**
+                     * Get absolute position for a node, pass only the first argument for usage,
+                     * second is used for recursion.
+                     * The node object will be modified to hold new properties for the absolute position,
+                     * namely <code>absX</code> and <code>absY</code>.
+                     *
+                     * @param n The node to set absolute position values for.
+                     * @private
+                     */
+                    _nodeAbsolutePosition: function (n, parent) {
+                        parent || (parent = n);
+                        if (n.absPosSet || n.absX === undefined || n.absY === undefined) {
+                            n.absX = 0;
+                            n.absY = 0;
+                            n.absPosSet = false;
+                        }
+                        n.absX += parent.x;
+                        n.absY += parent.y;
+                        parent.parent && this._nodeAbsolutePosition(n, Utils.findBy(this.graph.nodes, 'id', parent.parent));
+                        n.absPosSet = true;
                     },
 
                     /**
@@ -404,15 +415,17 @@ angular.module('gsUiInfra')
 
 //                        var arrowMargin = directed ? 3 : 0;
                         this._nodeAbsolutePosition(n1);
+                        console.log('- n1 abs pos - ', n1.id, ': ', n1.absX, '/', n1.absY)
                         this._nodeAbsolutePosition(n2);
+                        console.log('- n2 abs pos - ', n2.id, ': ', n2.absX, '/', n2.absY)
                         var n1AbsPos = {x: n1.absX, y: n1.absY},
                             n2AbsPos = {x: n2.absX, y: n2.absY},
-
 /*
                         var n1AbsPos = this._nodeAbsolutePosition(n1),
                             n2AbsPos = this._nodeAbsolutePosition(n2),
 */
                             cR = this.constants.circleRadius;
+
                         /* coordinates for potential connection coordinates from/to the objects */
                         var p = [
                             /* NORTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y},

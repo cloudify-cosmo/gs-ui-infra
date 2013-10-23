@@ -62,7 +62,8 @@ svg {
       }
     }
     &.db-server,
-    &.web-server {
+    &.web-server,
+    &.middleware-server {
       .container {
         stroke: $topologyColor2;
       }
