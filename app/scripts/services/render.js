@@ -357,15 +357,7 @@ angular.module('gsUiInfra')
                         edgeGroup
                             .append('path')
                             .attr('d', function (d) {
-                                return self._bezierPath(d.source, d.target, d.directed, self.lineFunction);
-/*
-                                return self.lineFunction([
-                                    {x: co.x1, y: co.y1},
-                                    {x: co.x2, y: co.y2},
-//                                        {x: co.x3, y: co.y3},
-                                    {x: co.x4, y: co.y4}
-                                ]);
-*/
+                                return self._renderPath(d.source, d.target, d.directed, self.lineFunction);
                             });
 
 
@@ -456,7 +448,7 @@ angular.module('gsUiInfra')
                         return { x1: x1, y1: y1, x2: x2, y2: y2, x3: x3, y3: y3, x4: x4, y4: y4 };
                     },
 
-                    _bezierPath: function (bb1, bb2, directed, lineRenderer) {
+                    _renderPath: function (bb1, bb2, directed, lineRenderer) {
 
                         var coords = this._calcBezierCoords(bb1, bb2, directed),
                             x1 = coords.x1,
