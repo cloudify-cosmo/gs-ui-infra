@@ -1,19 +1,21 @@
 
 /* glyph icons */
 
+$gs-infra-root: '../..' !default;
+
 @font-face {
   font-family: 'Topology';
-  src: url('../../assets/fonts/glyphs/Topology.ttf') format('truetype');
+  src: url('#{$gs-infra-root}/assets/fonts/glyphs/Topology.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Cosmo';
-  src: url('../../assets/fonts/glyphs/Cosmo.ttf') format('truetype');
+  src: url('#{$gs-infra-root}/assets/fonts/glyphs/Cosmo.ttf') format('truetype');
 }
 
 /* fonts */
 
 @font-face {
   font-family: 'OpenSansRegular';
-  src: url('../../assets/fonts/open-sans/OpenSans-Regular.ttf') format('truetype');
+  src: url('#{$gs-infra-root}/assets/fonts/open-sans/OpenSans-Regular.ttf') format('truetype');
 }
 
