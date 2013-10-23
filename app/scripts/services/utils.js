@@ -57,8 +57,8 @@ angular.module('gsUiInfra')
              * Used for comparisons, including array comparisons (only for sorted arrays).
              */
             equals: function (a, b) {
-                if (a === b) {
-                    return true;
+                if (a !== b) {
+                    return false;
                 }
                 if (a === null || b === null) {
                     return false;
@@ -66,7 +66,7 @@ angular.module('gsUiInfra')
                 if (a.length !== b.length) {
                     return false;
                 }
-
+                // handles sorted arrays only
                 for (var i = 0; i < a.length; ++i) {
                     if (a[i] !== b[i]) {
                         return false;
@@ -111,26 +111,28 @@ angular.module('gsUiInfra')
             /**
              * Traverse a tree (breadth first) and act on each node.
              *
-             * @param tree A root node to traverse from.
+             * @param node A root node to traverse from.
              * @param sorter (Optional) A function for Array.sort to sort each node's children.
-             * @param action (Optional) A handler function to act on each node.
+             * @param downHandler (Optional) A handler function to act on each node, when traversing down the tree.
+             * @param upHandler (Optional) A handler function to act on each node, when traversing up the tree.
              * @returns {*}
              */
-            walk: function (tree, sorter, action) {
+            walk: function (node, sorter, downHandler, upHandler) {
                 depth++;
                 // sort children
-                sorter && tree.children.sort(sorter);
-                var i = tree.children.length;
+                sorter && node.children.sort(sorter);
+                var i = node.children.length;
                 while (i--) {
-                    var child = tree.children[i];
-                    // TODO move this outside 'while'?
-                    // act on each child node
-                    action && action(child, i, depth);
+                    var child = node.children[i];
+                    // act on each child node, traversing down
+                    downHandler && downHandler(child, node, i, depth);
                     // continue with traversal
-                    child.children && child.children.length && this.walk(child, sorter, action);
+                    child.children && child.children.length && this.walk(child, sorter, downHandler, upHandler);
+                    // act on each parent node, traversing up
+                    upHandler && upHandler(child, node, i, depth);
                 }
                 depth--;
-                return tree;
+                return node;
             }
 
         };

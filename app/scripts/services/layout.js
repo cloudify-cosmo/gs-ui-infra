@@ -9,40 +9,35 @@ angular.module('gsUiInfra')
 
                 Tensor: {
 
+                    // TODO
+                    // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
+                    //   implementation details: consider that each node type might have different direction (horizontal/vertical)
                     // TODO possibly allow to limit the axis bounds, e.g. X should only span up to 3, and the Y should be used to flow nodes.
 
-                    // TODO mock for the order argument, should come from outside
-                    order: {
-
+                    init: function (config) {
+                        this.config = config || {
+                            xyPositioning: 'relative'
+                        };
+                        this.initialized = true;
+                        return this;
                     },
 
-                    layout: function (graph/*, order*/) {
+                    layout: function (graph) {
+                        this.initialized || init();
                         this.graph = graph;
                         this._layoutPrepare();
                         this._layoutCalcBounds();
+                        return this;
                     },
 
                     _layoutPrepare: function () {
 
-                        // TODO
-                        // * pass configuration object to control which level (Z), or which node type, spans what axis (X/Y)
-                        //   implementation details: consider that each node type might have different direction (horizontal/vertical)
-
-                        // PSEUDO
-                        // 1. build a tree from graph according to containment relationships
-                        // 2. sort the tree
-                        // 3. traverse the tree, determine X,Y,Z values for each node:
-                        //      Z will determine the padding as well as the width and height for any level that's not the deepest
-                        //      (deepest level has fixed dimensions)
-                        //      X,Y will determine the X,Y position in the layout
 
                         var self = this,
-                            tree = this._asTree(this.graph);
+                        // build a tree from graph according to containment relationships
+                            tree = this._asTree(this.graph, true, true);
 
-                        // traverse the tree, sort it, attach X,Y,Z values for each node
-                        // to represent a tensor (3 dimensional matrix).
-                        // update the graph for the renderer
-
+                        // traverse the tree, sort it, attach X,Y,Z values for each node to represent a tensor (3 dimensional matrix).
                         var sorter = function (a, b) {
                                 // sort the children according to connection relationships
                                 if (a.dependencies && a.dependencies.indexOf(b.id) !== -1) {
@@ -51,21 +46,72 @@ angular.module('gsUiInfra')
                                 if (b.dependencies && b.dependencies.indexOf(a.id) !== -1) {
                                     return 1;
                                 }
-                                return 0;
+                                return 1;
                             },
-                            action = function (child, i, depth) {
-                                // attach properties to the original graph
-                                var n = Utils.findBy(self.graph.nodes, 'id', child.id);
-                                n.layoutPosX = i + 1;
-                                n.layoutPosY = 1; // TODO get from config
+                            downHandler = function (node, parent, i, depth) {
+                                // initialize span values, increment when traversing up
+                                node.spanX = 0;
+                                node.spanY = 0;
+                            },
+                            upHandler = function (node, parent, i, depth) {
+                                // this is a leaf node
+                                if (!node.children || !node.children.length) {
+                                    parent.spanX++;
+                                } else { // it's a branch node
+                                    // sum spans from child
+                                    parent.spanX += node.spanX;
+                                }
+
+                                var n = Utils.findBy(self.graph.nodes, 'id', node.id);
+
+                                // populate span values
+                                n.layoutSpanX = node.spanX === 0 ? 1 : node.spanX;
+                                n.layoutSpanY = node.spanY === 0 ? 1 : node.spanY;
+
+                                // populate position values
+                                if (self.config.xyPositioning === 'relative') {
+                                    n.layoutPosX = i + 1;
+                                    n.layoutPosY = 1; // TODO calculate according to bounds (get from config)
+                                }
                                 n.layoutPosZ = depth;
-                                n.layoutSpanX = child.children.length || 1;
-                                n.layoutSpanY = 1; // TODO get from config
                             };
 
+                        Utils.walk(tree, sorter, downHandler, upHandler);
 
-                        Utils.walk(tree, sorter, action);
+                        // TODO how to avoid a second traversal?
+                        // increment x/y position values according to span values
+                        Utils.walk(tree, null, null, function (node, parent, i, depth) {
+                            var temp = 0;
+                            for (var j = 0; j < parent.children.length; j++) {
+                                var n = Utils.findBy(self.graph.nodes, 'id', parent.children[j].id);
+                                if (!n.layoutPosXIncremented) {
+                                    n.layoutPosX += temp;
+                                    n.layoutPosXIncremented = true;
+                                    temp = parent.children[j].layoutSpanX - 1;
+                                }
+                                if (j === parent.children.length - 1) {
+                                    n.last = true;
+                                }
+                                if (j === 0) {
+                                    n.first = true;
+                                }
+                            }
+                        });
 
+
+/*
+                        console.log(JSON.stringify(this.graph, function (k, v) {
+                            if (k === 'layoutPosY' ||
+                                k === 'layoutPosZ' ||
+                                k === 'layoutSpanY' ||
+//                                k === 'id' ||
+                                k === 'type' ||
+                                k === 'edges') {
+                                return undefined;
+                            }
+                            return v;
+                        }, 2))
+*/
                     },
 
                     _layoutCalcBounds: function () {
@@ -77,18 +123,31 @@ angular.module('gsUiInfra')
                             minz = Infinity,
                             maxz = -Infinity;
 
-                        var nodes = this.graph.nodes;
-                        for (var i in nodes) {
+                        var nodes = this.graph.nodes,
+                            i = nodes.length;
+                        while (i--) {
                             var x = nodes[i].layoutPosX,
                                 y = nodes[i].layoutPosY,
                                 z = nodes[i].layoutPosZ;
 
-                            if (x > maxx){ maxx = x;}
-                            if (x < minx){ minx = x;}
-                            if (y > maxy){ maxy = y;}
-                            if (y < miny){ miny = y;}
-                            if (z > maxz){ maxz = z;}
-                            if (z < minz){ minz = z;}
+                            if (x > maxx) {
+                                maxx = x;
+                            }
+                            if (x < minx) {
+                                minx = x;
+                            }
+                            if (y > maxy) {
+                                maxy = y;
+                            }
+                            if (y < miny) {
+                                miny = y;
+                            }
+                            if (z > maxz) {
+                                maxz = z;
+                            }
+                            if (z < minz) {
+                                minz = z;
+                            }
                         }
 
                         this.layoutMinX = minx;
@@ -99,35 +158,38 @@ angular.module('gsUiInfra')
                         this.layoutMaxZ = maxz;
                     },
 
-                    _asTree: function () {
+                    _asTree: function (graph, addRoot, copy) {
 
-                        var self = this;
-
-
-                        function getInitialForest() {
-                            var forest = [],
-                                i = self.graph.nodes.length;
-                            while (i--) {
-                                var n = self.graph.nodes[i];
-                                forest.push({id: n.id, children: []});
-                            }
-                            return forest;
-                        }
-
-                        var forest = getInitialForest();
-                        var ei = this.graph.edges.length;
+                        var getInitialForest = function () {
+                                var forest = [],
+                                    i = graph.nodes.length;
+                                while (i--) {
+                                    var n = graph.nodes[i];
+                                    if (copy) {
+                                        n.children = [];
+                                        n.parent = null;
+                                        forest.push(n);
+                                    } else {
+                                        forest.push({id: n.id, children: [], parent: null});
+                                    }
+                                }
+                                return forest;
+                            },
+                            forest = getInitialForest(),
+                            ei = graph.edges.length;
 
                         // TODO wrap in `while (tree not built)` if necessary. add tests to see what depth this loop can handle
                         while (ei--) {
-                            var e = this.graph.edges[ei],
+                            var e = graph.edges[ei],
                                 source = Utils.findBy(forest, 'id', e.source.id),
                                 target = Utils.findBy(forest, 'id', e.target.id);
-                            console.log(e.target.id);
+
                             // sort tree hierarchy
                             if (e.type === 'contained_in') {
-                                target.children && target.children.push(forest.splice(forest.indexOf(source), 1)[0]);
-// TODO resolve bug: tree not build correctly because forest is scanned as an ARRAY note that at this point it can be a TREE
-//                                Utils.walk(target.children)
+                                /*target.children &&*/
+                                var ch = forest.splice(forest.indexOf(source), 1)[0];
+                                target.children.push(ch);
+                                ch.parent = target.id;
                             }
                             // attach dependency references
                             else if (e.type === 'connected_to') {
@@ -136,11 +198,10 @@ angular.module('gsUiInfra')
                             }
                         }
 
-                        var tree = {id: 'root', children: forest};
-
-
-
-                        return tree;
+                        if (addRoot) {
+                            return {id: 'root', children: forest};
+                        }
+                        return forest[0];
                     }
 
                 }
