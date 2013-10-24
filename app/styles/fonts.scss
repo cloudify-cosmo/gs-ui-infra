@@ -19,3 +19,54 @@ $gs-infra-root: '../..' !default;
   src: url('#{$gs-infra-root}/assets/fonts/open-sans/OpenSans-Regular.ttf') format('truetype');
 }
 
+
+/* mappings */
+
+.topology-glyph {
+  &.app-module {
+    content: 'a';
+  }
+  &.load-balancer {
+    content: 'b';
+  }
+  &.db-server {
+    content: 'c';
+  }
+  &.floating-ip {
+    content: 'd';
+  }
+  &.host {
+    content: 'e';
+  }
+  &.messaging-bus {
+    content: 'f';
+  }
+  &.network {
+    content: 'g';
+  }
+  &.app-server {
+    content: 'h';
+  }
+  &.security-server {
+    content: 'i';
+  }
+  &.volume {
+    content: 'j';
+  }
+  &.tier,
+  &.cluster {
+    content: 'k';
+  }
+  &.web-app {
+    content: 'l';
+  }
+  &.edit-node {
+    content: 'm';
+  }
+  &.node-details {
+    content: 'n';
+  }
+  &.blob-storage {
+    content: 'o';
+  }
+}
