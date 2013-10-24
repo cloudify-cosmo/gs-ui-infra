@@ -12,11 +12,11 @@ svg {
     .heading {
       stroke-width: 0;
     }
-    .circle {
+    .status-circle {
       stroke: white;
       stroke-width: 2;
     }
-    .circle-text {
+    .status-glyph {
       fill: white;
       font-size: 40px;
       font-family: Topology;
@@ -33,7 +33,7 @@ svg {
       .node-label {
         fill: #9f9d9d;
       }
-      .circle {
+      .status-circle {
         fill: #dddddd;
       }
     }
@@ -45,7 +45,7 @@ svg {
       .node-label {
         fill: #939393;
       }
-      .circle {
+      .status-circle {
         fill: #bebebe;
       }
     }
@@ -54,7 +54,7 @@ svg {
         stroke: $topologyColor1;
       }
       .heading,
-      .circle {
+      .status-circle {
         fill: $topologyColor1;
       }
       .node-label {
@@ -68,7 +68,7 @@ svg {
         stroke: $topologyColor2;
       }
       .heading,
-      .circle {
+      .status-circle {
         fill: $topologyColor2;
       }
       .node-label {
@@ -76,7 +76,7 @@ svg {
       }
     }
     &.app-module {
-      .circle {
+      .status-circle {
         fill: $topologyColor3;
       }
       .node-label {

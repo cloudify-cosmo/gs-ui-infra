@@ -56,23 +56,23 @@ angular.module('gsUiInfra')
                             },
                             downHandler = function (node, parent, i, depth) {
                                 // initialize span values, increment when traversing up
-                                node.spanX = 0;
-                                node.spanY = 0;
+                                node.layoutSpanX = 0;
+                                node.layoutSpanY = 0;
                             },
                             upHandler = function (node, parent, i, depth) {
                                 // this is a leaf node
                                 if (!node.children || !node.children.length) {
-                                    parent.spanX++;
+                                    parent.layoutSpanX++;
                                 } else { // it's a branch node
                                     // sum spans from child
-                                    parent.spanX += node.spanX;
+                                    parent.layoutSpanX += node.layoutSpanX;
                                 }
 
                                 var n = Utils.findBy(self.graph.nodes, 'id', node.id);
 
                                 // populate span values
-                                n.layoutSpanX = node.spanX === 0 ? 1 : node.spanX;
-                                n.layoutSpanY = node.spanY === 0 ? 1 : node.spanY;
+                                n.layoutSpanX = node.layoutSpanX === 0 ? 1 : node.layoutSpanX;
+                                n.layoutSpanY = node.layoutSpanY === 0 ? 1 : node.layoutSpanY;
 
                                 // populate position values
                                 if (self.config.xyPositioning === 'relative') {
@@ -105,19 +105,24 @@ angular.module('gsUiInfra')
                         });
 
 
-/*
                         console.log(JSON.stringify(this.graph, function (k, v) {
                             if (k === 'layoutPosY' ||
                                 k === 'layoutPosZ' ||
                                 k === 'layoutSpanY' ||
-//                                k === 'id' ||
+                                k === 'dependencies' ||
+                                k === 'children' ||
+                                k === 'first' ||
+                                k === 'last' ||
+                                k === 'layoutPosXIncremented' ||
+                                k === 'parent' ||
+                                k === 'spanX' ||
+                                k === 'spanY' ||
                                 k === 'type' ||
                                 k === 'edges') {
                                 return undefined;
                             }
                             return v;
                         }, 2))
-*/
                     },
 
                     _layoutCalcBounds: function () {
@@ -166,22 +171,22 @@ angular.module('gsUiInfra')
 
                     _asTree: function (graph, addRoot, copy) {
 
-                        var getInitialForest = function () {
-                                var forest = [],
-                                    i = graph.nodes.length;
-                                while (i--) {
-                                    var n = graph.nodes[i];
-                                    if (copy) {
-                                        n.children = [];
-                                        n.parent = null;
-                                        forest.push(n);
-                                    } else {
-                                        forest.push({id: n.id, children: [], parent: null});
-                                    }
-                                }
-                                return forest;
-                            },
-                            forest = getInitialForest(),
+                        if (!Utils.findBy(graph.nodes, 'id', 'root')) {
+                            var roots = this._getRoots(graph),
+                                rIndex = roots.length,
+                                root,
+                                top = {id: 'root', children: roots, parent: null};
+                            console.log('rooooots: ', roots)
+//                            graph.nodes.push({id: 'root', children: roots, parent: null});
+                            graph.nodes.splice(0, 0, top);
+
+                            while (rIndex--) {
+                                root = roots[rIndex];
+                                graph.edges.push({type: this.constants.relationshipTypes.containedIn, source: root, target: top});
+                            }
+                        }
+
+                        var forest = this._getInitialForest(graph, copy),
                             ei = graph.edges.length;
 
                         while (ei--) {
@@ -192,7 +197,7 @@ angular.module('gsUiInfra')
                             // sort tree hierarchy
                             if (e.type === this.constants.relationshipTypes.containedIn) {
                                 var ch = forest.splice(forest.indexOf(source), 1)[0];
-                                target.children.push(ch);
+                                target.children && target.children.push(ch);
                                 ch.parent = target.id;
                             }
                             // attach dependency references
@@ -206,6 +211,46 @@ angular.module('gsUiInfra')
                             return {id: 'root', children: forest};
                         }
                         return forest[0];
+                    },
+
+                    _getInitialForest: function (graph, copy) {
+                        var forest = [],
+                            i = graph.nodes.length;
+                        while (i--) {
+                            var n = graph.nodes[i];
+                            if (copy) {
+                                n.children = [];
+                                n.parent = null;
+                                forest.push(n);
+                            } else {
+                                forest.push({id: n.id, children: [], parent: null});
+                            }
+                        }
+                        return forest;
+                    },
+
+                    _getRoots: function (graph) {
+                        var eIndex,
+                            nIndex = graph.nodes.length,
+                            node,
+                            edge,
+                            isRoot,
+                            roots = [];
+                        while (nIndex--) {
+                            node = graph.nodes[nIndex];
+                            eIndex = graph.edges.length;
+                            isRoot = true;
+                            while (eIndex--) {
+                                edge = graph.edges[eIndex];
+                                if (edge.type === this.constants.relationshipTypes.containedIn &&
+                                    (edge.source === node.id || edge.source === node)) {
+                                    isRoot = false;
+                                    break;
+                                }
+                            }
+                            isRoot && roots.push(node);
+                        }
+                        return roots;
                     }
 
                 }

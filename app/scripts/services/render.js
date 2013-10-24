@@ -161,14 +161,15 @@ angular.module('gsUiInfra')
                                 parent = {
                                     width: self.vis.attr('width'),
                                     height: self.vis.attr('height'),
-                                    layoutSpanX: 4,
-                                    layoutSpanY: 1
+                                    layoutSpanX: v.layoutSpanX,
+                                    layoutSpanY: v.layoutSpanY
                                 }
                             }
 
+//                            debugger;
                             v.width = parent.width / parent.layoutSpanX * v.layoutSpanX - pad[3];
+//                            console.log('width for ', v.name, ': ', v.width)
                             v.height = parent.height / parent.layoutSpanY * v.layoutSpanY - pad[0] - pad[2];
-                            // TODO determine height
                             v.x = parent.width / parent.layoutSpanX * (v.layoutPosX - 1) + pad[3];
                             v.y = parent.height / parent.layoutSpanY * (v.layoutPosY - 1) + pad[0];
                             if (v.last) {
@@ -297,7 +298,7 @@ angular.module('gsUiInfra')
                         // status icon
                         var nodeStatusGroup = nodeGroup.append('svg:g').attr('class', 'status')
                         nodeStatusGroup.append('svg:circle')
-                            .attr('class', 'circle')
+                            .attr('class', 'status-circle')
                             .attr('cx', function (d) {
                                 if (self._isAppModule(d)) {
                                     return self.constants.circleRadius + 10;
@@ -309,7 +310,7 @@ angular.module('gsUiInfra')
 
                         // circle icon
                         nodeStatusGroup.append('svg:text')
-                            .attr('class', 'circle-text')
+                            .attr('class', 'status-glyph')
                             .text(function (d) {
                                 return self._getFirstKnownType(d) ? self._getFirstKnownType(d).icon : '';
                             })
