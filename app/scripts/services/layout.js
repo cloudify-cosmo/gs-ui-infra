@@ -171,12 +171,17 @@ angular.module('gsUiInfra')
 
                     _asTree: function (graph, addRoot, copy) {
 
+                        if ( graph.nodes.length == 0){
+                            console.log("no nodes, nothing to paint");
+                            return {};
+                        }
+
                         if (!Utils.findBy(graph.nodes, 'id', 'root')) {
                             var roots = this._getRoots(graph),
                                 rIndex = roots.length,
                                 root,
                                 top = {id: 'root', children: roots, parent: null};
-                            console.log('rooooots: ', roots)
+
 //                            graph.nodes.push({id: 'root', children: roots, parent: null});
                             graph.nodes.splice(0, 0, top);
 

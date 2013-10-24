@@ -58,7 +58,7 @@ angular.module('gsUiInfra')
                                 'cloudify.types.app_module': { classname: 'app-module', icon: 'a'}
                             }
 
-                        }
+                        };
 
                         // tie resize behavior
                         $window.addEventListener('resize', function () {
@@ -89,6 +89,10 @@ angular.module('gsUiInfra')
                      */
                     refresh: function (newData) {
 
+                        if ( !newData ){
+                            console.log("render: nothing to paint");
+                            return;
+                        }
                         if (newData === this.graph) {
                             return;
                         }
@@ -100,6 +104,7 @@ angular.module('gsUiInfra')
 
                         // trigger rendering a tree-like dom structure by recursion traversal
                         var tree = this.layouter._asTree(this.graph, true, true);
+
 //                        console.log(JSON.stringify(tree, null, 2))
                         this._update(tree);
 
@@ -166,7 +171,6 @@ angular.module('gsUiInfra')
                                 }
                             }
 
-//                            debugger;
                             v.width = parent.width / parent.layoutSpanX * v.layoutSpanX - pad[3];
 //                            console.log('width for ', v.name, ': ', v.width)
                             v.height = parent.height / parent.layoutSpanY * v.layoutSpanY - pad[0] - pad[2];
@@ -209,7 +213,6 @@ angular.module('gsUiInfra')
                     },
 
                     _addNode: function (selection, depth, self) {
-
                         var nodeGroup = selection.selectAll('g.node')
                             .data(function (d) {
                                 return d.children;
