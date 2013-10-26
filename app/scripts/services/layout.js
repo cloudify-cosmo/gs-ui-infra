@@ -105,6 +105,7 @@ angular.module('gsUiInfra')
                         });
 
 
+/*
                         console.log(JSON.stringify(this.graph, function (k, v) {
                             if (k === 'layoutPosY' ||
                                 k === 'layoutPosZ' ||
@@ -123,6 +124,7 @@ angular.module('gsUiInfra')
                             }
                             return v;
                         }, 2))
+*/
                     },
 
                     _layoutCalcBounds: function () {
@@ -171,13 +173,13 @@ angular.module('gsUiInfra')
 
                     _asTree: function (graph, addRoot, copy) {
 
+                        // TODO find a solution not involving model mutation
                         if (!Utils.findBy(graph.nodes, 'id', 'root')) {
                             var roots = this._getRoots(graph),
                                 rIndex = roots.length,
                                 root,
                                 top = {id: 'root', children: roots, parent: null};
-                            console.log('rooooots: ', roots)
-//                            graph.nodes.push({id: 'root', children: roots, parent: null});
+                            // BUG why is order important?
                             graph.nodes.splice(0, 0, top);
 
                             while (rIndex--) {
@@ -206,9 +208,16 @@ angular.module('gsUiInfra')
                             }
                         }
 
-                        // TODO should we add root first of all? (yaml model bug)
                         if (addRoot) {
-                            return {id: 'root', children: forest};
+/*
+                            var fi = forest.length,
+                                f;
+                            while (fi--) {
+                                f = forest[fi];
+                                f.parent = 'root';
+                            }
+*/
+                            return {id: 'root', children: forest, parent: null};
                         }
                         return forest[0];
                     },

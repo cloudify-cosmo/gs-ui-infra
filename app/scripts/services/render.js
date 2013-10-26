@@ -27,7 +27,7 @@ angular.module('gsUiInfra')
 
                         // handles for nodes/edges selections
                         this.nodesGroup = self.vis.append('g').attr('class', 'nodes');
-                        this.edgesGroup = self.vis.append('g').attr('class', 'edges');
+                        this.edgesGroup = self.vis.append('g').attr('class', 'edges').selectAll('g.edge');
 
                         this.lineFunction = d3.svg.line()
                             .x(function (d) {
@@ -76,7 +76,7 @@ angular.module('gsUiInfra')
                         this.width = this.el.clientWidth || 1000;
                         this.height = this.el.clientHeight || 600;
                         this.vis.attr({width: this.width, height: this.height});
-                        this.layout();
+                        this._layout();
                     },
 
                     /**
@@ -96,10 +96,10 @@ angular.module('gsUiInfra')
                         this.graph = newData || this.graph;
 
                         // apply layout
-                        this.layout();
+                        this._layout();
 
                         // trigger rendering a tree-like dom structure by recursion traversal
-                        var tree = this.layouter._asTree(this.graph, true, true);
+                        var tree = this.layouter._asTree(this.graph, false, true);
 //                        console.log(JSON.stringify(tree, null, 2))
                         this._update(tree);
 
@@ -109,16 +109,16 @@ angular.module('gsUiInfra')
                         this.refresh({ nodes: [], edges: [] });
                     },
 
-                    layout: function () {
+                    _layout: function () {
                         if (!this.graph.nodes.length || !this.graph.edges.length) {
                             return;
                         }
                         if (this.layouter) {
-                            this.renderLayout();
+                            this._prepareLayout();
                         }
                     },
 
-                    renderLayout: function () {
+                    _prepareLayout: function () {
 
                         if (!this.layouter) {
                             return;
@@ -153,6 +153,9 @@ angular.module('gsUiInfra')
                             pad[i] = v + strokeWidth * 2;
                         });
 
+
+                        // TODO replace with walking in the tree?
+
                         // update the nodes position data according to the layouter data
                         this.graph.nodes.forEach(function (v, i) {
 
@@ -166,11 +169,10 @@ angular.module('gsUiInfra')
                                 }
                             }
 
-//                            debugger;
-                            v.width = parent.width / parent.layoutSpanX * v.layoutSpanX - pad[3];
-//                            console.log('width for ', v.name, ': ', v.width)
+                            // TODO adjust each node's width to compensate for last node width deduction (parent.children is available only in tree traversal)
+                            v.width = parent.width / parent.layoutSpanX * v.layoutSpanX - pad[3]/* - pad[3] / parent.children.length*/;
                             v.height = parent.height / parent.layoutSpanY * v.layoutSpanY - pad[0] - pad[2];
-                            v.x = parent.width / parent.layoutSpanX * (v.layoutPosX - 1) + pad[3];
+                            v.x = parent.width / parent.layoutSpanX * (v.layoutPosX - 1) + pad[3]/* - pad[3] / parent.children.length*/;
                             v.y = parent.height / parent.layoutSpanY * (v.layoutPosY - 1) + pad[0];
                             if (v.last) {
                                 v.width -= pad[1];
@@ -278,7 +280,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return self.constants.circleRadius + 10;
+                                    return d.width / 2 + 10;
                                 }
                                 return 28 + self.constants.circleRadius;
                             })
@@ -301,7 +303,7 @@ angular.module('gsUiInfra')
                             .attr('class', 'status-circle')
                             .attr('cx', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return self.constants.circleRadius + 10;
+                                    return d.width / 2 + 10;
                                 }
                                 return self.constants.circleRadius;
                             })
@@ -316,7 +318,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return self.constants.circleRadius + 10;
+                                    return d.width / 2 + 10;
                                 }
                                 return self.constants.circleRadius;
                             })
@@ -343,7 +345,7 @@ angular.module('gsUiInfra')
                         nodeGroup.each(function(datum) {
 
                             var edgeGroup = self.edgesGroup
-                                .selectAll('g.edge')
+                                /*.selectAll('g.edge')*/
                                 .data(function () {
                                     if (!datum) {
                                         return [];
@@ -458,7 +460,7 @@ angular.module('gsUiInfra')
                                     ) {
 //                                    console.log('id1, id2, dx, dy: ', n1.id, '->', n2.id, ':', dx, '/', dy)
                                     dis.push(dx + dy);
-                                    d[dis[dis.length - 1].toFixed(3)] = [i, /*j*/6];
+                                    d[dis[dis.length - 1].toFixed(3)] = [i, /*j*/ 6];
                                 }
                             }
                         }
@@ -488,7 +490,7 @@ angular.module('gsUiInfra')
                             y2 = coords.y2.toFixed(3),
 //                            x3 = coords.x3.toFixed(3),
 //                            y3 = coords.y3.toFixed(3),
-                            x3 = coords.x4 - 32,
+                            x3 = coords.x4 - 20,
                             y3 = coords.y4,
                             x4 = coords.x4,
                             y4 = coords.y4;
