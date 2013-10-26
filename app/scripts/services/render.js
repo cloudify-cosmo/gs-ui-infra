@@ -113,16 +113,16 @@ angular.module('gsUiInfra')
                         this.refresh({ nodes: [], edges: [] });
                     },
 
-                    layout: function () {
+                    _layout: function () {
                         if (!this.graph.nodes.length || !this.graph.edges.length) {
                             return;
                         }
                         if (this.layouter) {
-                            this.renderLayout();
+                            this._prepareLayout();
                         }
                     },
 
-                    renderLayout: function () {
+                    _prepareLayout: function () {
 
                         if (!this.layouter) {
                             return;
@@ -156,6 +156,9 @@ angular.module('gsUiInfra')
                         pad.forEach(function (v, i) {
                             pad[i] = v + strokeWidth * 2;
                         });
+
+
+                        // TODO replace with walking in the tree?
 
                         // update the nodes position data according to the layouter data
                         this.graph.nodes.forEach(function (v, i) {
@@ -281,7 +284,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return self.constants.circleRadius + 10;
+                                    return d.width / 2 + 10;
                                 }
                                 return 28 + self.constants.circleRadius;
                             })
@@ -304,7 +307,7 @@ angular.module('gsUiInfra')
                             .attr('class', 'status-circle')
                             .attr('cx', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return self.constants.circleRadius + 10;
+                                    return d.width / 2 + 10;
                                 }
                                 return self.constants.circleRadius;
                             })
@@ -319,7 +322,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return self.constants.circleRadius + 10;
+                                    return d.width / 2 + 10;
                                 }
                                 return self.constants.circleRadius;
                             })
@@ -346,7 +349,6 @@ angular.module('gsUiInfra')
                         nodeGroup.each(function(datum) {
 
                             var edgeGroup = self.edgesGroup
-                                .selectAll('g.edge')
                                 .data(function () {
                                     if (!datum) {
                                         return [];
@@ -461,7 +463,7 @@ angular.module('gsUiInfra')
                                     ) {
 //                                    console.log('id1, id2, dx, dy: ', n1.id, '->', n2.id, ':', dx, '/', dy)
                                     dis.push(dx + dy);
-                                    d[dis[dis.length - 1].toFixed(3)] = [i, /*j*/6];
+                                    d[dis[dis.length - 1].toFixed(3)] = [i, /*j*/ 6];
                                 }
                             }
                         }
@@ -491,7 +493,7 @@ angular.module('gsUiInfra')
                             y2 = coords.y2.toFixed(3),
 //                            x3 = coords.x3.toFixed(3),
 //                            y3 = coords.y3.toFixed(3),
-                            x3 = coords.x4 - 32,
+                            x3 = coords.x4 - 20,
                             y3 = coords.y4,
                             x4 = coords.x4,
                             y4 = coords.y4;
