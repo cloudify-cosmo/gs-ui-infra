@@ -173,6 +173,11 @@ angular.module('gsUiInfra')
 
                     _asTree: function (graph, addRoot, copy) {
 
+                        if ( graph.nodes.length == 0){
+                            console.log("no nodes, nothing to paint");
+                            return {};
+                        }
+
                         // TODO find a solution not involving model mutation
                         if (!Utils.findBy(graph.nodes, 'id', 'root')) {
                             var roots = this._getRoots(graph),
