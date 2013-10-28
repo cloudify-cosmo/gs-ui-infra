@@ -9,7 +9,6 @@ angular.module('gsUiInfra')
 
                 // TODO
                 // add hover icons for nodes and attach click handler to send external events
-                // add missing icons to types map
                 // clean up code
 
                 D3: {
@@ -61,9 +60,11 @@ angular.module('gsUiInfra')
                         };
 
                         // tie resize behavior
+/*
                         $window.addEventListener('resize', function () {
                             self.resize();
                         });
+*/
                         // call it once to set initial dimensions
                         this.resize();
 
@@ -149,10 +150,16 @@ angular.module('gsUiInfra')
                         // TODO extract the following code to the new rendering function (_addNode)
                         // TODO this will be done before or after the layout / paint? test both.
                         // TODO abstract away data structure implementation (getRoot(), getChildren(node), etc.)
+                        // TODO fix pads to represent half the current size
 
                         // use this data to paint
                         var strokeWidth = 2,
-                            pad = [47, 30, 30, 30];
+                            pad = [47, 30, 30, 30],
+                            visParent = {
+                                width: self.vis.attr('width'),
+                                height: self.vis.attr('height')
+                            };
+
                         pad.forEach(function (v, i) {
                             pad[i] = v + strokeWidth * 2;
                         });
@@ -164,26 +171,32 @@ angular.module('gsUiInfra')
                         this.graph.nodes.forEach(function (v, i) {
 
                             var parent = Utils.findBy(self.graph.nodes, 'id', v.parent);
-                            if (!parent) {
-                                parent = {
-                                    width: self.vis.attr('width'),
-                                    height: self.vis.attr('height'),
-                                    layoutSpanX: v.layoutSpanX,
-                                    layoutSpanY: v.layoutSpanY
-                                }
+                            if (!parent) { // this must be the fake root node, set its parent to the canvas
+                                parent = visParent;
+                                parent.layoutSpanX = v.layoutSpanX;
+                                parent.layoutSpanY = v.layoutSpanY;
+                                parent.children = [v];
                             }
 
+                            var segmentX = parent.width / parent.layoutSpanX,
+                                segmentY = parent.height / parent.layoutSpanY;
                             // TODO adjust each node's width to compensate for last node width deduction (parent.children is available only in tree traversal)
-                            v.width = parent.width / parent.layoutSpanX * v.layoutSpanX - pad[3]/* - pad[3] / parent.children.length*/;
-                            v.height = parent.height / parent.layoutSpanY * v.layoutSpanY - pad[0] - pad[2];
-                            v.x = parent.width / parent.layoutSpanX * (v.layoutPosX - 1) + pad[3]/* - pad[3] / parent.children.length*/;
-                            v.y = parent.height / parent.layoutSpanY * (v.layoutPosY - 1) + pad[0];
+                            v.width = segmentX * v.layoutSpanX - pad[3]/* - pad[3] / parent.children.length*/;
+                            v.height = segmentY * v.layoutSpanY - pad[0] - pad[2];
+                            v.x = segmentX * (v.layoutPosX - 1) + pad[3];
+                            v.y = segmentY * (v.layoutPosY - 1) + pad[0];
                             if (v.last) {
                                 v.width -= pad[1];
                             }
                             if (!v.first) {
                                 v.width += self.constants.circleRadius;
                                 v.x -= self.constants.circleRadius;
+                            }
+                            if (self._isAppModule(v)) {
+                                v.width = self.constants.circleRadius * 2;
+                                v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius;
+                                console.log('x: ', v.x)
+                                console.log('parent width: ', parent.width)
                             }
 
                         });
@@ -261,12 +274,6 @@ angular.module('gsUiInfra')
                         // heading box
                         nodeGroup.append('svg:rect')
                             .attr('class', 'heading')
-                            .attr('height', function (d) {
-                                if (self._isAppModule(d) || self._isRootNode(d)) {
-                                    return 0;
-                                }
-                                return self.constants.headingHeight;
-                            })
                             .attr('x', self.constants.circleRadius + 2)
                             .attr('y', 3)
                             .attr('width', function (d) {
@@ -274,6 +281,12 @@ angular.module('gsUiInfra')
                                     return 0;
                                 }
                                 return d.width - 6 - self.constants.circleRadius;
+                            })
+                            .attr('height', function (d) {
+                                if (self._isAppModule(d) || self._isRootNode(d)) {
+                                    return 0;
+                                }
+                                return self.constants.headingHeight;
                             });
 
                         // heading text
@@ -302,12 +315,14 @@ angular.module('gsUiInfra')
                             });
 
                         // status icon
-                        var nodeStatusGroup = nodeGroup.append('svg:g').attr('class', 'status')
+                        var nodeStatusGroup = nodeGroup.append('svg:g')
+                            .attr('class', 'status');
                         nodeStatusGroup.append('svg:circle')
                             .attr('class', 'status-circle')
                             .attr('cx', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return d.width / 2 + 10;
+                                    console.log('circle, d.x: ', d.x)
+                                    return d.width / 2/* + 10*/;
                                 }
                                 return self.constants.circleRadius;
                             })
@@ -322,7 +337,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return d.width / 2 + 10;
+                                    return d.width / 2/* + 10*/;
                                 }
                                 return self.constants.circleRadius;
                             })
