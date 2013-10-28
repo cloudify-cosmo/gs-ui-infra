@@ -194,6 +194,7 @@ angular.module('gsUiInfra')
                             }
                             if (self._isAppModule(v)) {
                                 v.width = self.constants.circleRadius * 2;
+                                v.height = self.constants.circleRadius * 2 + 32;
                                 v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius / 2;
                             }
 
@@ -319,7 +320,6 @@ angular.module('gsUiInfra')
                             .attr('class', 'status-circle')
                             .attr('cx', function (d) {
                                 if (self._isAppModule(d)) {
-                                    console.log('circle, d.x: ', d.x)
                                     return d.width / 2;
                                 }
                                 return self.constants.circleRadius;
@@ -445,13 +445,24 @@ angular.module('gsUiInfra')
                         var p = [
                             /* NORTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y},
                             /* SOUTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y + n1.height},
-                            /* WEST  1 */    {x: n1AbsPos.x + 2, y: n1AbsPos.y + cR},
-                            /* EAST  1 */    {x: n1AbsPos.x + n1.width, y: n1AbsPos.y + cR},
+                            /* WEST  1 */    {x: n1AbsPos.x + cR, y: n1AbsPos.y + n1.height / 2},
+                            /* EAST  1 */    {x: n1AbsPos.x + n1.width, y: n1AbsPos.y + n1.height / 2},
                             /* NORTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y},
                             /* SOUTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y + n2.height},
-                            /* WEST  2 */    {x: n2AbsPos.x, y: n2AbsPos.y + cR},
-                            /* EAST  2 */    {x: n2AbsPos.x + n2.width, y: n2AbsPos.y + cR}
+                            /* WEST  2 */    {x: n2AbsPos.x + cR - 2, y: n2AbsPos.y + n2.height / 2},
+                            /* EAST  2 */    {x: n2AbsPos.x + n2.width, y: n2AbsPos.y + n2.height / 2}
                         ];
+
+                        if (this._isAppModule(n1)) {
+                            p[0] = {x: n1AbsPos.x + n1.width / 2, y: n1AbsPos.y + 2};
+                            p[1].x = n1AbsPos.x + n1.width / 2;
+                            p[2] = {x: n1AbsPos.x, y: n1AbsPos.y + cR};
+                            p[3].y = n1AbsPos.y + cR;
+                            p[4].x = n2AbsPos.x + n2.width / 2;
+                            p[5].x = n2AbsPos.x + n2.width / 2;
+                            p[6] = {x: n2AbsPos.x - 2, y: n2AbsPos.y + cR};
+                            p[7] = {x: n2AbsPos.x + n2.width - 2, y: n2AbsPos.y + cR};
+                        }
 
                         /* distances between objects and according coordinates connection */
                         var d = {}, dis = [];
@@ -476,7 +487,7 @@ angular.module('gsUiInfra')
                                     ) {
 //                                    console.log('id1, id2, dx, dy: ', n1.id, '->', n2.id, ':', dx, '/', dy)
                                     dis.push(dx + dy);
-                                    d[dis[dis.length - 1].toFixed(3)] = [i, /*j*/ 6];
+                                    d[dis[dis.length - 1].toFixed(3)] = [/*i, j*/ 3, 6];
                                 }
                             }
                         }
