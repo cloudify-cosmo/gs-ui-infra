@@ -13,10 +13,11 @@ angular.module('gsUiInfra')
 
                 D3: {
 
-                    init: function (el, layouter) {
+                    init: function (el, layouter, scope) {
 
                         this.el = el;
                         this.layouter = layouter;
+                        this.scope = scope;
 
                         var self = this;
                         this.vis = d3.select(this.el).append('svg:svg');
@@ -392,6 +393,14 @@ angular.module('gsUiInfra')
                                 });
 
                         });
+
+                        // tie event handlers to all nodes
+                        nodeGroup.on('click', function (v/*, i*/) {
+                            d3.event.stopPropagation();
+                            console.log('node clicked: ', v)
+                            self.scope.$emit('topologyNodeClick', v);
+                        });
+
 
                         // recurse - there might be a way to ditch the conditional here
                         nodeGroup.each(function (d) {
