@@ -45,16 +45,16 @@ angular.module('gsUiInfra')
                                 'cloudify.types.tier': { classname: 'tier', icon: 'k'},
                                 'cloudify.types.host': { classname: 'host', icon: 'e'},
                                 'cloudify.types.volume': { classname: 'volume', icon: 'j'},
-                                'cloudify.types.object_container': { classname: 'object-container', icon: ''},
+                                'cloudify.types.object_container': { classname: 'object-container', icon: 'o'},
                                 'cloudify.types.network': { classname: 'network', icon: 'g'},
                                 'cloudify.types.load_balancer': { classname: 'load-balancer', icon: 'b'},
-                                'cloudify.types.virtual_ip': { classname: 'virtual-ip', icon: ''},
+                                'cloudify.types.virtual_ip': { classname: 'virtual-ip', icon: 'd'},
                                 'cloudify.types.security_group': { classname: 'security-group', icon: 'i'},
                                 'cloudify.types.middleware_server': { classname: 'middleware-server', icon: 'h'},
                                 'cloudify.types.db_server': { classname: 'db-server', icon: 'c'},
                                 'cloudify.types.web_server': { classname: 'web-server', icon: 'l'},
-                                'cloudify.types.app_server': { classname: 'app-server', icon: ''},
-                                'cloudify.types.message_bus_server': { classname: 'message-bus-server', icon: ''},
+                                'cloudify.types.app_server': { classname: 'app-server', icon: 'h'},
+                                'cloudify.types.message_bus_server': { classname: 'message-bus-server', icon: 'f'},
                                 'cloudify.types.app_module': { classname: 'app-module', icon: 'a'}
                             }
 
