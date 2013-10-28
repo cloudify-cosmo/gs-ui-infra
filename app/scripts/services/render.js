@@ -194,9 +194,7 @@ angular.module('gsUiInfra')
                             }
                             if (self._isAppModule(v)) {
                                 v.width = self.constants.circleRadius * 2;
-                                v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius;
-                                console.log('x: ', v.x)
-                                console.log('parent width: ', parent.width)
+                                v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius / 2;
                             }
 
                         });
@@ -297,7 +295,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return d.width / 2 + 10;
+                                    return d.width / 2;
                                 }
                                 return 28 + self.constants.circleRadius;
                             })
@@ -322,7 +320,7 @@ angular.module('gsUiInfra')
                             .attr('cx', function (d) {
                                 if (self._isAppModule(d)) {
                                     console.log('circle, d.x: ', d.x)
-                                    return d.width / 2/* + 10*/;
+                                    return d.width / 2;
                                 }
                                 return self.constants.circleRadius;
                             })
@@ -337,7 +335,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModule(d)) {
-                                    return d.width / 2/* + 10*/;
+                                    return d.width / 2;
                                 }
                                 return self.constants.circleRadius;
                             })
