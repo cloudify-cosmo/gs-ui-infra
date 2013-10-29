@@ -2,6 +2,7 @@ $topologyColor1: #136e9d;
 $topologyColor2: #3aaeda;
 $topologyColor3: #66a2c5;
 $topologyColor4: #555869;
+$connectionColor: #858585;
 
 svg {
   .node {
@@ -88,7 +89,7 @@ svg {
   .edge {
     path {
       fill: none;
-      stroke: $topologyColor1;
+      stroke: $connectionColor;
       stroke-width: 4;
       stroke-opacity: 0.3;
     }

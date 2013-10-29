@@ -109,6 +109,8 @@ angular.module('gsUiInfra')
                         console.log(JSON.stringify(this.graph, function (k, v) {
                             if (k === 'layoutPosY' ||
                                 k === 'layoutPosZ' ||
+                                k === 'layoutPosX' ||
+                                k === 'layoutSpanX' ||
                                 k === 'layoutSpanY' ||
                                 k === 'dependencies' ||
                                 k === 'children' ||
