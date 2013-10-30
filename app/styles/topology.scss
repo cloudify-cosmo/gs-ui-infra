@@ -35,6 +35,9 @@ svg {
       font-family: OpenSansRegular, Arial, sans-serif;
     }
     .actions {
+      * {
+        cursor: pointer;
+      }
       rect,
       path.separator {
         stroke: #e6e6e6;
