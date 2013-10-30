@@ -41,6 +41,7 @@ angular.module('gsUiInfra')
                         this.constants = {
                             headingHeight: 33,
                             circleRadius: 18,
+                            actionIconWidth: 36,
                             types: {
                                 'cloudify.types.tier': { classname: 'tier', icon: 'k'},
                                 'cloudify.types.host': { classname: 'host', icon: 'e'},
@@ -161,8 +162,9 @@ angular.module('gsUiInfra')
 
                         // TODO replace with walking in the tree?
 
-                        // update the nodes position data according to the layouter data
                         this.graph.nodes.forEach(function (v, i) {
+
+                            // update the nodes position data according to the layouter data
 
                             var parent = Utils.findBy(self.graph.nodes, 'id', v.parent);
                             if (!parent) { // this must be the fake root node, set its parent to the canvas
@@ -192,6 +194,10 @@ angular.module('gsUiInfra')
                                 v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius / 2;
                             }
 
+
+                            // update nodes actions according to node types
+
+                            v.actions = self._getNodeActions(v);
                         });
 
                     },
@@ -218,6 +224,23 @@ angular.module('gsUiInfra')
 
                     _isRootNode: function (d) {
                         return d.id === 'root';
+                    },
+
+                    _getNodeActions: function (d) {
+                        if (this._isAppModule(d) || this._isRootNode(d)) {
+                            return [];
+                        }
+                        return [
+                            {
+                                type: 'details',
+                                glyph: 'n'
+                            },
+                            {
+                                type: 'edit',
+                                glyph: 'm',
+                                last: true
+                            }
+                        ];
                     },
 
                     _addNode: function (selection, depth, self) {
@@ -321,9 +344,9 @@ angular.module('gsUiInfra')
                             .attr('cy', self.constants.circleRadius + 1)
                             .attr('r', self.constants.circleRadius);
 
-                        // circle icon
+                        // glyph icon
                         nodeStatusGroup.append('svg:text')
-                            .attr('class', 'status-glyph')
+                            .attr('class', 'status-glyph topology-glyph')
                             .text(function (d) {
                                 return self._getFirstKnownType(d) ? self._getFirstKnownType(d).icon : '';
                             })
@@ -336,12 +359,67 @@ angular.module('gsUiInfra')
                             .attr('y', 29)
                             .attr('text-anchor', 'middle');
 
+                        // action icons
+                        var actionIconsGroup = nodeGroup
+                            .append('svg:g')
+                            .attr('class', 'actions')
+                            .attr('transform', function (d) {
+                                return 'translate(' + (d.width - d.actions.length * 36 - 1) + ',-6)';
+                            })
+                            .classed('hidden', 1);
+                        actionIconsGroup
+                            .append('svg:rect')
+                            .attr('width', function (d) {
+                                return d.actions.length * self.constants.actionIconWidth;
+                            })
+                            .attr('height', 26)
+                            .attr('rx', 13)
+                            .attr('ry', 13);
+                        actionIconsGroup
+                            .selectAll('text')
+                            .data(function (d) {
+                                return d.actions;
+                            })
+                            .enter()
+                            .append('svg:text')
+                            .text(function (d) {
+                                return d.glyph;
+                            })
+                            .attr('class', 'action-glyph topology-glyph')
+                            .attr('x', function (d, i) {
+                                return (i + 0.5) * self.constants.actionIconWidth;
+                            })
+                            .attr('y', 21)
+                            .attr('text-anchor', 'middle');
+                        actionIconsGroup
+                            .selectAll('path')
+                            .data(function (d) {
+                                var arr = [],
+                                    actionsIndex = d.actions.length,
+                                    item;
+                                while (actionsIndex--) {
+                                    item = d.actions[actionsIndex];
+                                    if (!item.last) {
+                                        arr.unshift(item);
+                                    }
+                                }
+                                return arr;
+                            })
+                            .enter()
+                            .append('svg:path')
+                            .attr('d', function (d, i) {
+                                var x = (i + 1) * self.constants.actionIconWidth;
+                                return 'M' + x + ' 0L' + x + ' 27';
+                            })
+                            .attr('class', 'separator');
 
-                        // render positioning
+
+                        // positioning
                         nodeGroup.attr('transform', function (d) {
                             return 'translate(' + d.x + ',' + d.y + ')';
                         });
 
+                        // node edges
                         nodeGroup.each(function (datum) {
 
                             var edgeGroup = self.edgesGroup
@@ -364,30 +442,49 @@ angular.module('gsUiInfra')
                                     return arr;
                                 })
                                 .enter()
-                                .append('g')
+                                .append('svg:g')
                                 .attr('class', 'edge')
 
 
                             edgeGroup
-                                .append('path')
+                                .append('svg:path')
                                 .attr('d', function (d) {
                                     return self._renderPath(d.source, d.target, self.lineFunction);
                                 });
 
                         });
 
+                        // tie default event listeners to the node's elements
+                        nodeGroup.selectAll('*').on('mouseover', function (d) {
+                            actionIconsGroup.classed('hidden', function (datum) {
+                                return d !== datum;
+                            });
+                        });
+                        nodeGroup.selectAll('*').on('mouseout', function () {
+                            actionIconsGroup.classed('hidden', 1);
+                        });
 
-                        // tie each of the event listeners to the node's elements
+                        // tie each of the custom event listeners to the node's elements
                         var type, listener;
                         for (type in self.events) {
                             listener = self.events[type];
-                            nodeGroup.selectAll('*')
-                                .on(type, function (d/*, i*/) {
-                                    d3.event.stopPropagation();
-                                    listener && listener(d);
-                                    $rootScope.$apply();
-                                });
+                            nodeGroup.selectAll('*').on(type, function (d) {
+                                d3.event.stopPropagation();
+                                listener && listener(d);
+                                $rootScope.$apply();
+                            });
                         }
+
+                        // tie click listeners to action buttons
+                        actionIconsGroup.selectAll('.actions *')
+                            .style('pointer-events', 'all') // make sure events are bubbled up
+                            .on('click', null) // clear any previously assigned listeners
+                            .on('click', function (d) {
+                                // TODO document self.events type
+                                // TODO how to get the node datum and pass it to an event trigger?
+                                console.log('action clicked: ', d);
+                                d3.event.stopPropagation();
+                            });
 
 
                         // recurse - there might be a way to ditch the conditional here
