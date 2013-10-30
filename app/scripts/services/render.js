@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .factory('Render', ['Utils', '$window', function (Utils, $window) {
+    .factory('Render', ['Utils', '$rootScope', function (Utils, $rootScope) {
 
         return {
 
@@ -60,15 +60,8 @@ angular.module('gsUiInfra')
 
                         };
 
-                        // tie resize behavior
-                        /*
-                         $window.addEventListener('resize', function () {
-                         self.resize();
-                         });
-                         */
                         // call it once to set initial dimensions
                         this.resize();
-
                     },
 
                     /**
@@ -392,6 +385,7 @@ angular.module('gsUiInfra')
                                 .on(type, function (d/*, i*/) {
                                     d3.event.stopPropagation();
                                     listener && listener(d);
+                                    $rootScope.$apply();
                                 });
                         }
 
