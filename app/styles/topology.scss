@@ -5,6 +5,12 @@ $topologyColor4: #555869;
 $connectionColor: #858585;
 
 svg {
+  .translucent {
+    fill: white;
+    opacity: 0;
+    fill-opacity: 0;
+    stroke-opacity: 0;
+  }
   .node {
     .container {
       fill: white;

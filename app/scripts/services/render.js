@@ -7,10 +7,6 @@ angular.module('gsUiInfra')
 
             Topology: {
 
-                // TODO
-                // add hover icons for nodes and attach click handler to send external events
-                // clean up code
-
                 D3: {
 
                     init: function (el, layouter, events) {
@@ -19,15 +15,15 @@ angular.module('gsUiInfra')
                         this.layouter = layouter;
                         this.events = events;
 
-                        var self = this;
                         this.vis = d3.select(this.el).append('svg:svg');
 
                         /** graph data structure */
                         this.graph = { nodes: [], edges: [] };
 
-                        // handles for nodes/edges selections
-                        this.nodesGroup = self.vis.append('g').attr('class', 'nodes');
-                        this.edgesGroup = self.vis.append('g').attr('class', 'edges').selectAll('g.edge');
+                        // handles for static selections
+                        this.nodesGroup = this.vis.append('g').attr('class', 'nodes');
+                        this.edgesGroup = this.vis.append('g').attr('class', 'edges').selectAll('g.edge');
+                        this.clipPathsGroup = this.vis.append('svg:defs').selectAll('clipPath');
 
                         this.lineFunction = d3.svg.line()
                             .x(function (d) {
@@ -239,11 +235,13 @@ angular.module('gsUiInfra')
                         return [
                             {
                                 type: 'details',
-                                glyph: 'n'
+                                glyph: 'n',
+                                datum: d
                             },
                             {
                                 type: 'edit',
                                 glyph: 'm',
+                                datum: d,
                                 last: true
                             }
                         ];
@@ -408,21 +406,48 @@ angular.module('gsUiInfra')
 
                     _createActionIcons: function (nodeGroup, self) {
 
+                        // clip paths used for group
+
+                        this.clipPathsGroup.append('svg:clipPath')
+                            .attr('id', 'actionsClip')
+                            .append('svg:rect')
+                            .attr('width', 72 + 2)
+                            .attr('height', 26 + 2)
+                            .attr('rx', 13)
+                            .attr('ry', 13);
+
                         var actionIconsGroup = nodeGroup
                             .append('svg:g')
                             .attr('class', 'actions')
+                            .attr('clip-path', 'url(#actionsClip)')
                             .attr('transform', function (d) {
-                                return 'translate(' + (d.width - d.actions.length * 36 - 1) + ',-6)';
+                                return 'translate(' + (d.width - d.actions.length * self.constants.actionIconWidth - 2) + ',-6)';
                             })
                             .classed('hidden', 1);
                         actionIconsGroup
                             .append('svg:rect')
+                            .attr('x', 1)
+                            .attr('y', 1)
                             .attr('width', function (d) {
                                 return d.actions.length * self.constants.actionIconWidth;
                             })
                             .attr('height', 26)
                             .attr('rx', 13)
                             .attr('ry', 13);
+                        actionIconsGroup
+                            .selectAll('rect')
+                            .data(function (d) {
+                                return d.actions;
+                            })
+                            .enter()
+                            .append('svg:rect')
+                            .attr('class', 'translucent')
+                            .attr('x', function (d, i) {
+                                return i * self.constants.actionIconWidth;
+                            })
+                            .attr('y', 0)
+                            .attr('width', 36)
+                            .attr('height', 36);
                         actionIconsGroup
                             .selectAll('text')
                             .data(function (d) {
@@ -502,6 +527,12 @@ angular.module('gsUiInfra')
                      */
                     _tieEventListeners: function (nodeGroup, actionIconsGroup, self) {
 
+                        self._tieDefaultEventListeners(nodeGroup, actionIconsGroup);
+                        self._tieCustomEventListeners(nodeGroup, actionIconsGroup, self);
+                    },
+
+                    _tieDefaultEventListeners: function (nodeGroup, actionIconsGroup) {
+                        // show actions toolbox on node hover
                         nodeGroup.selectAll('*').on('mouseover', function (d) {
                             actionIconsGroup.classed('hidden', function (datum) {
                                 return d !== datum;
@@ -510,28 +541,35 @@ angular.module('gsUiInfra')
                         nodeGroup.selectAll('*').on('mouseout', function () {
                             actionIconsGroup.classed('hidden', 1);
                         });
+                    },
 
-                        // tie each of the custom event listeners to the node's elements
-                        var type, listener;
-                        for (type in self.events) {
-                            listener = self.events[type];
-                            nodeGroup.selectAll('*').on(type, function (d) {
-                                d3.event.stopPropagation();
-                                listener && listener(d);
-                                $rootScope.$apply();
-                            });
+                    _tieCustomEventListeners: function (nodeGroup, actionIconsGroup, self) {
+
+                        var eventType, listener;
+                        for (eventType in self.events) {
+                            listener = self.events[eventType];
+                            switch (eventType) {
+                                case 'actionClick':
+                                    // tie click listeners to action buttons
+                                    actionIconsGroup.selectAll('.actions text')
+                                        .style('pointer-events', 'none'); // pass clicks through action glyph elements to the capturer below
+                                    actionIconsGroup.selectAll('.actions rect')
+                                        .on('click', null) // clear any previously assigned listeners
+                                        .on('click', function (d) {
+                                            // TODO document self.events
+                                            // TODO how to get the node datum and pass it to an event trigger?
+//                                            console.log(d3.event);
+                                            listener && listener({
+                                                node: d.datum,
+                                                type:d.type
+                                            });
+                                            $rootScope.$apply();
+                                        });
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
-
-                        // tie click listeners to action buttons
-                        actionIconsGroup.selectAll('.actions *')
-                            .style('pointer-events', 'all') // make sure events are bubbled up
-                            .on('click', null) // clear any previously assigned listeners
-                            .on('click', function (d) {
-                                // TODO document self.events type
-                                // TODO how to get the node datum and pass it to an event trigger?
-                                console.log('action clicked: ', d);
-                                d3.event.stopPropagation();
-                            });
                     },
 
                     /**
