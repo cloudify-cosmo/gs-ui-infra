@@ -3,7 +3,7 @@
 angular.module('gsUiInfra')
     .directive('topology', function () {
         return {
-            template: '<div></div>',
+            template: '<div class="topology-directive-inner-div"></div>',
             restrict: 'EAC',
             scope: {
                 data: '=',
