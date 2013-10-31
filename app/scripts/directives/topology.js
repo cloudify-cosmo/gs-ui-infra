@@ -8,7 +8,8 @@ angular.module('gsUiInfra')
             scope: {
                 data: '=',
                 layouter: '=',
-                renderer: '='
+                renderer: '=',
+                events: '='
             },
 
             link: function (scope, element/*, attrs*/) {
@@ -19,7 +20,7 @@ angular.module('gsUiInfra')
                     console.log('missing a layouter');
                 }
 
-                scope.renderer.init(element[0].childNodes[0], scope.layouter);
+                scope.renderer.init(element[0].childNodes[0], scope.layouter, scope.events);
 
                 scope.$watch('data', function (/*oldValue, newValue*/) {
                     scope.renderer.refresh(scope.data);

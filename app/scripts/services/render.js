@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .factory('Render', ['Utils', '$window', function (Utils, $window) {
+    .factory('Render', ['Utils', '$rootScope', function (Utils, $rootScope) {
 
         return {
 
@@ -13,10 +13,11 @@ angular.module('gsUiInfra')
 
                 D3: {
 
-                    init: function (el, layouter) {
+                    init: function (el, layouter, events) {
 
                         this.el = el;
                         this.layouter = layouter;
+                        this.events = events;
 
                         var self = this;
                         this.vis = d3.select(this.el).append('svg:svg');
@@ -59,15 +60,8 @@ angular.module('gsUiInfra')
 
                         };
 
-                        // tie resize behavior
-/*
-                        $window.addEventListener('resize', function () {
-                            self.resize();
-                        });
-*/
                         // call it once to set initial dimensions
                         this.resize();
-
                     },
 
                     /**
@@ -90,7 +84,7 @@ angular.module('gsUiInfra')
                      */
                     refresh: function (newData) {
 
-                        if ( !newData ){
+                        if (!newData) {
                             console.log("render: nothing to paint");
                             return;
                         }
@@ -253,7 +247,7 @@ angular.module('gsUiInfra')
                         });
 
                         // outer container
-                        nodeGroup.append('svg:rect')
+                        var container = nodeGroup.append('svg:rect')
                             .attr('class', 'container')
                             .attr('x', self.constants.circleRadius)
                             .attr('y', 0)
@@ -265,7 +259,7 @@ angular.module('gsUiInfra')
                                 }
                                 return d.width - self.constants.circleRadius;
                             })
-                            .attr('height',function (d) {
+                            .attr('height', function (d) {
                                 if (self._isAppModule(d)) {
                                     return 0;
                                 } else if (self._isRootNode(d)) {
@@ -349,23 +343,12 @@ angular.module('gsUiInfra')
                             .attr('text-anchor', 'middle');
 
 
-                        // prepare z-index for svg paint order
-                        nodeGroup.sort(function (a, b) {
-                            if (a.layoutPosZ > b.layoutPosZ) {
-                                return 1;
-                            }
-                            if (a.layoutPosZ < b.layoutPosZ) {
-                                return -1;
-                            }
-                            return 0;
-                        });
-
                         // render positioning
                         nodeGroup.attr('transform', function (d) {
                             return 'translate(' + d.x + ',' + d.y + ')';
                         });
 
-                        nodeGroup.each(function(datum) {
+                        nodeGroup.each(function (datum) {
 
                             var edgeGroup = self.edgesGroup
                                 .data(function () {
@@ -398,6 +381,20 @@ angular.module('gsUiInfra')
                                 });
 
                         });
+
+
+                        // tie each of the event listeners to the node's elements
+                        var type, listener;
+                        for (type in self.events) {
+                            listener = self.events[type];
+                            nodeGroup.selectAll('*')
+                                .on(type, function (d/*, i*/) {
+                                    d3.event.stopPropagation();
+                                    listener && listener(d);
+                                    $rootScope.$apply();
+                                });
+                        }
+
 
                         // recurse - there might be a way to ditch the conditional here
                         nodeGroup.each(function (d) {
