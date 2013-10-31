@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfra')
-    .factory('Render', ['Utils', '$window', function (Utils, $window) {
+    .factory('Render', ['Utils', '$rootScope', function (Utils, $rootScope) {
 
         return {
 
@@ -41,6 +41,7 @@ angular.module('gsUiInfra')
                         this.constants = {
                             headingHeight: 33,
                             circleRadius: 18,
+                            actionIconWidth: 36,
                             types: {
                                 'cloudify.types.tier': { classname: 'tier', icon: 'k'},
                                 'cloudify.types.host': { classname: 'host', icon: 'e'},
@@ -60,15 +61,8 @@ angular.module('gsUiInfra')
 
                         };
 
-                        // tie resize behavior
-                        /*
-                         $window.addEventListener('resize', function () {
-                         self.resize();
-                         });
-                         */
                         // call it once to set initial dimensions
                         this.resize();
-
                     },
 
                     /**
@@ -168,8 +162,9 @@ angular.module('gsUiInfra')
 
                         // TODO replace with walking in the tree?
 
-                        // update the nodes position data according to the layouter data
                         this.graph.nodes.forEach(function (v, i) {
+
+                            // update the nodes position data according to the layouter data
 
                             var parent = Utils.findBy(self.graph.nodes, 'id', v.parent);
                             if (!parent) { // this must be the fake root node, set its parent to the canvas
@@ -199,6 +194,10 @@ angular.module('gsUiInfra')
                                 v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius / 2;
                             }
 
+
+                            // update nodes actions according to node types
+
+                            v.actions = self._getNodeActions(v);
                         });
 
                     },
@@ -227,7 +226,53 @@ angular.module('gsUiInfra')
                         return d.id === 'root';
                     },
 
+                    _getNodeActions: function (d) {
+                        if (this._isAppModule(d) || this._isRootNode(d)) {
+                            return [];
+                        }
+                        return [
+                            {
+                                type: 'details',
+                                glyph: 'n'
+                            },
+                            {
+                                type: 'edit',
+                                glyph: 'm',
+                                last: true
+                            }
+                        ];
+                    },
+
+                    // pass a reference to self as this method will run under d3 context (function owner is not the D3 object)
                     _addNode: function (selection, depth, self) {
+
+                        var nodeGroup = self._createNodeGroup(selection, self);
+                        self._createOuterContainer(nodeGroup, self);
+                        self._createHeadingBox(nodeGroup, self);
+                        self._createHeadingText(nodeGroup, self);
+                        self._createStatusGroup(nodeGroup, self);
+                        self._createNodeEdges(nodeGroup, self);
+
+                        var actionIconsGroup = self._createActionIcons(nodeGroup, self);
+
+                        self._tieEventListeners(nodeGroup, actionIconsGroup, self);
+
+                        // recurse - there might be a way to ditch the conditional here
+                        nodeGroup.each(function (d) {
+                            d.children && nodeGroup.call(self._addNode, depth + 1, self);
+                        });
+
+                    },
+
+                    _update: function (root) {
+                        // kick off the recursive append
+                        this.nodesGroup
+                            .datum({ children: [root] })
+                            .call(this._addNode, 0, this);
+                    },
+
+
+                    _createNodeGroup: function (selection, self) {
 
                         var nodeGroup = selection.selectAll('g.node')
                             .data(function (d) {
@@ -235,7 +280,7 @@ angular.module('gsUiInfra')
                             })
                             .enter()
                             .append('svg:g');
-
+                        // apply classname by type
                         nodeGroup.attr('class', function (d) {
                             var classname = 'node';
                             if (self._isRootNode(d)) {
@@ -246,8 +291,15 @@ angular.module('gsUiInfra')
                             }
                             return classname;
                         });
+                        // positioning
+                        nodeGroup.attr('transform', function (d) {
+                            return 'translate(' + d.x + ',' + d.y + ')';
+                        });
 
-                        // outer container
+                        return nodeGroup;
+                    },
+
+                    _createOuterContainer: function (nodeGroup, self) {
                         var container = nodeGroup.append('svg:rect')
                             .attr('class', 'container')
                             .attr('x', self.constants.circleRadius)
@@ -270,8 +322,9 @@ angular.module('gsUiInfra')
                             })
                             .attr('rx', 6)
                             .attr('ry', 6);
+                    },
 
-                        // heading box
+                    _createHeadingBox: function (nodeGroup, self) {
                         nodeGroup.append('svg:rect')
                             .attr('class', 'heading')
                             .attr('x', self.constants.circleRadius + 2)
@@ -288,8 +341,9 @@ angular.module('gsUiInfra')
                                 }
                                 return self.constants.headingHeight;
                             });
+                    },
 
-                        // heading text
+                    _createHeadingText: function (nodeGroup, self) {
                         nodeGroup.append('svg:text')
                             .attr('class', 'node-label')
                             .text(function (d) {
@@ -313,10 +367,13 @@ angular.module('gsUiInfra')
                                 }
                                 return 'start';
                             });
+                    },
 
-                        // status icon
+                    _createStatusGroup: function (nodeGroup, self) {
+
                         var nodeStatusGroup = nodeGroup.append('svg:g')
                             .attr('class', 'status');
+                        // status icon circle
                         nodeStatusGroup.append('svg:circle')
                             .attr('class', 'status-circle')
                             .attr('cx', function (d) {
@@ -327,10 +384,9 @@ angular.module('gsUiInfra')
                             })
                             .attr('cy', self.constants.circleRadius + 1)
                             .attr('r', self.constants.circleRadius);
-
-                        // circle icon
+                        // glyph icon
                         nodeStatusGroup.append('svg:text')
-                            .attr('class', 'status-glyph')
+                            .attr('class', 'status-glyph topology-glyph')
                             .text(function (d) {
                                 return self._getFirstKnownType(d) ? self._getFirstKnownType(d).icon : '';
                             })
@@ -342,13 +398,66 @@ angular.module('gsUiInfra')
                             })
                             .attr('y', 29)
                             .attr('text-anchor', 'middle');
+                    },
 
+                    _createActionIcons: function (nodeGroup, self) {
 
-                        // render positioning
-                        nodeGroup.attr('transform', function (d) {
-                            return 'translate(' + d.x + ',' + d.y + ')';
-                        });
+                        var actionIconsGroup = nodeGroup
+                            .append('svg:g')
+                            .attr('class', 'actions')
+                            .attr('transform', function (d) {
+                                return 'translate(' + (d.width - d.actions.length * 36 - 1) + ',-6)';
+                            })
+                            .classed('hidden', 1);
+                        actionIconsGroup
+                            .append('svg:rect')
+                            .attr('width', function (d) {
+                                return d.actions.length * self.constants.actionIconWidth;
+                            })
+                            .attr('height', 26)
+                            .attr('rx', 13)
+                            .attr('ry', 13);
+                        actionIconsGroup
+                            .selectAll('text')
+                            .data(function (d) {
+                                return d.actions;
+                            })
+                            .enter()
+                            .append('svg:text')
+                            .text(function (d) {
+                                return d.glyph;
+                            })
+                            .attr('class', 'action-glyph topology-glyph')
+                            .attr('x', function (d, i) {
+                                return (i + 0.5) * self.constants.actionIconWidth;
+                            })
+                            .attr('y', 21)
+                            .attr('text-anchor', 'middle');
+                        actionIconsGroup
+                            .selectAll('path')
+                            .data(function (d) {
+                                var arr = [],
+                                    actionsIndex = d.actions.length,
+                                    item;
+                                while (actionsIndex--) {
+                                    item = d.actions[actionsIndex];
+                                    if (!item.last) {
+                                        arr.unshift(item);
+                                    }
+                                }
+                                return arr;
+                            })
+                            .enter()
+                            .append('svg:path')
+                            .attr('d', function (d, i) {
+                                var x = (i + 1) * self.constants.actionIconWidth;
+                                return 'M' + x + ' 0L' + x + ' 27';
+                            })
+                            .attr('class', 'separator');
+                        return actionIconsGroup;
+                    },
 
+                    _createNodeEdges: function (nodeGroup, self) {
                         nodeGroup.each(function (datum) {
 
                             var edgeGroup = self.edgesGroup
@@ -356,9 +465,7 @@ angular.module('gsUiInfra')
                                     if (!datum) {
                                         return [];
                                     }
-                                    var arr = [],
-                                        dep,
-                                        j;
+                                    var arr = [], dep, j;
                                     if (dep = datum.dependencies) {
                                         j = dep.length;
                                         while (j--) {
@@ -371,43 +478,54 @@ angular.module('gsUiInfra')
                                     return arr;
                                 })
                                 .enter()
-                                .append('g')
+                                .append('svg:g')
                                 .attr('class', 'edge')
 
 
                             edgeGroup
-                                .append('path')
+                                .append('svg:path')
                                 .attr('d', function (d) {
                                     return self._renderPath(d.source, d.target, self.lineFunction);
                                 });
 
                         });
+                    },
 
+                    /**
+                     * tie default event listeners to the node's elements
+                     */
+                    _tieEventListeners: function (nodeGroup, actionIconsGroup, self) {
 
-                        // tie each of the event listeners to the node's elements
+                        nodeGroup.selectAll('*').on('mouseover', function (d) {
+                            actionIconsGroup.classed('hidden', function (datum) {
+                                return d !== datum;
+                            });
+                        });
+                        nodeGroup.selectAll('*').on('mouseout', function () {
+                            actionIconsGroup.classed('hidden', 1);
+                        });
+
+                        // tie each of the custom event listeners to the node's elements
                         var type, listener;
                         for (type in self.events) {
                             listener = self.events[type];
-                            nodeGroup.selectAll('*')
-                                .on(type, function (d/*, i*/) {
-                                    d3.event.stopPropagation();
-                                    listener && listener(d);
-                                });
+                            nodeGroup.selectAll('*').on(type, function (d) {
+                                d3.event.stopPropagation();
+                                listener && listener(d);
+                                $rootScope.$apply();
+                            });
                         }
 
-
-                        // recurse - there might be a way to ditch the conditional here
-                        nodeGroup.each(function (d) {
-                            d.children && nodeGroup.call(self._addNode, depth + 1, self);
-                        });
-
-                    },
-
-                    _update: function (root) {
-                        // kick off the recursive append
-                        this.nodesGroup
-                            .datum({ children: [root] })
-                            .call(this._addNode, 0, this);
+                        // tie click listeners to action buttons
+                        actionIconsGroup.selectAll('.actions *')
+                            .style('pointer-events', 'all') // make sure events are bubbled up
+                            .on('click', null) // clear any previously assigned listeners
+                            .on('click', function (d) {
+                                // TODO document self.events type
+                                // TODO how to get the node datum and pass it to an event trigger?
+                                console.log('action clicked: ', d);
+                                d3.event.stopPropagation();
+                            });
                     },
 
                     /**

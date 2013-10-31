@@ -7,8 +7,9 @@ $connectionColor: #858585;
 svg {
   .node {
     .container {
-      fill: none;
-      stroke-width: 2;
+      fill: white;
+      fill-opacity: 0;
+      stroke-width: 2px;
     }
     .heading {
       stroke-width: 0;
@@ -16,16 +17,35 @@ svg {
     .status-circle {
       fill: none;
       stroke: white;
-      stroke-width: 2;
+      stroke-width: 2px;
+    }
+    .topology-glyph {
+      font-family: Topology;
     }
     .status-glyph {
       fill: white;
       font-size: 40px;
-      font-family: Topology;
+    }
+    .action-glyph {
+      fill: #333333;
+      font-size: 30px;
     }
     .node-label {
       font-size: 18px;
       font-family: OpenSansRegular, Arial, sans-serif;
+    }
+    .actions {
+      * {
+        cursor: pointer;
+      }
+      rect,
+      path.separator {
+        stroke: #e6e6e6;
+        stroke-width: 2px;
+      }
+      rect {
+        fill: #fafafa;
+      }
     }
     &.network {
       .container,
@@ -90,7 +110,7 @@ svg {
     path {
       fill: none;
       stroke: $connectionColor;
-      stroke-width: 4;
+      stroke-width: 4px;
       stroke-opacity: 0.3;
     }
   }
