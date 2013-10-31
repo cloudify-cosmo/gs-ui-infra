@@ -243,7 +243,36 @@ angular.module('gsUiInfra')
                         ];
                     },
 
+                    // pass a reference to self as this method will run under d3 context (function owner is not the D3 object)
                     _addNode: function (selection, depth, self) {
+
+                        var nodeGroup = self._createNodeGroup(selection, self);
+                        self._createOuterContainer(nodeGroup, self);
+                        self._createHeadingBox(nodeGroup, self);
+                        self._createHeadingText(nodeGroup, self);
+                        self._createStatusGroup(nodeGroup, self);
+                        self._createNodeEdges(nodeGroup, self);
+
+                        var actionIconsGroup = self._createActionIcons(nodeGroup, self);
+
+                        self._tieEventListeners(nodeGroup, actionIconsGroup, self);
+
+                        // recurse - there might be a way to ditch the conditional here
+                        nodeGroup.each(function (d) {
+                            d.children && nodeGroup.call(self._addNode, depth + 1, self);
+                        });
+
+                    },
+
+                    _update: function (root) {
+                        // kick off the recursive append
+                        this.nodesGroup
+                            .datum({ children: [root] })
+                            .call(this._addNode, 0, this);
+                    },
+
+
+                    _createNodeGroup: function (selection, self) {
 
                         var nodeGroup = selection.selectAll('g.node')
                             .data(function (d) {
@@ -251,7 +280,7 @@ angular.module('gsUiInfra')
                             })
                             .enter()
                             .append('svg:g');
-
+                        // apply classname by type
                         nodeGroup.attr('class', function (d) {
                             var classname = 'node';
                             if (self._isRootNode(d)) {
@@ -262,8 +291,15 @@ angular.module('gsUiInfra')
                             }
                             return classname;
                         });
+                        // positioning
+                        nodeGroup.attr('transform', function (d) {
+                            return 'translate(' + d.x + ',' + d.y + ')';
+                        });
 
-                        // outer container
+                        return nodeGroup;
+                    },
+
+                    _createOuterContainer: function (nodeGroup, self) {
                         var container = nodeGroup.append('svg:rect')
                             .attr('class', 'container')
                             .attr('x', self.constants.circleRadius)
@@ -286,8 +322,9 @@ angular.module('gsUiInfra')
                             })
                             .attr('rx', 6)
                             .attr('ry', 6);
+                    },
 
-                        // heading box
+                    _createHeadingBox: function (nodeGroup, self) {
                         nodeGroup.append('svg:rect')
                             .attr('class', 'heading')
                             .attr('x', self.constants.circleRadius + 2)
@@ -304,8 +341,9 @@ angular.module('gsUiInfra')
                                 }
                                 return self.constants.headingHeight;
                             });
+                    },
 
-                        // heading text
+                    _createHeadingText: function (nodeGroup, self) {
                         nodeGroup.append('svg:text')
                             .attr('class', 'node-label')
                             .text(function (d) {
@@ -329,10 +367,13 @@ angular.module('gsUiInfra')
                                 }
                                 return 'start';
                             });
+                    },
 
-                        // status icon
+                    _createStatusGroup: function (nodeGroup, self) {
+
                         var nodeStatusGroup = nodeGroup.append('svg:g')
                             .attr('class', 'status');
+                        // status icon circle
                         nodeStatusGroup.append('svg:circle')
                             .attr('class', 'status-circle')
                             .attr('cx', function (d) {
@@ -343,7 +384,6 @@ angular.module('gsUiInfra')
                             })
                             .attr('cy', self.constants.circleRadius + 1)
                             .attr('r', self.constants.circleRadius);
-
                         // glyph icon
                         nodeStatusGroup.append('svg:text')
                             .attr('class', 'status-glyph topology-glyph')
@@ -358,8 +398,10 @@ angular.module('gsUiInfra')
                             })
                             .attr('y', 29)
                             .attr('text-anchor', 'middle');
+                    },
 
-                        // action icons
+                    _createActionIcons: function (nodeGroup, self) {
+
                         var actionIconsGroup = nodeGroup
                             .append('svg:g')
                             .attr('class', 'actions')
@@ -412,14 +454,10 @@ angular.module('gsUiInfra')
                                 return 'M' + x + ' 0L' + x + ' 27';
                             })
                             .attr('class', 'separator');
+                        return actionIconsGroup;
+                    },
 
-
-                        // positioning
-                        nodeGroup.attr('transform', function (d) {
-                            return 'translate(' + d.x + ',' + d.y + ')';
-                        });
-
-                        // node edges
+                    _createNodeEdges: function (nodeGroup, self) {
                         nodeGroup.each(function (datum) {
 
                             var edgeGroup = self.edgesGroup
@@ -427,9 +465,7 @@ angular.module('gsUiInfra')
                                     if (!datum) {
                                         return [];
                                     }
-                                    var arr = [],
-                                        dep,
-                                        j;
+                                    var arr = [], dep, j;
                                     if (dep = datum.dependencies) {
                                         j = dep.length;
                                         while (j--) {
@@ -453,8 +489,13 @@ angular.module('gsUiInfra')
                                 });
 
                         });
+                    },
 
-                        // tie default event listeners to the node's elements
+                    /**
+                     * tie default event listeners to the node's elements
+                     */
+                    _tieEventListeners: function (nodeGroup, actionIconsGroup, self) {
+
                         nodeGroup.selectAll('*').on('mouseover', function (d) {
                             actionIconsGroup.classed('hidden', function (datum) {
                                 return d !== datum;
@@ -485,20 +526,6 @@ angular.module('gsUiInfra')
                                 console.log('action clicked: ', d);
                                 d3.event.stopPropagation();
                             });
-
-
-                        // recurse - there might be a way to ditch the conditional here
-                        nodeGroup.each(function (d) {
-                            d.children && nodeGroup.call(self._addNode, depth + 1, self);
-                        });
-
-                    },
-
-                    _update: function (root) {
-                        // kick off the recursive append
-                        this.nodesGroup
-                            .datum({ children: [root] })
-                            .call(this._addNode, 0, this);
                     },
 
                     /**
