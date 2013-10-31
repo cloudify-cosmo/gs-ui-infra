@@ -178,13 +178,15 @@ angular.module('gsUiInfra')
                                 parent.children = [v];
                             }
 
-                            var segmentX = parent.width / parent.layoutSpanX,
+
+                            var padTop = self._shouldPadTop(v) && pad[0] + 14 || pad[0],
+                                segmentX = parent.width / parent.layoutSpanX,
                                 segmentY = parent.height / parent.layoutSpanY;
                             // TODO adjust each node's width to compensate for last node width deduction (parent.children is available only in tree traversal)
                             v.width = segmentX * v.layoutSpanX - pad[3]/* - pad[3] / parent.children.length*/;
-                            v.height = segmentY * v.layoutSpanY - pad[0] - pad[2];
+                            v.height = segmentY * v.layoutSpanY - padTop - pad[2];
                             v.x = segmentX * (v.layoutPosX - 1) + pad[3];
-                            v.y = segmentY * (v.layoutPosY - 1) + pad[0];
+                            v.y = segmentY * (v.layoutPosY - 1) + padTop;
                             if (v.last) {
                                 v.width -= pad[1];
                             }
@@ -213,6 +215,10 @@ angular.module('gsUiInfra')
                             }
                         }
                         return '';
+                    },
+
+                    _shouldPadTop: function (d) {
+                        return d.layoutPosZ === this.layouter.layoutMaxZ - 1;
                     },
 
                     _isAppModule: function (d) {
