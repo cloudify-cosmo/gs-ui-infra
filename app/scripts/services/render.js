@@ -408,6 +408,10 @@ angular.module('gsUiInfra')
 
                         // clip paths used for group
 
+
+                        // TODO refactor: remove hard coded dimensions, determine by actions size
+                        // TODO refactor: add clipPaths only when necessary (use selections?)
+
                         this.clipPathsGroup.append('svg:clipPath')
                             .attr('id', 'actionsClip')
                             .append('svg:rect')
@@ -558,7 +562,6 @@ angular.module('gsUiInfra')
                                         .on('click', function (d) {
                                             // TODO document self.events
                                             // TODO how to get the node datum and pass it to an event trigger?
-//                                            console.log(d3.event);
                                             listener && listener({
                                                 node: d.datum,
                                                 type:d.type
