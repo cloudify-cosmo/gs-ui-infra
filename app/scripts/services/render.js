@@ -229,7 +229,7 @@ angular.module('gsUiInfra')
                     },
 
                     _getNodeActions: function (d) {
-                        if (this._isAppModule(d) || this._isRootNode(d)) {
+                        if (this._isRootNode(d)) {
                             return [];
                         }
                         return [
@@ -415,16 +415,19 @@ angular.module('gsUiInfra')
                         this.clipPathsGroup.append('svg:clipPath')
                             .attr('id', 'actionsClip')
                             .append('svg:rect')
-                            .attr('width', 72 + 2)
-                            .attr('height', 26 + 2)
-                            .attr('rx', 13)
-                            .attr('ry', 13);
+                            .attr('width', 74)
+                            .attr('height', 28)
+                            .attr('rx', 14)
+                            .attr('ry', 14);
 
                         var actionIconsGroup = nodeGroup
                             .append('svg:g')
                             .attr('class', 'actions')
                             .attr('clip-path', 'url(#actionsClip)')
                             .attr('transform', function (d) {
+                                if (self._isAppModule(d)) {
+                                    return 'translate(' + (d.width - 14) + ',-10)';
+                                }
                                 return 'translate(' + (d.width - d.actions.length * self.constants.actionIconWidth - 2) + ',-6)';
                             })
                             .classed('hidden', 1);
