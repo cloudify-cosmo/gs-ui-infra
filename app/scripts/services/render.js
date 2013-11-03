@@ -213,11 +213,13 @@ angular.module('gsUiInfra')
 //                                v.height = v.layoutSpanY * (appHeight + padBottom)  * z + padTop;
                                 v.height = appHeight + verticalMargin * z;
 
+/*
                                 console.log(v.name)
                                 console.log('\tz: ', z)
                                 console.log('\tmargin: ', verticalMargin)
                                 console.log('\tappHeight: ', appHeight)
                                 console.log('\tv.height: ', v.height)
+*/
 
                             }
 
