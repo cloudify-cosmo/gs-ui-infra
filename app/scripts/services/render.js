@@ -57,19 +57,9 @@ angular.module('gsUiInfra')
                             'cloudify.types.app_module': { classname: 'app-module', icon: 'a'}
                         };
 
-                        this.actions = {
-                            common: [ // default actions for all nodes (can't use 'default'...)
-                                {
-                                    type: 'details',
-                                    glyph: 'n'
-                                },
-                                {
-                                    type: 'edit',
-                                    glyph: 'm',
-                                    last: true
-                                }
-                            ]
-                        };
+                        this.actions = [
+                            'common' // default actions for all nodes (can't use 'default'...)
+                        ];
 
                         // call it once to set initial dimensions
                         this.resize();
@@ -246,17 +236,36 @@ angular.module('gsUiInfra')
                         if (this._isRootNode(d)) {
                             return [];
                         }
-                        var actions = this.actions.common, // always return the default actions, as it's the only set for now
-                            aIndex = actions;
-                        // attach datum to each action to be used in event objects
-                        while (aIndex--) {
-                            actions[aIndex].datum = d;
-                        }
+
+                        var type = 'common', // always return the default actions, as it's the only set for now
+                            actions = this._actionsByType(type, d);
+
                         return actions;
                     },
 
+                    _actionsByType: function (type, d) {
+                        switch (type) {
+                            case 'common':
+                                return [
+                                    {
+                                        type: 'details',
+                                        glyph: 'n',
+                                        datum: d
+                                    },
+                                    {
+                                        type: 'edit',
+                                        glyph: 'm',
+                                        datum: d,
+                                        last: true
+                                    }
+                                ];
+                            default:
+                                return [];
+                        }
+                    },
+
                     _getNodeActionTypes: function () {
-                        return Object.keys(this.actions);
+                        return this.actions;
                     },
 
                     // pass a reference to self as this method will run under d3 context (function owner is not the D3 object)
@@ -429,7 +438,7 @@ angular.module('gsUiInfra')
                             .attr('id', 'actionsClip')
                             .append('svg:rect')
                             .datum(function (d) {
-                                return self.actions[d];
+                                return self._actionsByType(d);
                             })
                             .attr('width', function (d) {
                                 return d.length * self.constants.actionIconWidth + 2;
@@ -460,13 +469,13 @@ angular.module('gsUiInfra')
                             .attr('rx', 13)
                             .attr('ry', 13);
                         actionIconsGroup
-                            .selectAll('rect')
+                            .selectAll('rect.dummy')
                             .data(function (d) {
                                 return d.actions;
                             })
                             .enter()
                             .append('svg:rect')
-                            .attr('class', 'translucent')
+                            .attr('class', 'dummy translucent')
                             .attr('x', function (d, i) {
                                 return i * self.constants.actionIconWidth;
                             })
@@ -582,10 +591,9 @@ angular.module('gsUiInfra')
                                         .on('click', null) // clear any previously assigned listeners
                                         .on('click', function (d) {
                                             // TODO document self.events
-                                            // TODO how to get the node datum and pass it to an event trigger?
                                             listener && listener({
                                                 node: d.datum,
-                                                type:d.type
+                                                type: d.type
                                             });
                                             $rootScope.$apply();
                                         });
