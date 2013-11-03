@@ -176,7 +176,6 @@ angular.module('gsUiInfra')
 
 
                             var padTop = self._shouldPadTop(v) && pad[0] + 14 || pad[0],
-                                padBottom = pad[2],
                                 segmentX = parent.width / parent.layoutSpanX,
                                 segmentY = parent.height / parent.layoutSpanY;
                             // TODO adjust each node's width to compensate for last node width deduction (parent.children is available only in tree traversal)
@@ -184,6 +183,7 @@ angular.module('gsUiInfra')
                             v.height = segmentY * v.layoutSpanY - padTop - pad[2];
                             v.x = segmentX * (v.layoutPosX - 1) + pad[3];
                             v.y = segmentY * (v.layoutPosY - 1) + padTop;
+                            console.log(' - x: ', v.name, v.x)
                             if (v.last) {
                                 v.width -= pad[1];
                             }
@@ -191,24 +191,23 @@ angular.module('gsUiInfra')
                                 v.width += self.constants.circleRadius;
                                 v.x -= self.constants.circleRadius;
                             }
-                            if (self._isAppModuleNode(v)) {
+
+                            if (self._isAppModuleNode(v)) { // deepest level, the only node type with absolute dimensions
                                 v.width = self.constants.circleRadius * 2;
                                 v.height = self.constants.circleRadius * 2 + 32;
                                 v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius / 2;
                             }
+                            else if (self._isRootNode(v)) { // root level does not need any padding
+                                v. width = parent.width;
+                                v.height = parent.height;
+                                v.x = 0;
+                                v.y = 0;
+                            }
 
                             if (!self._isNetworkNode(v) && !self._isAppModuleNode(v) && !self._isRootNode(v)) {
                                 var z = (self.layouter.layoutMaxZ - v.layoutPosZ),
-                                    verticalMargin = (padTop + padBottom),
+                                    verticalMargin = z === 1 ? 68 : 85, // TODO make pretty code!
                                     appHeight = (self.constants.circleRadius * 2 + 32);
-
-                                // TODO make pretty code!
-
-                                if (z === 1) {
-                                    verticalMargin = 68;
-                                } else {
-                                    verticalMargin = 85;
-                                }
 
 //                                v.height = v.layoutSpanY * (appHeight + padBottom)  * z + padTop;
                                 v.height = appHeight + verticalMargin * z;
