@@ -23,7 +23,7 @@ angular.module('gsUiInfra')
                         // handles for static selections
                         this.nodesGroup = this.vis.append('g').attr('class', 'nodes');
                         this.edgesGroup = this.vis.append('g').attr('class', 'edges').selectAll('g.edge');
-                        this.clipPathsGroup = this.vis.append('svg:defs').selectAll('clipPath');
+                        this.defsGroup = this.vis.append('svg:defs');
 
                         this.lineFunction = d3.svg.line()
                             .x(function (d) {
@@ -38,23 +38,37 @@ angular.module('gsUiInfra')
                             headingHeight: 33,
                             circleRadius: 18,
                             actionIconWidth: 36,
-                            types: {
-                                'cloudify.types.tier': { classname: 'tier', icon: 'k'},
-                                'cloudify.types.host': { classname: 'host', icon: 'e'},
-                                'cloudify.types.volume': { classname: 'volume', icon: 'j'},
-                                'cloudify.types.object_container': { classname: 'object-container', icon: 'o'},
-                                'cloudify.types.network': { classname: 'network', icon: 'g'},
-                                'cloudify.types.load_balancer': { classname: 'load-balancer', icon: 'b'},
-                                'cloudify.types.virtual_ip': { classname: 'virtual-ip', icon: 'd'},
-                                'cloudify.types.security_group': { classname: 'security-group', icon: 'i'},
-                                'cloudify.types.middleware_server': { classname: 'middleware-server', icon: 'h'},
-                                'cloudify.types.db_server': { classname: 'db-server', icon: 'c'},
-                                'cloudify.types.web_server': { classname: 'web-server', icon: 'l'},
-                                'cloudify.types.app_server': { classname: 'app-server', icon: 'h'},
-                                'cloudify.types.message_bus_server': { classname: 'message-bus-server', icon: 'f'},
-                                'cloudify.types.app_module': { classname: 'app-module', icon: 'a'}
-                            }
+                        };
 
+                        this.types = {
+                            'cloudify.types.tier': { classname: 'tier', icon: 'k'},
+                            'cloudify.types.host': { classname: 'host', icon: 'e'},
+                            'cloudify.types.volume': { classname: 'volume', icon: 'j'},
+                            'cloudify.types.object_container': { classname: 'object-container', icon: 'o'},
+                            'cloudify.types.network': { classname: 'network', icon: 'g'},
+                            'cloudify.types.load_balancer': { classname: 'load-balancer', icon: 'b'},
+                            'cloudify.types.virtual_ip': { classname: 'virtual-ip', icon: 'd'},
+                            'cloudify.types.security_group': { classname: 'security-group', icon: 'i'},
+                            'cloudify.types.middleware_server': { classname: 'middleware-server', icon: 'h'},
+                            'cloudify.types.db_server': { classname: 'db-server', icon: 'c'},
+                            'cloudify.types.web_server': { classname: 'web-server', icon: 'l'},
+                            'cloudify.types.app_server': { classname: 'app-server', icon: 'h'},
+                            'cloudify.types.message_bus_server': { classname: 'message-bus-server', icon: 'f'},
+                            'cloudify.types.app_module': { classname: 'app-module', icon: 'a'}
+                        };
+
+                        this.actions = {
+                            common: [ // default actions for all nodes (can't use 'default'...)
+                                {
+                                    type: 'details',
+                                    glyph: 'n'
+                                },
+                                {
+                                    type: 'edit',
+                                    glyph: 'm',
+                                    last: true
+                                }
+                            ]
                         };
 
                         // call it once to set initial dimensions
@@ -206,7 +220,7 @@ angular.module('gsUiInfra')
                         }
                         var type, i;
                         for (i = 0; i < d.type.length; i++) {
-                            if ((type = this.constants.types[d.type[i]]) !== undefined) {
+                            if ((type = this.types[d.type[i]]) !== undefined) {
                                 return type;
                             }
                         }
@@ -232,19 +246,17 @@ angular.module('gsUiInfra')
                         if (this._isRootNode(d)) {
                             return [];
                         }
-                        return [
-                            {
-                                type: 'details',
-                                glyph: 'n',
-                                datum: d
-                            },
-                            {
-                                type: 'edit',
-                                glyph: 'm',
-                                datum: d,
-                                last: true
-                            }
-                        ];
+                        var actions = this.actions.common, // always return the default actions, as it's the only set for now
+                            aIndex = actions;
+                        // attach datum to each action to be used in event objects
+                        while (aIndex--) {
+                            actions[aIndex].datum = d;
+                        }
+                        return actions;
+                    },
+
+                    _getNodeActionTypes: function () {
+                        return Object.keys(this.actions);
                     },
 
                     // pass a reference to self as this method will run under d3 context (function owner is not the D3 object)
@@ -407,15 +419,21 @@ angular.module('gsUiInfra')
                     _createActionIcons: function (nodeGroup, self) {
 
                         // clip paths used for group
-
-
-                        // TODO refactor: remove hard coded dimensions, determine by actions size
-                        // TODO refactor: add clipPaths only when necessary (use selections?)
-
-                        this.clipPathsGroup.append('svg:clipPath')
+                        this.defsGroup
+                            .selectAll('#actionsClip')
+                            .data(function () {
+                                return self._getNodeActionTypes();
+                            })
+                            .enter()
+                            .append('svg:clipPath')
                             .attr('id', 'actionsClip')
                             .append('svg:rect')
-                            .attr('width', 74)
+                            .datum(function (d) {
+                                return self.actions[d];
+                            })
+                            .attr('width', function (d) {
+                                return d.length * self.constants.actionIconWidth + 2;
+                            })
                             .attr('height', 28)
                             .attr('rx', 14)
                             .attr('ry', 14);
@@ -453,8 +471,8 @@ angular.module('gsUiInfra')
                                 return i * self.constants.actionIconWidth;
                             })
                             .attr('y', 0)
-                            .attr('width', 36)
-                            .attr('height', 36);
+                            .attr('width', self.constants.actionIconWidth)
+                            .attr('height', 28);
                         actionIconsGroup
                             .selectAll('text')
                             .data(function (d) {
