@@ -162,7 +162,7 @@ angular.module('gsUiInfra')
 
                         // TODO replace with walking in the tree?
 
-                        this.graph.nodes.forEach(function (v, i) {
+                        this.graph.nodes.forEach(function (v/*, i*/) {
 
                             // update the nodes position data according to the layouter data
 
@@ -176,6 +176,7 @@ angular.module('gsUiInfra')
 
 
                             var padTop = self._shouldPadTop(v) && pad[0] + 14 || pad[0],
+                                padBottom = pad[2],
                                 segmentX = parent.width / parent.layoutSpanX,
                                 segmentY = parent.height / parent.layoutSpanY;
                             // TODO adjust each node's width to compensate for last node width deduction (parent.children is available only in tree traversal)
@@ -190,10 +191,34 @@ angular.module('gsUiInfra')
                                 v.width += self.constants.circleRadius;
                                 v.x -= self.constants.circleRadius;
                             }
-                            if (self._isAppModule(v)) {
+                            if (self._isAppModuleNode(v)) {
                                 v.width = self.constants.circleRadius * 2;
                                 v.height = self.constants.circleRadius * 2 + 32;
                                 v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius / 2;
+                            }
+
+                            if (!self._isNetworkNode(v) && !self._isAppModuleNode(v) && !self._isRootNode(v)) {
+                                var z = (self.layouter.layoutMaxZ - v.layoutPosZ),
+                                    verticalMargin = (padTop + padBottom),
+                                    appHeight = (self.constants.circleRadius * 2 + 32);
+
+                                // TODO make pretty code!
+
+                                if (z === 1) {
+                                    verticalMargin = 68;
+                                } else {
+                                    verticalMargin = 85;
+                                }
+
+//                                v.height = v.layoutSpanY * (appHeight + padBottom)  * z + padTop;
+                                v.height = appHeight + verticalMargin * z;
+
+                                console.log(v.name)
+                                console.log('\tz: ', z)
+                                console.log('\tmargin: ', verticalMargin)
+                                console.log('\tappHeight: ', appHeight)
+                                console.log('\tv.height: ', v.height)
+
                             }
 
 
@@ -221,11 +246,19 @@ angular.module('gsUiInfra')
                         return d.layoutPosZ === this.layouter.layoutMaxZ - 1;
                     },
 
-                    _isAppModule: function (d) {
+                    _isAppModuleNode: function (d) {
+                        return this._isNodeOfType(d, 'cloudify.types.app_module');
+                    },
+
+                    _isNetworkNode: function (d) {
+                        return this._isNodeOfType(d, 'cloudify.types.network');
+                    },
+
+                    _isNodeOfType: function (d, type) {
                         if (!d.type) {
                             return false;
                         }
-                        return d.type.indexOf('cloudify.types.app_module') !== -1;
+                        return d.type.indexOf(type) !== -1;
                     },
 
                     _isRootNode: function (d) {
@@ -330,7 +363,7 @@ angular.module('gsUiInfra')
                             .attr('x', self.constants.circleRadius)
                             .attr('y', 0)
                             .attr('width', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return 0;
                                 } else if (self._isRootNode(d)) {
                                     return self.width;
@@ -338,7 +371,7 @@ angular.module('gsUiInfra')
                                 return d.width - self.constants.circleRadius;
                             })
                             .attr('height', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return 0;
                                 } else if (self._isRootNode(d)) {
                                     return self.height;
@@ -355,13 +388,13 @@ angular.module('gsUiInfra')
                             .attr('x', self.constants.circleRadius + 2)
                             .attr('y', 3)
                             .attr('width', function (d) {
-                                if (self._isAppModule(d) || self._isRootNode(d)) {
+                                if (self._isAppModuleNode(d) || self._isRootNode(d)) {
                                     return 0;
                                 }
                                 return d.width - 6 - self.constants.circleRadius;
                             })
                             .attr('height', function (d) {
-                                if (self._isAppModule(d) || self._isRootNode(d)) {
+                                if (self._isAppModuleNode(d) || self._isRootNode(d)) {
                                     return 0;
                                 }
                                 return self.constants.headingHeight;
@@ -375,19 +408,19 @@ angular.module('gsUiInfra')
                                 return d.name || '';
                             })
                             .attr('x', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return d.width / 2;
                                 }
                                 return 28 + self.constants.circleRadius;
                             })
                             .attr('y', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return 60;
                                 }
                                 return 26;
                             })
                             .attr('text-anchor', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return 'middle';
                                 }
                                 return 'start';
@@ -402,7 +435,7 @@ angular.module('gsUiInfra')
                         nodeStatusGroup.append('svg:circle')
                             .attr('class', 'status-circle')
                             .attr('cx', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return d.width / 2;
                                 }
                                 return self.constants.circleRadius;
@@ -416,7 +449,7 @@ angular.module('gsUiInfra')
                                 return self._getFirstKnownType(d) ? self._getFirstKnownType(d).icon : '';
                             })
                             .attr('x', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return d.width / 2;
                                 }
                                 return self.constants.circleRadius;
@@ -452,7 +485,7 @@ angular.module('gsUiInfra')
                             .attr('class', 'actions')
                             .attr('clip-path', 'url(#actionsClip)')
                             .attr('transform', function (d) {
-                                if (self._isAppModule(d)) {
+                                if (self._isAppModuleNode(d)) {
                                     return 'translate(' + (d.width - 14) + ',-10)';
                                 }
                                 return 'translate(' + (d.width - d.actions.length * self.constants.actionIconWidth - 2) + ',-6)';
@@ -650,7 +683,7 @@ angular.module('gsUiInfra')
                             /* EAST  2 */    {x: n2AbsPos.x + n2.width, y: n2AbsPos.y + n2.height / 2}
                         ];
 
-                        if (this._isAppModule(n1)) {
+                        if (this._isAppModuleNode(n1)) {
                             p[0] = {x: n1AbsPos.x + n1.width / 2, y: n1AbsPos.y + 2};
                             p[1].x = n1AbsPos.x + n1.width / 2;
                             p[2] = {x: n1AbsPos.x, y: n1AbsPos.y + cR};
