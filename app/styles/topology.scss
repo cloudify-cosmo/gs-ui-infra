@@ -57,6 +57,7 @@ svg {
       .container,
       .heading {
         fill: #f1f1f1;
+        fill-opacity: 1;
       }
       .node-label {
         fill: #9f9d9d;
@@ -69,6 +70,7 @@ svg {
       .container,
       .heading {
         fill: #eaeaea;
+        fill-opacity: 1;
       }
       .node-label {
         fill: #939393;
@@ -79,6 +81,8 @@ svg {
     }
     &.host {
       .container {
+        fill: white;
+        fill-opacity: 0;
         stroke: $topologyColor1;
       }
       .heading,
@@ -93,6 +97,8 @@ svg {
     &.web-server,
     &.middleware-server {
       .container {
+        fill: white;
+        fill-opacity: 0;
         stroke: $topologyColor2;
       }
       .heading,
