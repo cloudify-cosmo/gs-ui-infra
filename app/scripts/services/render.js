@@ -37,7 +37,7 @@ angular.module('gsUiInfra')
                         this.constants = {
                             headingHeight: 33,
                             circleRadius: 18,
-                            actionIconWidth: 36,
+                            actionIconWidth: 36
                         };
 
                         this.types = {
