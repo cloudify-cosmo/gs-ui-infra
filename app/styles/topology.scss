@@ -44,13 +44,14 @@ svg {
       * {
         cursor: pointer;
       }
-      rect,
+      rect {
+        stroke: #dddddd;
+        stroke-width: 2px;
+        fill: #ffffff;
+      }
       path.separator {
         stroke: #e6e6e6;
-        stroke-width: 2px;
-      }
-      rect {
-        fill: #fafafa;
+        stroke-width: 1px;
       }
     }
     &.network {

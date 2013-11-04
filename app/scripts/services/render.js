@@ -37,7 +37,8 @@ angular.module('gsUiInfra')
                         this.constants = {
                             headingHeight: 33,
                             circleRadius: 18,
-                            actionIconWidth: 36
+                            actionIconWidth: 36,
+                            actionIconHeight: 28
                         };
 
                         this.types = {
@@ -477,9 +478,9 @@ angular.module('gsUiInfra')
                             .attr('width', function (d) {
                                 return d.length * self.constants.actionIconWidth + 2;
                             })
-                            .attr('height', 28)
-                            .attr('rx', 14)
-                            .attr('ry', 14);
+                            .attr('height', self.constants.actionIconHeight + 2)
+                            .attr('rx', self.constants.actionIconHeight / 2 + 1)
+                            .attr('ry', self.constants.actionIconHeight / 2 + 1);
 
                         var actionIconsGroup = nodeGroup
                             .append('svg:g')
@@ -487,9 +488,9 @@ angular.module('gsUiInfra')
                             .attr('clip-path', 'url(#actionsClip)')
                             .attr('transform', function (d) {
                                 if (self._isAppModuleNode(d)) {
-                                    return 'translate(' + (d.width - 14) + ',-10)';
+                                    return 'translate(' + (d.width - 14) + ',-12)';
                                 }
-                                return 'translate(' + (d.width - d.actions.length * self.constants.actionIconWidth - 2) + ',-6)';
+                                return 'translate(' + (d.width - d.actions.length * self.constants.actionIconWidth - 2) + ',-8)';
                             })
                             .classed('hidden', 1);
                         actionIconsGroup
@@ -499,9 +500,9 @@ angular.module('gsUiInfra')
                             .attr('width', function (d) {
                                 return d.actions.length * self.constants.actionIconWidth;
                             })
-                            .attr('height', 26)
-                            .attr('rx', 13)
-                            .attr('ry', 13);
+                            .attr('height', self.constants.actionIconHeight)
+                            .attr('rx', self.constants.actionIconHeight / 2)
+                            .attr('ry', self.constants.actionIconHeight / 2);
                         actionIconsGroup
                             .selectAll('rect.dummy')
                             .data(function (d) {
@@ -515,7 +516,7 @@ angular.module('gsUiInfra')
                             })
                             .attr('y', 0)
                             .attr('width', self.constants.actionIconWidth)
-                            .attr('height', 28);
+                            .attr('height', self.constants.actionIconHeight);
                         actionIconsGroup
                             .selectAll('text')
                             .data(function (d) {
@@ -530,7 +531,7 @@ angular.module('gsUiInfra')
                             .attr('x', function (d, i) {
                                 return (i + 0.5) * self.constants.actionIconWidth;
                             })
-                            .attr('y', 21)
+                            .attr('y', 23)
                             .attr('text-anchor', 'middle');
                         actionIconsGroup
                             .selectAll('path')
@@ -550,7 +551,7 @@ angular.module('gsUiInfra')
                             .append('svg:path')
                             .attr('d', function (d, i) {
                                 var x = (i + 1) * self.constants.actionIconWidth;
-                                return 'M' + x + ' 0L' + x + ' 27';
+                                return 'M' + x + ' 0L' + x + ' ' + (self.constants.actionIconHeight + 1);
                             })
                             .attr('class', 'separator');
                         return actionIconsGroup;
