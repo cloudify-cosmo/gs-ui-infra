@@ -184,7 +184,7 @@ angular.module('gsUiInfra')
                             v.height = segmentY * v.layoutSpanY - padTop - pad[2];
                             v.x = segmentX * (v.layoutPosX - 1) + pad[3];
                             v.y = segmentY * (v.layoutPosY - 1) + padTop;
-                            console.log(' - x: ', v.name, v.x)
+
                             if (v.last) {
                                 v.width -= pad[1];
                             }
@@ -303,7 +303,7 @@ angular.module('gsUiInfra')
                         return this.actions;
                     },
 
-                    // pass a reference to self as this method will run under d3 context (function owner is not the D3 object)
+                    // pass a reference to self as this method will run under d3 context (function owner is changed at runtime)
                     _addNode: function (selection, depth, self) {
 
                         var nodeGroup = self._createNodeGroup(selection, self);
