@@ -551,7 +551,7 @@ angular.module('gsUiInfra')
                             .append('svg:path')
                             .attr('d', function (d, i) {
                                 var x = (i + 1) * self.constants.actionIconWidth;
-                                return 'M' + x + ' 0L' + x + ' ' + (self.constants.actionIconHeight + 1);
+                                return 'M' + x + ' 0L' + x + ' ' + (self.constants.actionIconHeight);
                             })
                             .attr('class', 'separator');
                         return actionIconsGroup;
