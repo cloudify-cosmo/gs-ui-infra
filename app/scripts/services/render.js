@@ -303,7 +303,7 @@ angular.module('gsUiInfra')
                         return this.actions;
                     },
 
-                    // pass a reference to self as this method will run under d3 context (function owner is changed at runtime)
+                    // pass a reference to self as this method will run under d3 context (function owner is not the D3 object)
                     _addNode: function (selection, depth, self) {
 
                         var nodeGroup = self._createNodeGroup(selection, self);
@@ -620,9 +620,9 @@ angular.module('gsUiInfra')
                             switch (eventType) {
                                 case 'actionClick':
                                     // tie click listeners to action buttons
-                                    actionIconsGroup.selectAll('.actions text')
+                                    actionIconsGroup.selectAll('text')
                                         .style('pointer-events', 'none'); // pass clicks through action glyph elements to the capturer below
-                                    actionIconsGroup.selectAll('.actions rect')
+                                    actionIconsGroup.selectAll('rect')
                                         .on('click', null) // clear any previously assigned listeners
                                         .on('click', function (d) {
                                             // TODO document self.events
