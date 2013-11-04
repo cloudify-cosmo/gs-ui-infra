@@ -1,5 +1,6 @@
 
 $gs-infra-root: '../..' !default;
+$fonts: '#{$gs-infra-root}/assets/fonts';
 
 /* for embedding fonts, see http://css-tricks.com/snippets/css/using-font-face/ */
 
@@ -8,24 +9,24 @@ $gs-infra-root: '../..' !default;
 
 @font-face {
   font-family: 'Topology';
-  src:  url('#{$gs-infra-root}/assets/fonts/glyphs/topology.eot'); /* IE9 Compat Modes */
-  src:  url('#{$gs-infra-root}/assets/fonts/glyphs/topology.woff') format('woff'), /* Modern Browsers */
-        url('#{$gs-infra-root}/assets/fonts/glyphs/topology.ttf')  format('truetype'); /* Safari, Android, iOS */
+  src:  url('#{$fonts}/glyphs/topology.eot'); /* IE9 Compat Modes */
+  src:  url('#{$fonts}/glyphs/topology.woff') format('woff'), /* Modern Browsers */
+        url('#{$fonts}/glyphs/topology.ttf')  format('truetype'); /* Safari, Android, iOS */
 }
 @font-face {
   font-family: 'Cosmo';
-  src:  url('#{$gs-infra-root}/assets/fonts/glyphs/cosmo.eot'); /* IE9 Compat Modes */
-  src:  url('#{$gs-infra-root}/assets/fonts/glyphs/cosmo.woff') format('woff'), /* Modern Browsers */
-        url('#{$gs-infra-root}/assets/fonts/glyphs/cosmo.ttf')  format('truetype'); /* Safari, Android, iOS */
+  src:  url('#{$fonts}/glyphs/cosmo.eot'); /* IE9 Compat Modes */
+  src:  url('#{$fonts}/glyphs/cosmo.woff') format('woff'), /* Modern Browsers */
+        url('#{$fonts}/glyphs/cosmo.ttf')  format('truetype'); /* Safari, Android, iOS */
 }
 
 /* fonts */
 
 @font-face {
   font-family: 'OpenSansRegular';
-  src:  url('#{$gs-infra-root}/assets/fonts/opensans/opensans-regular.eot'); /* IE9 Compat Modes */
-  src:  url('#{$gs-infra-root}/assets/fonts/opensans/opensans-regular.woff') format('woff'), /* Modern Browsers */
-        url('#{$gs-infra-root}/assets/fonts/opensans/opensans-regular.ttf')  format('truetype'); /* Safari, Android, iOS */
+  src:  url('#{$fonts}/opensans/opensans-regular.eot'); /* IE9 Compat Modes */
+  src:  url('#{$fonts}/opensans/opensans-regular.woff') format('woff'), /* Modern Browsers */
+        url('#{$fonts}/opensans/opensans-regular.ttf')  format('truetype'); /* Safari, Android, iOS */
 }
 
 
