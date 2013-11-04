@@ -184,7 +184,6 @@ angular.module('gsUiInfra')
                             v.height = segmentY * v.layoutSpanY - padTop - pad[2];
                             v.x = segmentX * (v.layoutPosX - 1) + pad[3];
                             v.y = segmentY * (v.layoutPosY - 1) + padTop;
-                            console.log(' - x: ', v.name, v.x)
                             if (v.last) {
                                 v.width -= pad[1];
                             }
@@ -620,9 +619,9 @@ angular.module('gsUiInfra')
                             switch (eventType) {
                                 case 'actionClick':
                                     // tie click listeners to action buttons
-                                    actionIconsGroup.selectAll('.actions text')
+                                    actionIconsGroup.selectAll('text')
                                         .style('pointer-events', 'none'); // pass clicks through action glyph elements to the capturer below
-                                    actionIconsGroup.selectAll('.actions rect')
+                                    actionIconsGroup.selectAll('rect')
                                         .on('click', null) // clear any previously assigned listeners
                                         .on('click', function (d) {
                                             // TODO document self.events
