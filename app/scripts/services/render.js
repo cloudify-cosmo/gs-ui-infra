@@ -499,13 +499,14 @@ angular.module('gsUiInfra')
                             .attr('rx', self.constants.actionIconHeight / 2 + 1)
                             .attr('ry', self.constants.actionIconHeight / 2 + 1);
 
+                        // actions toolbox
                         var actionIconsGroup = nodeGroup
                             .append('svg:g')
                             .attr('class', 'actions')
                             .attr('clip-path', 'url(#actionsClip)')
                             .attr('transform', function (d) {
                                 if (self._isAppModuleNode(d)) {
-                                    return 'translate(' + (d.width - 14) + ',-12)';
+                                    return 'translate(' + (d.width - 32) + ',-12)';
                                 }
                                 return 'translate(' + (d.width - d.actions.length * self.constants.actionIconWidth - 2) + ',-8)';
                             })
