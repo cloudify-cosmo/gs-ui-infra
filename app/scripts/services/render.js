@@ -32,7 +32,12 @@ angular.module('gsUiInfra')
                             .y(function (d) {
                                 return d.y;
                             })
-                            .interpolate("linear");
+                            .interpolate('linear');
+
+                        this.scaleX = d3.scale.linear();
+                        this.scaleY = d3.scale.linear();
+                        this.scaleW = d3.scale.linear();
+                        this.scaleH = d3.scale.linear();
 
                         this.constants = {
                             headingHeight: 33,
@@ -142,11 +147,18 @@ angular.module('gsUiInfra')
                         // call the layouter to attach positioning data to nodes
                         this.layouter.layout(this.graph);
 
+/*
+                        this.scaleX
+                            .domain([this.layouter.layoutMinX, this.layouter.layoutMaxX + 1])
+                            .range([0, this.vis.attr('width')]);
+                        this.scaleW
+                            .domain([this.layouter.layoutMinX - 1, this.layouter.layoutMaxX])
+                            .range([0, this.vis.attr('width')]);
+*/
+
 
                         // TODO extract the following code to the new rendering function (_addNode)
-                        // TODO this will be done before or after the layout / paint? test both.
                         // TODO abstract away data structure implementation (getRoot(), getChildren(node), etc.)
-                        // TODO fix pads to represent half the current size
 
                         // use this data to paint
                         var strokeWidth = 2,
@@ -179,47 +191,53 @@ angular.module('gsUiInfra')
                             var padTop = self._shouldPadTop(v) && pad[0] + 14 || pad[0],
                                 segmentX = parent.width / parent.layoutSpanX,
                                 segmentY = parent.height / parent.layoutSpanY;
-                            // TODO adjust each node's width to compensate for last node width deduction (parent.children is available only in tree traversal)
-                            v.width = segmentX * v.layoutSpanX - pad[3]/* - pad[3] / parent.children.length*/;
-                            v.height = segmentY * v.layoutSpanY - padTop - pad[2];
-                            v.x = segmentX * (v.layoutPosX - 1) + pad[3];
-                            v.y = segmentY * (v.layoutPosY - 1) + padTop;
+//                            v.x = segmentX * (v.layoutPosX - 1) + pad[1] + pad[3] + self.constants.circleRadius;
+//                            v.y = segmentY * (v.layoutPosY - 1) + padTop;
+//                            v.width = segmentX * v.layoutSpanX - pad[1] - pad[3];
+//                            v.height = segmentY * v.layoutSpanY - padTop - pad[2];
 
-                            if (v.last) {
-                                v.width -= pad[1];
-                            }
-                            if (!v.first) {
-                                v.width += self.constants.circleRadius;
-                                v.x -= self.constants.circleRadius;
-                            }
 
+                            // using scales
+//                            self.scaleX.domain([1, parent.layoutSpanX + 1]).range([40, parent.width - 20]);
+//                            self.scaleW.domain([0, parent.layoutSpanX]).range([40, parent.width - 40 * parent.children.length - 40]);
+
+                            self.scaleX
+                                .domain([1, parent.layoutSpanX + 1])
+                                .range([pad[3], parent.width]);
+                            self.scaleY
+                                .domain([1, parent.layoutSpanY + 1])
+                                .range([padTop, parent.height]);
+                            self.scaleW
+                                .domain([0, parent.layoutSpanX])
+                                .range([0, parent.width - pad[1]]);
+                            self.scaleH
+                                .domain([0, parent.layoutSpanY])
+                                .range([0, parent.height - pad[2]]);
+
+                            v.x = ~~self.scaleX(v.layoutPosX);
+                            v.y = ~~self.scaleY(v.layoutPosY);
+                            v.width = ~~self.scaleW(v.layoutSpanX) - pad[1];
+                            v.height = ~~self.scaleH(v.layoutSpanY) - pad[2];
+
+
+                            // special node types // TODO replace with d3.scale as well
                             if (self._isAppModuleNode(v)) { // deepest level, the only node type with absolute dimensions
                                 v.width = self.constants.circleRadius * 2;
                                 v.height = self.constants.circleRadius * 2 + 32;
-                                v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 - self.constants.circleRadius / 2;
+                                v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 /*- self.constants.circleRadius / 2*/;
                             }
                             else if (self._isRootNode(v)) { // root level does not need any padding
-                                v. width = parent.width;
+                                v.width = parent.width;
                                 v.height = parent.height;
                                 v.x = 0;
                                 v.y = 0;
-                            }
-
-                            if (!self._isNetworkNode(v) && !self._isAppModuleNode(v) && !self._isRootNode(v)) {
+                            } else if (!self._isNetworkNode(v)) {
                                 var z = (self.layouter.layoutMaxZ - v.layoutPosZ),
                                     verticalMargin = z === 1 ? 68 : 85, // TODO make pretty code!
                                     appHeight = (self.constants.circleRadius * 2 + 32);
 
 //                                v.height = v.layoutSpanY * (appHeight + padBottom)  * z + padTop;
                                 v.height = appHeight + verticalMargin * z;
-
-/*
-                                console.log(v.name)
-                                console.log('\tz: ', z)
-                                console.log('\tmargin: ', verticalMargin)
-                                console.log('\tappHeight: ', appHeight)
-                                console.log('\tv.height: ', v.height)
-*/
 
                             }
 
@@ -353,7 +371,7 @@ angular.module('gsUiInfra')
                         });
                         // positioning
                         nodeGroup.attr('transform', function (d) {
-                            return 'translate(' + d.x + ',' + d.y + ')';
+                            return 'translate(' + (d.x) + ',' + d.y + ')';
                         });
 
                         return nodeGroup;
@@ -362,21 +380,19 @@ angular.module('gsUiInfra')
                     _createOuterContainer: function (nodeGroup, self) {
                         var container = nodeGroup.append('svg:rect')
                             .attr('class', 'container')
-                            .attr('x', self.constants.circleRadius)
+                            .attr('x', function (d) {
+                                return 0;
+                            })
                             .attr('y', 0)
                             .attr('width', function (d) {
                                 if (self._isAppModuleNode(d)) {
                                     return 0;
-                                } else if (self._isRootNode(d)) {
-                                    return self.width;
                                 }
-                                return d.width - self.constants.circleRadius;
+                                return d.width;
                             })
                             .attr('height', function (d) {
                                 if (self._isAppModuleNode(d)) {
                                     return 0;
-                                } else if (self._isRootNode(d)) {
-                                    return self.height;
                                 }
                                 return d.height;
                             })
@@ -387,13 +403,13 @@ angular.module('gsUiInfra')
                     _createHeadingBox: function (nodeGroup, self) {
                         nodeGroup.append('svg:rect')
                             .attr('class', 'heading')
-                            .attr('x', self.constants.circleRadius + 2)
+                            .attr('x', 3)
                             .attr('y', 3)
                             .attr('width', function (d) {
                                 if (self._isAppModuleNode(d) || self._isRootNode(d)) {
                                     return 0;
                                 }
-                                return d.width - 6 - self.constants.circleRadius;
+                                return d.width - 6;
                             })
                             .attr('height', function (d) {
                                 if (self._isAppModuleNode(d) || self._isRootNode(d)) {
@@ -411,9 +427,9 @@ angular.module('gsUiInfra')
                             })
                             .attr('x', function (d) {
                                 if (self._isAppModuleNode(d)) {
-                                    return d.width / 2;
+                                    return d.width / 2 - self.constants.circleRadius;
                                 }
-                                return 28 + self.constants.circleRadius;
+                                return 28;
                             })
                             .attr('y', function (d) {
                                 if (self._isAppModuleNode(d)) {
@@ -432,7 +448,8 @@ angular.module('gsUiInfra')
                     _createStatusGroup: function (nodeGroup, self) {
 
                         var nodeStatusGroup = nodeGroup.append('svg:g')
-                            .attr('class', 'status');
+                            .attr('class', 'status')
+                            .attr('transform', 'translate(-' + self.constants.circleRadius + ',0)');
                         // status icon circle
                         nodeStatusGroup.append('svg:circle')
                             .attr('class', 'status-circle')
@@ -675,25 +692,27 @@ angular.module('gsUiInfra')
 
                         /* coordinates for potential connection coordinates from/to the objects */
                         var p = [
-                            /* NORTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y},
-                            /* SOUTH 1 */    {x: n1AbsPos.x + cR + (n1.width - cR) / 2, y: n1AbsPos.y + n1.height},
-                            /* WEST  1 */    {x: n1AbsPos.x + cR, y: n1AbsPos.y + n1.height / 2},
+                            /* NORTH 1 */    {x: n1AbsPos.x + n1.width / 2, y: n1AbsPos.y},
+                            /* SOUTH 1 */    {x: n1AbsPos.x + n1.width / 2, y: n1AbsPos.y + n1.height},
+                            /* WEST  1 */    {x: n1AbsPos.x, y: n1AbsPos.y + n1.height / 2},
                             /* EAST  1 */    {x: n1AbsPos.x + n1.width, y: n1AbsPos.y + n1.height / 2},
-                            /* NORTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y},
-                            /* SOUTH 2 */    {x: n2AbsPos.x + cR + (n2.width - cR) / 2, y: n2AbsPos.y + n2.height},
-                            /* WEST  2 */    {x: n2AbsPos.x + cR - 2, y: n2AbsPos.y + n2.height / 2},
+                            /* NORTH 2 */    {x: n2AbsPos.x + n2.width / 2, y: n2AbsPos.y},
+                            /* SOUTH 2 */    {x: n2AbsPos.x + n2.width / 2, y: n2AbsPos.y + n2.height},
+                            /* WEST  2 */    {x: n2AbsPos.x - 2, y: n2AbsPos.y + n2.height / 2},
                             /* EAST  2 */    {x: n2AbsPos.x + n2.width, y: n2AbsPos.y + n2.height / 2}
                         ];
 
                         if (this._isAppModuleNode(n1)) {
-                            p[0] = {x: n1AbsPos.x + n1.width / 2, y: n1AbsPos.y + 2};
-                            p[1].x = n1AbsPos.x + n1.width / 2;
-                            p[2] = {x: n1AbsPos.x, y: n1AbsPos.y + cR};
-                            p[3].y = n1AbsPos.y + cR;
-                            p[4].x = n2AbsPos.x + n2.width / 2;
-                            p[5].x = n2AbsPos.x + n2.width / 2;
-                            p[6] = {x: n2AbsPos.x - 2, y: n2AbsPos.y + cR};
-                            p[7] = {x: n2AbsPos.x + n2.width - 2, y: n2AbsPos.y + cR};
+                            p[0] = {x: n1AbsPos.x + n1.width / 2 - cR, y: n1AbsPos.y + 2};
+                            p[1].x = n1AbsPos.x + n1.width / 2 - cR;
+                            p[2] = {x: n1AbsPos.x - cR, y: n1AbsPos.y + cR};
+                            p[3] = {x: n1AbsPos.x + n1.width - cR - 2, y: n1AbsPos.y + cR};
+                        }
+                        if (this._isAppModuleNode(n2)) {
+                            p[4].x = n2AbsPos.x + n2.width / 2 - cR;
+                            p[5].x = n2AbsPos.x + n2.width / 2 - cR;
+                            p[6] = {x: n2AbsPos.x - cR - 2, y: n2AbsPos.y + cR};
+                            p[7] = {x: n2AbsPos.x + n2.width - cR - 2, y: n2AbsPos.y + cR};
                         }
 
                         /* distances between objects and according coordinates connection */
