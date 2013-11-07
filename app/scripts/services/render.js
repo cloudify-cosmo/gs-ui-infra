@@ -188,16 +188,16 @@ angular.module('gsUiInfra')
                             }
 
 
-                            var padTop = self._shouldPadTop(v) && pad[0] + 14 || pad[0],
-                                segmentX = parent.width / parent.layoutSpanX,
-                                segmentY = parent.height / parent.layoutSpanY;
+                            var padTop = self._shouldPadTop(v) && pad[0] + 14 || pad[0];
+//                                segmentX = parent.width / parent.layoutSpanX,
+//                                segmentY = parent.height / parent.layoutSpanY;
 //                            v.x = segmentX * (v.layoutPosX - 1) + pad[1] + pad[3] + self.constants.circleRadius;
 //                            v.y = segmentY * (v.layoutPosY - 1) + padTop;
 //                            v.width = segmentX * v.layoutSpanX - pad[1] - pad[3];
 //                            v.height = segmentY * v.layoutSpanY - padTop - pad[2];
 
 
-                            // using scales
+                            // using scales to calculate absolute values
 //                            self.scaleX.domain([1, parent.layoutSpanX + 1]).range([40, parent.width - 20]);
 //                            self.scaleW.domain([0, parent.layoutSpanX]).range([40, parent.width - 40 * parent.children.length - 40]);
 
@@ -214,17 +214,23 @@ angular.module('gsUiInfra')
                                 .domain([0, parent.layoutSpanY])
                                 .range([0, parent.height - pad[2]]);
 
-                            v.x = ~~self.scaleX(v.layoutPosX);
-                            v.y = ~~self.scaleY(v.layoutPosY);
-                            v.width = ~~self.scaleW(v.layoutSpanX) - pad[1];
-                            v.height = ~~self.scaleH(v.layoutSpanY) - pad[2];
+                            var x = ~~self.scaleX(v.layoutPosX),
+                                y = ~~self.scaleY(v.layoutPosY),
+                                width = ~~self.scaleW(v.layoutSpanX) - pad[1],
+                                height = ~~self.scaleH(v.layoutSpanY) - pad[2],
+                                appModuleHeight = self.constants.circleRadius * 2 + 32;
 
+                            // set node properties
+                            v.x = x;
+                            v.y = y;
+                            v.width = width;
+                            v.height = height;
 
-                            // special node types // TODO replace with d3.scale as well
+                            // special node types
                             if (self._isAppModuleNode(v)) { // deepest level, the only node type with absolute dimensions
+                                v.x = x + width / 2;
                                 v.width = self.constants.circleRadius * 2;
-                                v.height = self.constants.circleRadius * 2 + 32;
-                                v.x = segmentX * (v.layoutPosX - 1) + segmentX / 2 /*- self.constants.circleRadius / 2*/;
+                                v.height = appModuleHeight;
                             }
                             else if (self._isRootNode(v)) { // root level does not need any padding
                                 v.width = parent.width;
@@ -233,17 +239,13 @@ angular.module('gsUiInfra')
                                 v.y = 0;
                             } else if (!self._isNetworkNode(v)) {
                                 var z = (self.layouter.layoutMaxZ - v.layoutPosZ),
-                                    verticalMargin = z === 1 ? 68 : 85, // TODO make pretty code!
-                                    appHeight = (self.constants.circleRadius * 2 + 32);
-
+                                    verticalMargin = z === 1 ? 68 : 85; // TODO make pretty code!
 //                                v.height = v.layoutSpanY * (appHeight + padBottom)  * z + padTop;
-                                v.height = appHeight + verticalMargin * z;
-
+                                v.height = appModuleHeight + verticalMargin * z;
                             }
 
 
-                            // update nodes actions according to node types
-
+                            // set nodes actions according to node types
                             v.actions = self._getNodeActions(v);
                         });
 
