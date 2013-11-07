@@ -16,7 +16,12 @@ angular.module('gsUiInfra')
 
                     init: function (config) {
                         this.config = config || {
-                            xyPositioning: 'relative'
+                            /**
+                             * describes how many nodes should be laid out horizontally before
+                             * flowing them to the next row. can be a number, or an array
+                             * correlating to the Z index of each level in ascending order.
+                             */
+                            flowBounds: 2
                         };
                         this.constants = {
                             relationshipTypes: {
@@ -74,11 +79,9 @@ angular.module('gsUiInfra')
                                 n.layoutSpanX = node.layoutSpanX === 0 ? 1 : node.layoutSpanX;
                                 n.layoutSpanY = node.layoutSpanY === 0 ? 1 : node.layoutSpanY;
 
-                                // populate position values
-                                if (self.config.xyPositioning === 'relative') {
-                                    n.layoutPosX = i + 1;
-                                    n.layoutPosY = 1; // TODO calculate according to bounds (get from config)
-                                }
+                                // populate position values (X/Y positioning is relative to each level's parent dimensions)
+                                n.layoutPosX = i + 1;
+                                n.layoutPosY = 1; // TODO calculate according to bounds (get from config)
                                 n.layoutPosZ = depth;
                             };
 
