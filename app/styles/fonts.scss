@@ -1,4 +1,3 @@
-
 /* glyph icons */
 
 $gs-infra-root: '../..' !default;
@@ -21,52 +20,56 @@ $gs-infra-root: '../..' !default;
 
 
 /* mappings */
-
+.topology-glyph:after {
+    font-size:40px;
+    font-family: 'Topology';
+    font-style:normal;
+}
 .topology-glyph {
-  &.app-module {
+  &.app-module:after {
     content: 'a';
   }
-  &.load-balancer {
+  &.load-balancer:after {
     content: 'b';
   }
-  &.db-server {
+  &.db-server:after {
     content: 'c';
   }
-  &.floating-ip {
+  &.floating-ip:after {
     content: 'd';
   }
-  &.host {
+  &.host:after {
     content: 'e';
   }
-  &.messaging-bus {
+  &.messaging-bus:after {
     content: 'f';
   }
-  &.network {
+  &.network:after {
     content: 'g';
   }
-  &.app-server {
+  &.app-server:after {
     content: 'h';
   }
-  &.security-server {
+  &.security-server:after {
     content: 'i';
   }
-  &.volume {
+  &.volume:after {
     content: 'j';
   }
-  &.tier,
-  &.cluster {
+  &.tier:after,
+  &.cluster:after {
     content: 'k';
   }
-  &.web-app {
+  &.web-app:after {
     content: 'l';
   }
-  &.edit-node {
+  &.edit-node:after {
     content: 'm';
   }
-  &.node-details {
+  &.node-details:after {
     content: 'n';
   }
-  &.blob-storage {
+  &.blob-storage:after {
     content: 'o';
   }
 }
