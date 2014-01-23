@@ -4,3 +4,5 @@ dist
 .idea
 .sass-cache
 app/bower_components
+*.log
+*.iml

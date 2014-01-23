@@ -1,8 +1,9 @@
 'use strict';
 
-angular.module('gsUiInfraApp')
-  .filter('i18n', function () {
-    return function (input) {
-      return 'i18n filter: ' + input;
-    };
-  });
+angular.module('gsUiInfra')
+    .filter('i18n', function () {
+
+        return function () {
+            return t(arguments);
+        };
+    });
