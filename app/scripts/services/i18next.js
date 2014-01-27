@@ -5,11 +5,7 @@ angular.module('gsUiInfra')
 
         var deferred = $q.defer();
 
-        function getOptions() {
-            return false;
-        }
-
-        var options = getOptions() || {
+        var defaultOptions = {
             lng: 'en',
             resGetPath: 'i18n/__ns_____lng__.json',
             ns: {
@@ -20,13 +16,29 @@ angular.module('gsUiInfra')
 
         // this is the only global reference we'll need, and it's there after loading the i18next
         // script. the filter using this service will rely on the resolved promise to get an instance.
-        $window.i18n.init(options, function (t) {
-            if (t) {
-                deferred.resolve(t);
-            } else {
-                deferred.reject('couldn\'t initialize i18next');
-            }
-        });
+        var i18nGlobal = $window.i18n;
 
-        return deferred.promise;
+        var init = function (options) {
+            var _options = angular.extend(defaultOptions, options || {});
+            i18nGlobal.init(_options, function (t) {
+                console.log('i18next initialization done, resolving i18next promise...');
+                deferred.notify('i18next initialization callback');
+                if (t) {
+                    deferred.resolve(t);
+                } else {
+                    deferred.reject('couldn\'t initialize i18next');
+                }
+            });
+        };
+
+        init();
+
+        return {
+            getPromise: function () {
+                return deferred.promise;
+            },
+            setOptions: function (options) {
+                init(options);
+            }
+        };
     });
