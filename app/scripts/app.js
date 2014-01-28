@@ -1,4 +1,4 @@
 'use strict';
 
-angular.module('gsUiInfra', [])
-    .run(['I18next', angular.noop]);
+angular.module('gsUiInfra', []);
+//    .run(['I18next', angular.noop]);
