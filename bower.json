@@ -9,7 +9,7 @@
     "angular-cookies": "~1.2.10",
     "angular-sanitize": "~1.2.10",
     "raphael": "~2.1.0",
-    "jquery": "~1.7.2",
+    "jquery": "~2.1.0",
     "i18next": "~1.7.1"
   },
   "devDependencies": {
