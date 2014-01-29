@@ -4,7 +4,7 @@
  * SVG layer to implement the relations between the nodes
  */
 angular.module("gsUiInfra")
-    .directive("blueprintArrows", function(){
+    .directive("blueprintArrows", function(blueprintCoordinateService){
         return {
             restrict: "A",
             scope: {
@@ -73,6 +73,13 @@ angular.module("gsUiInfra")
                             .attr("shape-rendering", "geometricPrecision");
                     }
                 }, true);
+
+                $scope.$watch(function () {
+                    return $element.is(':visible');
+                },
+                function () {
+                    blueprintCoordinateService.draw();
+                });
             }
         }
     });
@@ -105,7 +112,7 @@ angular.module("gsUiInfra")
             link: function($scope, $element) {
                 function broadcastResize() {
                     $element.scope().$apply(function(){
-                        blueprintCoordinateService.refresh();
+                        blueprintCoordinateService.draw();
                     });
                 }
                 document.addEventListener("DOMContentLoaded", broadcastResize, false);
