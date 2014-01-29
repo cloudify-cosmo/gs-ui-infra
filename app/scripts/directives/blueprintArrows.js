@@ -3,26 +3,26 @@
 /*********************
  * SVG layer to implement the relations between the nodes
  */
-angular.module("gsUiInfra")
-    .directive("blueprintArrows", function(blueprintCoordinateService){
+angular.module('gsUiInfra')
+    .directive('blueprintArrows', function(blueprintCoordinateService){
         return {
-            restrict: "A",
+            restrict: 'A',
             scope: {
-                "coordinates": "=blueprintArrows"
+                'coordinates': '=blueprintArrows'
             },
             link: function($scope, $element, $attr)
             {
-                var lineColor = $attr.color || "#ccc",
+                var lineColor = $attr.color || '#ccc',
                     withArrow = Boolean($attr.arrow) || false,
                     storkeSize = $attr.storke || 3;
 
-                var canvas = d3.select($element[0]).append("svg:svg")
-                    .attr("width", "100%")
-                    .attr("height", "100%")
-                    .attr("fill", "silver");
+                var canvas = d3.select($element[0]).append('svg:svg')
+                    .attr('width', '100%')
+                    .attr('height', '100%')
+                    .attr('fill', 'silver');
 
                 var group = canvas.append("g")
-                    .attr("transform", "translate(0, 0)");
+                    .attr('transform', 'translate(0, 0)');
 
                 var diagonal = d3.svg.diagonal();
 
@@ -40,37 +40,37 @@ angular.module("gsUiInfra")
                 }
 
                 if(withArrow == true) {
-                    canvas.append("svg:defs").selectAll("marker")
-                        .data(["Arrow"])
+                    canvas.append('svg:defs').selectAll('marker')
+                        .data(['Arrow'])
                         .enter()
-                        .append("svg:marker")
-                        .attr("id", "arrowhead")
-                        .attr("viewBox", "0 -5 10 10")
-                        .attr("refX", 9)
-                        .attr("refY", 0)
-                        .attr("markerWidth", 4)
-                        .attr("markerHeight", 5)
-                        .attr("orient", "auto")
-                        .attr("fill", lineColor)
-                        .append("svg:path")
-                        .attr("d", "M0,-5L10,0L0,5");
+                        .append('svg:marker')
+                        .attr('id', 'arrowhead')
+                        .attr('viewBox', '0 -5 10 10')
+                        .attr('refX', 9)
+                        .attr('refY', 0)
+                        .attr('markerWidth', 4)
+                        .attr('markerHeight', 5)
+                        .attr('orient', 'auto')
+                        .attr('fill', lineColor)
+                        .append('svg:path')
+                        .attr('d', 'M0,-5L10,0L0,5');
                 }
 
-                $scope.$watch("coordinates", function(data){
+                $scope.$watch('coordinates', function(data){
                     if(data) {
-                        group.selectAll("path")
+                        group.selectAll('path')
                             .remove();
 
-                        group.selectAll("path")
+                        group.selectAll('path')
                             .data(data)
                             .enter()
-                            .append("path")
-                            .attr("d", applyDiagonals)
-                            .attr("marker-end", "url(#arrowhead)")
-                            .attr("fill", "none")
-                            .attr("stroke", lineColor)
-                            .attr("stroke-width", storkeSize + "px")
-                            .attr("shape-rendering", "geometricPrecision");
+                            .append('path')
+                            .attr('d', applyDiagonals)
+                            .attr('marker-end', 'url(#arrowhead)')
+                            .attr('fill', 'none')
+                            .attr('stroke', lineColor)
+                            .attr('stroke-width', storkeSize + 'px')
+                            .attr('shape-rendering', 'geometricPrecision');
                     }
                 }, true);
 
@@ -81,22 +81,22 @@ angular.module("gsUiInfra")
                     blueprintCoordinateService.draw();
                 });
             }
-        }
+        };
     });
 
 /***************
  * Directive to define DOM element coordinate
  * Must be as: Attribute="{id}"
  */
-angular.module("gsUiInfra")
-    .directive("blueprintCoordinate", function(blueprintCoordinateService){
+angular.module('gsUiInfra')
+    .directive('blueprintCoordinate', function(blueprintCoordinateService){
         return {
-            restrict: "A",
+            restrict: 'A',
             scope: true,
-            link: function($scope, $element, $attr) {
+            link: function($scope, $element) {
                 blueprintCoordinateService.addElement($scope.elementid, $element);
             }
-        }
+        };
     });
 
 /*****************
@@ -104,10 +104,10 @@ angular.module("gsUiInfra")
  * and broadcast it into angular, which update the "data" of the
  * coordinates
  */
-angular.module("gsUiInfra")
-    .directive("blueprintResize", function(blueprintCoordinateService){
+angular.module('gsUiInfra')
+    .directive('blueprintResize', function(blueprintCoordinateService){
         return {
-            restrict: "A",
+            restrict: 'A',
             scope: false,
             link: function($scope, $element) {
                 function broadcastResize() {
@@ -115,17 +115,17 @@ angular.module("gsUiInfra")
                         blueprintCoordinateService.draw();
                     });
                 }
-                document.addEventListener("DOMContentLoaded", broadcastResize, false);
+                document.addEventListener('DOMContentLoaded', broadcastResize, false);
                 window.onresize = broadcastResize;
             }
-        }
+        };
     });
 
 /***************
  * Service to store and calculate the coordinate data
  */
-angular.module("gsUiInfra")
-    .service("blueprintCoordinateService", function($timeout){
+angular.module('gsUiInfra')
+    .service('blueprintCoordinateService', function($timeout){
 
         var data = {},
             elements = {},
@@ -175,8 +175,8 @@ angular.module("gsUiInfra")
             angular.forEach(elements, function (element, id){
                 if($(document).find(element).length) {
                     data[id] = {
-                        "x": element.offset().left - element.parents(".bpContainer").offset().left,
-                        "y": element.offset().top  - element.parents(".bpContainer").offset().top
+                        "x": element.offset().left - element.parents('.bpContainer').offset().left,
+                        "y": element.offset().top  - element.parents('.bpContainer').offset().top
                     }
                 }
                 else {
