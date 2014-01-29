@@ -9,8 +9,8 @@ angular.module('gsUiInfra')
             lng: 'en',
             resGetPath: 'i18n/__ns_____lng__.json',
             ns: {
-                namespaces: ['constants', 'messages'],
-                defaultNs: 'constants'
+                namespaces: ['constants', 'messages', 'translations'],
+                defaultNs: 'translations'
             }
         };
 
