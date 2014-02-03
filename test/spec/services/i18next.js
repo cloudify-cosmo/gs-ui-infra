@@ -3,7 +3,7 @@
 describe('Service: i18next', function () {
 
   // load the service's module
-  beforeEach(module('gsUiInfraApp'));
+  beforeEach(module('gsUiInfra'));
 
   // instantiate service
   var i18next;
