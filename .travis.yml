@@ -6,6 +6,7 @@ before_script:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - npm install -g bower
+  - bower update
   - bower install
 notifications:
   email:
