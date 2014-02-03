@@ -14,7 +14,7 @@ angular.module('gsUiInfra')
             }
         };
 
-        // this is the only global reference we'll need, and it's there after loading the i18next
+        // this is the only global reference we'll need, and it's available after loading the i18next
         // script. the filter using this service will rely on the resolved promise to get an instance.
         var i18nGlobal = $window.i18n;
 
