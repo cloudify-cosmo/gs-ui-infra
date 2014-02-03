@@ -7,6 +7,7 @@ angular.module('gsUiInfra')
 
         var defaultOptions = {
             lng: 'en',
+            fallbackLng: 'en',
             resGetPath: 'i18n/__ns_____lng__.json',
             ns: {
                 namespaces: ['translations'],
