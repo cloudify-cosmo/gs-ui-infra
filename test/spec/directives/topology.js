@@ -3,7 +3,7 @@
 describe('Directive: topology', function () {
 
   // load the directive's module
-  beforeEach(module('gsUiInfra'));
+  beforeEach(module('gsUiInfraApp'));
 
   var element,
     scope;
