@@ -1,3 +1,3 @@
 'use strict';
 
-angular.module('gsUiInfra', []);
+angular.module('gsUiInfraApp', []);

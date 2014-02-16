@@ -3,7 +3,7 @@
 /*********************
  * SVG layer to implement the relations between the nodes
  */
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive('blueprintArrows', function(blueprintCoordinateService){
         return {
             restrict: 'A',
@@ -88,7 +88,7 @@ angular.module('gsUiInfra')
  * Directive to define DOM element coordinate
  * Must be as: Attribute="{id}"
  */
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive('blueprintCoordinate', function(blueprintCoordinateService){
         return {
             restrict: 'A',
@@ -104,7 +104,7 @@ angular.module('gsUiInfra')
  * and broadcast it into angular, which update the "data" of the
  * coordinates
  */
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive('blueprintResize', function(blueprintCoordinateService){
         return {
             restrict: 'A',
@@ -124,7 +124,7 @@ angular.module('gsUiInfra')
 /***************
  * Service to store and calculate the coordinate data
  */
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .service('blueprintCoordinateService', function($timeout){
 
         var data = {},

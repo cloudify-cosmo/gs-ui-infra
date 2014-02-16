@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive('pieProgress', function () {
         return {
             restrict: 'A',

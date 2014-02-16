@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .service('I18next', function I18next($window, $q) {
 
         var deferred = $q.defer();

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive('multiSelectMenu', function ($document) {
         return {
             restrict: 'A',
