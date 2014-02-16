@@ -28,8 +28,16 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
 }
 
 /* Import Fonts */
-@import "../../assets/fonts/opensans_bold_macroman/stylesheet.css";
-
+@font-face {
+    font-family: 'OpenSansBold';
+    src: url('#{$fonts}/opensans_bold_macroman/OpenSans-Bold-webfont.eot');
+    src: url('#{$fonts}/opensans_bold_macroman/OpenSans-Bold-webfont.eot?#iefix') format('embedded-opentype'),
+    url('#{$fonts}/opensans_bold_macroman/OpenSans-Bold-webfont.woff') format('woff'),
+    url('#{$fonts}/opensans_bold_macroman/OpenSans-Bold-webfont.ttf') format('truetype'),
+    url('#{$fonts}/opensans_bold_macroman/OpenSans-Bold-webfont.svg#open_sansbold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
 
 /* glyph icon mapping */
 
