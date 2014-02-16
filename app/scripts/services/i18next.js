@@ -7,14 +7,15 @@ angular.module('gsUiInfra')
 
         var defaultOptions = {
             lng: 'en',
+            fallbackLng: 'en',
             resGetPath: 'i18n/__ns_____lng__.json',
             ns: {
-                namespaces: ['constants', 'messages'],
-                defaultNs: 'constants'
+                namespaces: ['translations'],
+                defaultNs: 'translations'
             }
         };
 
-        // this is the only global reference we'll need, and it's there after loading the i18next
+        // this is the only global reference we'll need, and it's available after loading the i18next
         // script. the filter using this service will rely on the resolved promise to get an instance.
         var i18nGlobal = $window.i18n;
 

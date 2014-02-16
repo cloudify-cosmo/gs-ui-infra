@@ -2,8 +2,9 @@
 
 describe('Service: i18next', function () {
 
+/*
   // load the service's module
-  beforeEach(module('gsUiInfraApp'));
+  beforeEach(module('gsUiInfra'));
 
   // instantiate service
   var i18next;
@@ -14,5 +15,6 @@ describe('Service: i18next', function () {
   it('should do something', function () {
     expect(!!i18next).toBe(true);
   });
+*/
 
 });
