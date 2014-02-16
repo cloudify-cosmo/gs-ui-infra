@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .filter('i18n', function ($window, I18next) {
 
         var fn = null;

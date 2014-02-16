@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive("draggable", function () {
         return {
             restrict: "A",
@@ -32,7 +32,7 @@ angular.module('gsUiInfra')
         }
     });
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive("droppable", function () {
         return {
             restrict: "A",

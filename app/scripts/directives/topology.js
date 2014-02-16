@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive('topology', function () {
         return {
             template: '<div class="topology-directive-inner-div"></div>',

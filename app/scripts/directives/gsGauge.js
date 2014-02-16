@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .directive('gsGauge', ['$window', 'Utils', function ($window, Utils) {
         return {
             template: '',

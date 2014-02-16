@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .factory('Layout', ['Utils', function (Utils) {
 
         return {

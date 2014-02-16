@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
     .factory('Render', ['Utils', '$rootScope', function (Utils, $rootScope) {
 
         return {

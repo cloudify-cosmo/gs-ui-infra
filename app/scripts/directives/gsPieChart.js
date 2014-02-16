@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('gsUiInfra')
+angular.module('gsUiInfraApp')
   .directive('gsPieChart', function () {
         // return our directive description object
         // that will create the directive
