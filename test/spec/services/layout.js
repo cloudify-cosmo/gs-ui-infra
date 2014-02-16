@@ -4,7 +4,7 @@ describe('Service: layout', function () {
 
 /*
   // load the service's module
-  beforeEach(module('gsUiInfra'));
+  beforeEach(module('gsUiInfraApp'));
 
   // instantiate service
   var layout;

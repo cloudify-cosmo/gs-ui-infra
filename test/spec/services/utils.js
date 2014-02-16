@@ -3,7 +3,7 @@
 describe('Factory: Utils', function () {
 
     // load the service's module
-    beforeEach(module('gsUiInfra'));
+    beforeEach(module('gsUiInfraApp'));
 
     // instantiate service
     var Utils;

@@ -1,7 +1,7 @@
 'use strict';
 
 describe('Directive: gsPieChart', function () {
-  beforeEach(module('gsUiInfra'));
+  beforeEach(module('gsUiInfraApp'));
 
 /*
   var element;

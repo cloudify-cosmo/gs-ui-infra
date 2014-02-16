@@ -15,7 +15,7 @@ describe('Directive: gsGauge', function () {
     }
 
 
-    beforeEach(module('gsUiInfra'));
+    beforeEach(module('gsUiInfraApp'));
 
     beforeEach(inject(function ($rootScope, $compile) {
         scope = $rootScope;

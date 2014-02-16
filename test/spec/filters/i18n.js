@@ -4,7 +4,7 @@ describe('Filter: i18n', function () {
 
   // load the filter's module
 /*
-  beforeEach(module('gsUiInfra'));
+  beforeEach(module('gsUiInfraApp'));
 
   // initialize a new instance of the filter before each test
   var i18n;
