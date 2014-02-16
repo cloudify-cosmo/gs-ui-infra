@@ -27,6 +27,9 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
   url('#{$fonts}/opensans/opensans-regular.ttf')  format('truetype'); /* Safari, Android, iOS */
 }
 
+/* Import Fonts */
+@import "../../assets/fonts/opensans_bold_macroman/stylesheet.css";
+
 
 /* glyph icon mapping */
 
