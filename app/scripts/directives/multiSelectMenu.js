@@ -58,6 +58,20 @@ angular.module('gsUiInfraApp')
                 }
 
                 /**
+                 * Set Init Value
+                 */
+                if($attrs.init !== undefined) {
+                    for(var i in $scope.options) {
+                        if($attrs.init.indexOf($scope.options[i].value) !== -1) {
+                            _select($scope.options[i]);
+                            if(!$scope.multiple) {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                /**
                  * Open DropDown
                  * @private
                  */
