@@ -27,7 +27,8 @@ angular.module('gsUiInfraApp')
                 '</div>',
             replace: true,
             scope: {
-                options: '='
+                options: '=',
+                onchange: '&'
             },
             link: function postLink($scope, $element, $attrs, ngModel) {
 
@@ -42,6 +43,9 @@ angular.module('gsUiInfraApp')
                 $scope.$watch('selected', function (newValue) {
                     if (newValue) {
                         ngModel.$setViewValue(newValue);
+                        if(angular.isFunction($scope.onchange)) {
+                            $scope.onchange({filter: newValue});
+                        }
                     }
                 });
 
