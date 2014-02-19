@@ -27,6 +27,17 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
   url('#{$fonts}/opensans/opensans-regular.ttf')  format('truetype'); /* Safari, Android, iOS */
 }
 
+/* Import Fonts */
+@font-face {
+    font-family: 'OpenSansBold';
+    src: url('#{$fonts}/opensans_bold/OpenSans-Bold-webfont.eot');
+    src: url('#{$fonts}/opensans_bold/OpenSans-Bold-webfont.eot?#iefix') format('embedded-opentype'),
+    url('#{$fonts}/opensans_bold/OpenSans-Bold-webfont.woff') format('woff'),
+    url('#{$fonts}/opensans_bold/OpenSans-Bold-webfont.ttf') format('truetype'),
+    url('#{$fonts}/opensans_bold/OpenSans-Bold-webfont.svg#open_sansbold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
 
 /* glyph icon mapping */
 

@@ -27,7 +27,8 @@ angular.module('gsUiInfraApp')
                 '</div>',
             replace: true,
             scope: {
-                options: '='
+                options: '=',
+                onchange: '&'
             },
             link: function postLink($scope, $element, $attrs, ngModel) {
 
@@ -42,6 +43,9 @@ angular.module('gsUiInfraApp')
                 $scope.$watch('selected', function (newValue) {
                     if (newValue) {
                         ngModel.$setViewValue(newValue);
+                        if(angular.isFunction($scope.onchange)) {
+                            $scope.onchange({filter: newValue});
+                        }
                     }
                 });
 
@@ -51,6 +55,20 @@ angular.module('gsUiInfraApp')
                 if($attrs.hasOwnProperty('multiple') && $attrs.multiple === 'true') {
                     $scope.multiple = true;
                     $scope.selected = [];
+                }
+
+                /**
+                 * Set Init Value
+                 */
+                if($attrs.init !== undefined) {
+                    for(var i in $scope.options) {
+                        if($attrs.init.indexOf($scope.options[i].value) !== -1) {
+                            _select($scope.options[i]);
+                            if(!$scope.multiple) {
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 /**
