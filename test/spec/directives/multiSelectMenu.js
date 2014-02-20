@@ -1,6 +1,8 @@
 'use strict';
 
 describe('Directive: multiSelectMenu', function () {
+
+/*
   beforeEach(module('gsUiInfraApp'));
 
   var element;
@@ -10,4 +12,5 @@ describe('Directive: multiSelectMenu', function () {
     element = $compile(element)($rootScope);
     expect(element.text()).toBe('this is the multiSelectMenu directive');
   }));
+*/
 });

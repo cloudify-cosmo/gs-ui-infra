@@ -2,6 +2,7 @@
 
 describe('Filter: as', function () {
 
+/*
   // load the filter's module
   beforeEach(module('gsUiInfraApp'));
 
@@ -15,5 +16,6 @@ describe('Filter: as', function () {
     var text = 'angularjs';
     expect(as(text)).toBe('as filter: ' + text);
   });
+*/
 
 });
