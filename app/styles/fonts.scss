@@ -38,6 +38,17 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     font-weight: normal;
     font-style: normal;
 }
+@font-face {
+    font-family: 'routerregular';
+    src: url('#{$fonts}/router-regular/router-webfont.eot');
+    src: url('#{$fonts}/router-regular/router-webfont.eot?#iefix') format('embedded-opentype'),
+    url('#{$fonts}/router-regular/router-webfont.woff') format('woff'),
+    url('#{$fonts}/router-regular/router-webfont.ttf') format('truetype'),
+    url('#{$fonts}/router-regular/router-webfont.svg#routerregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
 
 /* glyph icon mapping */
 
