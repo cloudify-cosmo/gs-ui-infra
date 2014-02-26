@@ -1,6 +1,9 @@
 .multiSelectMenu {
     position: relative;
     display: inline-block;
+    overflow: hidden;
+    height: 31px;
+    min-width: 175px;
     *:focus {
         outline: 0;
     }
@@ -20,6 +23,7 @@
             cursor: pointer;
             > input {
                 position: relative;
+                width: 100%;
                 display: none;
                 border: 0px;
                 background: transparent;
@@ -35,8 +39,8 @@
         }
     }
     ul {
-        display: none;
-        position: absolute;
+        display: block;
+        position: relative;
         top: calc(100% - 1px);
         left: 0;
         width: 100%;
@@ -66,8 +70,10 @@
         }
     }
     &.open {
+        overflow: visible;
+        height: auto;
         ul {
-            display: block;
+            position: absolute;
         }
         div.button {
             border-radius: 3px 3px 0 0;
