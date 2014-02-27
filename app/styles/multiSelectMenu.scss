@@ -17,13 +17,14 @@
         border-radius: 3px;
         cursor: pointer;
         > label {
+            display: block;
+            width: 100%;
             font-weight: normal;
             margin: 0px;
             padding: 5px 10px;
             cursor: pointer;
             > input {
                 position: relative;
-                width: 100%;
                 display: none;
                 border: 0px;
                 background: transparent;
@@ -40,10 +41,10 @@
     }
     ul {
         display: block;
-        position: relative;
-        top: calc(100% - 1px);
+        position: absolute;
+        top: 100%;
         left: 0;
-        width: 100%;
+        min-width: 100%;
         max-height: 250px;
         overflow-y: auto;
         background-color: #f5f5f5;
@@ -54,6 +55,10 @@
         > li {
             background-color: transparent;
             padding: 5px 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
             &.markNav {
                 background-color: #0064cd;
                 color: #fff;
@@ -73,7 +78,7 @@
         overflow: visible;
         height: auto;
         ul {
-            position: absolute;
+            top: calc(100% - 1px);
         }
         div.button {
             border-radius: 3px 3px 0 0;

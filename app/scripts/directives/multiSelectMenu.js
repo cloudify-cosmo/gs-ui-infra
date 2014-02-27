@@ -20,7 +20,8 @@ angular.module('gsUiInfraApp')
                         '<li data-ng-repeat="option in options | filter: filter | as: \'filteredItems\'"' +
                             'data-ng-click="select(option)" ' +
                             'data-ng-class="navigator(option)" ' +
-                            'data-ng-mouseover="hoverOption(option)">' +
+                            'data-ng-mouseover="hoverOption(option)" ' +
+                            'title="{{ option.label }}">' +
                             '<input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">' +
                             '{{ option.label }}</li> ' +
                     '</ul>' +
