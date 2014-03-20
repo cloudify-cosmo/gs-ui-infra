@@ -75,11 +75,11 @@ angular.module('gsUiInfraApp')
                 }, true);
 
                 $scope.$watch(function () {
-                    return $element.is(':visible');
-                },
-                function () {
-                    blueprintCoordinateService.draw();
-                });
+                        return $element.is(':visible');
+                    },
+                    function () {
+                        blueprintCoordinateService.draw();
+                    });
             }
         };
     });
@@ -93,8 +93,8 @@ angular.module('gsUiInfraApp')
         return {
             restrict: 'A',
             scope: true,
-            link: function($scope, $element) {
-                blueprintCoordinateService.addElement($scope.elementid, $element);
+            link: function($scope, $element, $attr) {
+                blueprintCoordinateService.addElement(parseInt($attr.blueprintCoordinate), $element);
             }
         };
     });
@@ -138,7 +138,7 @@ angular.module('gsUiInfraApp')
         this.draw = function() {
             $timeout(function(){
                 updateData();
-            }, 100);
+            }, 1500);
         };
 
         /**************
