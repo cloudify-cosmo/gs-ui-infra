@@ -25,11 +25,11 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
 
 @font-face {
     font-family: 'OpenSansLight';
-    src: url('OpenSans-Light-webfont.eot');
-    src: url('OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
-         url('OpenSans-Light-webfont.woff') format('woff'),
-         url('OpenSans-Light-webfont.ttf') format('truetype'),
-         url('OpenSans-Light-webfont.svg#open_sanslight') format('svg');
+    src: url('#{$fonts}/opensans_light/OpenSans-Light-webfont.eot');
+    src: url('#{$fonts}/opensans_light/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
+         url('#{$fonts}/opensans_light/OpenSans-Light-webfont.woff') format('woff'),
+         url('#{$fonts}/opensans_light/OpenSans-Light-webfont.ttf') format('truetype'),
+         url('#{$fonts}/opensans_light/OpenSans-Light-webfont.svg#open_sanslight') format('svg');
     font-weight: normal;
     font-style: normal;
 }
