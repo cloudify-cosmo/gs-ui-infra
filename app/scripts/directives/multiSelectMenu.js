@@ -35,6 +35,7 @@ angular.module('gsUiInfraApp')
 
                 $scope.selected = false;
                 $scope.multiple = false;
+                $scope.isInit = false;
                 var optionMark = false,
                     isOpen = false;
 
@@ -61,14 +62,17 @@ angular.module('gsUiInfraApp')
                 /**
                  * Set Init Value
                  */
-                if($attrs.init !== undefined) {
-                    for(var i in $scope.options) {
-                        if($attrs.init.indexOf($scope.options[i].value) !== -1) {
-                            _select($scope.options[i]);
-                            if(!$scope.multiple) {
-                                break;
+                function setInit() {
+                    if(!$scope.isInit && $attrs.init !== undefined) {
+                        for(var i in $scope.options) {
+                            if($attrs.init.indexOf($scope.options[i].value) !== -1) {
+                                _select($scope.options[i]);
+                                if(!$scope.multiple) {
+                                    break;
+                                }
                             }
                         }
+                        $scope.isInit = false;
                     }
                 }
 
@@ -244,6 +248,7 @@ angular.module('gsUiInfraApp')
                  * Clean non relevant selected options
                  */
                 $scope.$watch('options', function (options) {
+                    setInit();
                     if ($scope.selected.length > 0) {
                         angular.forEach($scope.selected, function (option, i) {
                             if (options.indexOf(option) === -1) {
@@ -251,7 +256,7 @@ angular.module('gsUiInfraApp')
                             }
                         });
                     }
-                });
+                }, true);
 
                 /**
                  * Close on Click Out
