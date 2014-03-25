@@ -6,3 +6,4 @@ dist
 app/bower_components
 *.log
 *.iml
+.DS_Store
