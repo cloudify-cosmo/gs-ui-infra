@@ -10,22 +10,22 @@ angular.module('gsUiInfraApp')
                     'class="multiSelectMenu"' +
                     'data-ng-class="isOpen()">' +
                     '<div class="button" data-ng-click="open()">' +
-                        '<label>' +
-                            '<t>{{ selectedLabel() }}</t>' +
-                            '<input type="text" data-ng-model="filter">' +
-                            '<input value="{{ reflection() }}" class="reflection">' +
-                        '</label>' +
+                    '<label>' +
+                    '<t>{{ selectedLabel() }}</t>' +
+                    '<input type="text" data-ng-model="filter">' +
+                    '<input value="{{ reflection() }}" class="reflection">' +
+                    '</label>' +
                     '</div>' +
                     '<ul>' +
-                        '<li data-ng-repeat="option in options | filter: filter | as: \'filteredItems\'"' +
-                            'data-ng-click="select(option)" ' +
-                            'data-ng-class="navigator(option)" ' +
-                            'data-ng-mouseover="hoverOption(option)" ' +
-                            'title="{{ option.label }}">' +
-                            '<input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">' +
-                            '{{ option.label }}</li> ' +
+                    '<li data-ng-repeat="option in options | filter: filter | as: \'filteredItems\'"' +
+                    'data-ng-click="select(option)" ' +
+                    'data-ng-class="navigator(option)" ' +
+                    'data-ng-mouseover="hoverOption(option)" ' +
+                    'title="{{ option.label }}">' +
+                    '<input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">' +
+                    '{{ option.label }}</li> ' +
                     '</ul>' +
-                '</div>',
+                    '</div>',
             replace: true,
             scope: {
                 options: '=',
@@ -134,20 +134,20 @@ angular.module('gsUiInfraApp')
                  */
                 function _navigate(to) {
                     switch (to) {
-                    case 38:
-                        if ($scope.options.indexOf(optionMark) > 0) {
-                            $scope.$apply(function () {
-                                optionMark = $scope.options[$scope.options.indexOf(optionMark) - 1];
-                            });
-                        }
-                        break;
-                    case 40:
-                        if ($scope.options.indexOf(optionMark) < $scope.options.length - 1) {
-                            $scope.$apply(function () {
-                                optionMark = $scope.options[$scope.options.indexOf(optionMark) + 1];
-                            });
-                        }
-                        break;
+                        case 38:
+                            if ($scope.options.indexOf(optionMark) > 0) {
+                                $scope.$apply(function () {
+                                    optionMark = $scope.options[$scope.options.indexOf(optionMark) - 1];
+                                });
+                            }
+                            break;
+                        case 40:
+                            if ($scope.options.indexOf(optionMark) < $scope.options.length - 1) {
+                                $scope.$apply(function () {
+                                    optionMark = $scope.options[$scope.options.indexOf(optionMark) + 1];
+                                });
+                            }
+                            break;
                     }
                 }
 
@@ -241,6 +241,19 @@ angular.module('gsUiInfraApp')
                 }, true);
 
                 /**
+                 * Clean non relevant selected options
+                 */
+                $scope.$watch('options', function (options) {
+                    if ($scope.selected.length > 0) {
+                        angular.forEach($scope.selected, function (option, i) {
+                            if (options.indexOf(option) === -1) {
+                                $scope.selected.splice(i, 1);
+                            }
+                        });
+                    }
+                });
+
+                /**
                  * Close on Click Out
                  */
                 $document.click(function (e) {
@@ -260,16 +273,16 @@ angular.module('gsUiInfraApp')
                         $scope.$apply(_close);
                     }
                     switch (e.keyCode) {
-                    case 27: // Esc
-                        $scope.$apply(_close);
-                        break;
-                    case 13: // Enter
-                        $scope.$apply(_select(optionMark));
-                        break;
-                    case 38: // navigate up
-                    case 40: // navigate down
-                        _navigate(e.keyCode);
-                        break;
+                        case 27: // Esc
+                            $scope.$apply(_close);
+                            break;
+                        case 13: // Enter
+                            $scope.$apply(_select(optionMark));
+                            break;
+                        case 38: // navigate up
+                        case 40: // navigate down
+                            _navigate(e.keyCode);
+                            break;
                     }
                 });
             }
