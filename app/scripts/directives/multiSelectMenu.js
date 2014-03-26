@@ -7,25 +7,25 @@ angular.module('gsUiInfraApp')
             require: '?ngModel',
             template:
                 '<div ' +
-                    'class="multiSelectMenu"' +
-                    'data-ng-class="isOpen()">' +
-                    '<div class="button" data-ng-click="open()">' +
-                    '<label>' +
-                    '<t>{{ selectedLabel() }}</t>' +
-                    '<input type="text" data-ng-model="filter">' +
-                    '<input value="{{ reflection() }}" class="reflection">' +
-                    '</label>' +
-                    '</div>' +
-                    '<ul>' +
-                    '<li data-ng-repeat="option in options | filter: filter | as: \'filteredItems\'"' +
-                    'data-ng-click="select(option)" ' +
-                    'data-ng-class="navigator(option)" ' +
-                    'data-ng-mouseover="hoverOption(option)" ' +
-                    'title="{{ option.label }}">' +
-                    '<input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">' +
-                    '{{ option.label }}</li> ' +
-                    '</ul>' +
-                    '</div>',
+                'class="multiSelectMenu"' +
+                'data-ng-class="isOpen()">' +
+                '<div class="button" data-ng-click="open()">' +
+                '<label>' +
+                '<t>{{ selectedLabel() }}</t>' +
+                '<input type="text" data-ng-model="filter">' +
+                '<input value="{{ reflection() }}" class="reflection">' +
+                '</label>' +
+                '</div>' +
+                '<ul>' +
+                '<li data-ng-repeat="option in options | filter: filter | as: \'filteredItems\'"' +
+                'data-ng-click="select(option)" ' +
+                'data-ng-class="navigator(option)" ' +
+                'data-ng-mouseover="hoverOption(option)" ' +
+                'title="{{ option.label }}">' +
+                '<input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">' +
+                '{{ option.label }}</li> ' +
+                '</ul>' +
+                '</div>',
             replace: true,
             scope: {
                 options: '=',
@@ -180,6 +180,9 @@ angular.module('gsUiInfraApp')
                     }
                     else {
                         if($scope.multiple === true) {
+                            if($scope.selected.length == 1) {
+                                return $scope.selected[0].label;
+                            }
                             if($attrs.hasOwnProperty('selection')) {
                                 return $attrs.selection.replace('$count', $scope.selected.length);
                             }
