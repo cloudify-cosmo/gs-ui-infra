@@ -95,7 +95,7 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     &.cluster:after {
         content: 'k';
     }
-    &.web-app:after {
+    &.web-server:after {
         content: 'l';
     }
     &.edit-node:after {
