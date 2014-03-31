@@ -70,7 +70,8 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     &.db-server:after {
         content: 'c';
     }
-    &.floating-ip:after {
+    &.floating-ip:after,
+    &.port:after {
         content: 'd';
     }
     &.host:after {
