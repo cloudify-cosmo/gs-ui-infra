@@ -89,6 +89,9 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     &.security-server:after {
         content: 'i';
     }
+    &.security-group:after {
+        content: 'i';
+    }
     &.volume:after {
         content: 'j';
     }
