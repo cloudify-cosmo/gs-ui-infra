@@ -77,7 +77,7 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     &.host:after {
         content: 'e';
     }
-    &.messaging-bus:after {
+    &.message-bus-server:after {
         content: 'f';
     }
     &.subnet:after {
