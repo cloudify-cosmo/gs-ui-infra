@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .factory('Utils', function Utils() {
+    .factory('Utils', function Utils($log) {
 
         var depth = -1;
 
@@ -48,7 +48,7 @@ angular.module('gsUiInfraApp')
                     }
                     return filtered;
                 } catch (e) {
-                    console.log([arr, propName, propValue]);
+                    $log.info([arr, propName, propValue]);
                     throw e;
                 }
             },

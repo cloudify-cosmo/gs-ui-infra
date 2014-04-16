@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .service('I18next', function I18next($window, $q) {
+    .service('I18next', function I18next($window, $q, $log) {
 
         var deferred = $q.defer();
 
@@ -22,7 +22,7 @@ angular.module('gsUiInfraApp')
         var init = function (options) {
             var _options = angular.extend(angular.copy(defaultOptions), options || {});
             i18nGlobal.init(_options, function (t) {
-                console.log('i18next initialization done, resolving i18next promise...');
+                $log.info('i18next initialization done, resolving i18next promise...');
                 deferred.notify('i18next initialization callback');
                 if (t) {
                     deferred.resolve(t);

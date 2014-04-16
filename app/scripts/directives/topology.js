@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .directive('topology', function () {
+    .directive('topology', function ($log) {
         return {
             template: '<div class="topology-directive-inner-div"></div>',
             restrict: 'EAC',
@@ -14,10 +14,10 @@ angular.module('gsUiInfraApp')
 
             link: function (scope, element/*, attrs*/) {
                 if (!scope.renderer) {
-                    console.log('missing a renderer');
+                    $log.info('missing a renderer');
                 }
                 if (!scope.layouter) {
-                    console.log('missing a layouter');
+                    $log.info('missing a layouter');
                 }
 
                 scope.renderer.init(element[0].childNodes[0], scope.layouter, scope.events);

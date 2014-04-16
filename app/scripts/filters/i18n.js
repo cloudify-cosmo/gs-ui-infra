@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .filter('i18n', function ($window, I18next) {
+    .filter('i18n', function ($window, I18next, $log) {
 
         var fn = null;
 
@@ -17,7 +17,7 @@ angular.module('gsUiInfraApp')
                     },
                     angular.noop,
                     function (message) {
-                        console.log('notification: ', message);
+                        $log.info('notification: ', message);
                     });
                 return ''; // placeholder while loading
             } else {

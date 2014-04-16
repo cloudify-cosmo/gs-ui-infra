@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .factory('Render', ['Utils', '$rootScope', function (Utils, $rootScope) {
+    .factory('Render', ['Utils', '$rootScope', function (Utils, $rootScope, $log) {
 
         return {
 
@@ -92,7 +92,7 @@ angular.module('gsUiInfraApp')
                     refresh: function (newData) {
 
                         if (!newData) {
-                            console.log("render: nothing to paint");
+                            $log.info("render: nothing to paint");
                             return;
                         }
                         if (newData === this.graph) {
@@ -106,7 +106,7 @@ angular.module('gsUiInfraApp')
 
                         // trigger rendering a tree-like dom structure by recursion traversal
                         var tree = this.layouter._asTree(this.graph, false, true);
-//                        console.log(JSON.stringify(tree, null, 2))
+//                        $log.info(JSON.stringify(tree, null, 2))
                         this._update(tree);
 
                     },
@@ -739,7 +739,7 @@ angular.module('gsUiInfraApp')
                                                 ((i != 1 && j != 4) || p[i].y < p[j].y)
                                             )
                                     ) {
-//                                    console.log('id1, id2, dx, dy: ', n1.id, '->', n2.id, ':', dx, '/', dy)
+//                                    $log.info('id1, id2, dx, dy: ', n1.id, '->', n2.id, ':', dx, '/', dy)
                                     dis.push(dx + dy);
                                     d[dis[dis.length - 1].toFixed(3)] = [/*i, j*/ 3, 6];
                                 }

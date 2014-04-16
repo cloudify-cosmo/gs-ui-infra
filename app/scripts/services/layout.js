@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .factory('Layout', ['Utils', function (Utils) {
+    .factory('Layout', ['Utils', function (Utils, $log) {
 
         return {
 
@@ -109,7 +109,7 @@ angular.module('gsUiInfraApp')
 
 
 /*
-                        console.log(JSON.stringify(this.graph, function (k, v) {
+ $log.info(JSON.stringify(this.graph, function (k, v) {
                             if (k === 'layoutPosY' ||
                                 k === 'layoutPosZ' ||
                                 k === 'layoutPosX' ||
@@ -179,7 +179,7 @@ angular.module('gsUiInfraApp')
                     _asTree: function (graph, addRoot, copy) {
 
                         if ( graph.nodes.length == 0){
-                            console.log("no nodes, nothing to paint");
+                            $log.info("no nodes, nothing to paint");
                             return {};
                         }
 
