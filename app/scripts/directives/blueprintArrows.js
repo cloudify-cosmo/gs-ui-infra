@@ -45,16 +45,16 @@ angular.module('gsUiInfraApp')
                         .enter()
                         .append('svg:marker')
                         .attr('id', 'arrowhead')
-                        .attr("viewBox", "0 -5 10 10")
-                        .attr("refX", 9)
-                        .attr("refY", 0)
-                        .attr("markerUnits", "strokeWidth")
-                        .attr("markerWidth", 6)
-                        .attr("markerHeight", 6)
+                        .attr("viewBox", "0 0 20 20")
+                        .attr("refX", 16)
+                        .attr("refY", 10)
+                        .attr("markerUnits", "userSpaceOnUse")
+                        .attr("markerWidth", 16)
+                        .attr("markerHeight", 12)
                         .attr("orient", "auto")
                         .attr('fill', lineColor)
                         .append("path")
-                        .attr("d", "M0,-5L10,0L0,5");
+                        .attr("d", "M 0 0 L 20 10 L 0 20 z");
                 }
 
                 $scope.$watch('coordinates', function(data){
