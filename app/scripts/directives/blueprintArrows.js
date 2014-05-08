@@ -30,11 +30,11 @@ angular.module('gsUiInfraApp')
                     return diagonal.apply(this, [{
                         source : {
                             x: data[0].x,
-                            y: data[0].y
+                            y: Math.floor(data[0].y)
                         },
                         target : {
                             x: data[1].x,
-                            y: data[1].y
+                            y: Math.floor(data[1].y)
                         }
                     }]);
                 }
