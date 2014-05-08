@@ -25,6 +25,7 @@ angular.module('gsUiInfraApp')
                 '<input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">' +
                 '{{ option.label }}</li> ' +
                 '</ul>' +
+                '<div class="msArrow" data-ng-click="open()"></div>' +
                 '</div>',
             replace: true,
             scope: {
