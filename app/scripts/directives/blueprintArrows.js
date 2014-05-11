@@ -151,6 +151,13 @@ angular.module('gsUiInfraApp')
         };
 
         /**************
+         * Api method to reset the coordinates
+         */
+        this.resetCoordinates = function() {
+            coordinates = [];
+        };
+
+        /**************
          * Set the map of relations between the nodes
          * @param data
          */
