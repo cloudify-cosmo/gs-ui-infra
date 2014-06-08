@@ -95,7 +95,7 @@ angular.module('gsUiInfraApp')
             restrict: 'A',
             scope: true,
             link: function($scope, $element, $attr) {
-                blueprintCoordinateService.addElement(parseInt($attr.blueprintCoordinate), $element);
+                blueprintCoordinateService.addElement($attr.blueprintCoordinate, $element);
             }
         };
     });
