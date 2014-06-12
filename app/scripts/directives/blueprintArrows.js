@@ -66,7 +66,10 @@ angular.module('gsUiInfraApp')
                             .data(data)
                             .enter()
                             .append('path')
-                            .attr('d', applyDiagonals)
+                            .attr('d', d3.svg.line()
+                                .x(function(d) { return d.x; })
+                                .y(function(d) { return d.y; })
+                                .interpolate("linear"))
                             .attr('marker-end', 'url(#arrowhead)')
                             .attr('fill', 'none')
                             .attr('stroke', lineColor)
@@ -95,7 +98,7 @@ angular.module('gsUiInfraApp')
             restrict: 'A',
             scope: true,
             link: function($scope, $element, $attr) {
-                blueprintCoordinateService.addElement(parseInt($attr.blueprintCoordinate), $element);
+                blueprintCoordinateService.addElement($attr.blueprintCoordinate, $element);
             }
         };
     });
