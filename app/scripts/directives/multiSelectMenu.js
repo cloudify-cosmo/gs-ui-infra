@@ -40,6 +40,11 @@ angular.module('gsUiInfraApp')
                 var optionMark = false,
                     isOpen = false;
 
+                if($attrs.listner === 'true') {
+                    _filterItems();
+                    _listner();
+                }
+
                 /**
                  * Bind data to ng-model
                  */
@@ -244,23 +249,30 @@ angular.module('gsUiInfraApp')
                 /**
                  * Update Marked option when filtering the options
                  */
-                $scope.$watch('filteredItems', function () {
-                    _navigateStart();
-                }, true);
+                function _filterItems() {
+                    $scope.$watch('filteredItems', function () {
+                        _navigateStart();
+                    }, true);
+                }
 
                 /**
                  * Clean non relevant selected options
                  */
-                $scope.$watch('options', function (options) {
-                    setInit();
-                    if ($scope.selected.length > 0) {
-                        angular.forEach($scope.selected, function (option, i) {
-                            if (options.indexOf(option) === -1) {
-                                $scope.selected.splice(i, 1);
+                function _listner() {
+                    $scope.$watch('options', function (options) {
+                        setInit();
+                        if ($scope.selected.length > 0) {
+                            var selected = $scope.selected;
+                            for(var i in selected) {
+                                var option = selected[i];
+                                if (options.indexOf(option) === -1) {
+                                    selected.splice(i, 1);
+                                }
                             }
-                        });
-                    }
-                }, true);
+                            $scope.selected = selected;
+                        }
+                    }, true);
+                }
 
                 /**
                  * Close on Click Out
