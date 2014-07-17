@@ -142,7 +142,7 @@ angular.module('gsUiInfraApp')
         this.draw = function() {
             $timeout(function(){
                 updateData();
-            }, 100);
+            }, 300);
         };
 
         /**************
