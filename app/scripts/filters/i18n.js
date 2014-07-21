@@ -1,12 +1,12 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .filter('i18n', function ($window, I18next, $log) {
+    .filter('i18n', function ($window, I18next, $log, $sce) {
 
         var fn = null;
 
         var realFilter = function () {
-            return fn(arguments);
+            return $sce.trustAsHtml(fn(arguments));
         };
 
         return function () { // filter wrapper to cope with service asynchronicity
