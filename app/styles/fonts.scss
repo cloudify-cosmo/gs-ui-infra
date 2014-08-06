@@ -52,6 +52,17 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
 
 }
 
+@font-face {
+    font-family: 'task-retried';
+    src:url('#{$fonts}/task-retried/icomoon.eot?8e8koj');
+    src:url('#{$fonts}/task-retried/icomoon.eot?#iefix8e8koj') format('embedded-opentype'),
+    url('#{$fonts}/task-retried/icomoon.woff?8e8koj') format('woff'),
+    url('#{$fonts}/task-retried/icomoon.ttf?8e8koj') format('truetype'),
+    url('#{$fonts}/task-retried/icomoon.svg?8e8koj#icomoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* glyph icon mapping */
 
 .topology-glyph:after {
