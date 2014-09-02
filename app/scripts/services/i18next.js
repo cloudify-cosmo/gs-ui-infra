@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('gsUiInfraApp')
-    .service('I18next', function I18next($window, $q, $log) {
+    .service('I18next', function I18next($window, $q, $log, $rootScope ) {
 
         var deferred = $q.defer();
 
@@ -29,6 +29,7 @@ angular.module('gsUiInfraApp')
                 } else {
                     deferred.reject('couldn\'t initialize i18next');
                 }
+                $rootScope.$apply();
             });
         };
 
