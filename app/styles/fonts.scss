@@ -49,7 +49,14 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     src: url('#{$fonts}/router-regular/router-webfont.eot?#iefix') format('embedded-opentype'), url('#{$fonts}/router-regular/router-webfont.woff') format('woff'), url('#{$fonts}/router-regular/router-webfont.ttf') format('truetype'), url('#{$fonts}/router-regular/router-webfont.svg#routerregular') format('svg');
     font-weight: normal;
     font-style: normal;
+}
 
+@font-face {
+    font-family: 'cloudify-events';
+    src: url('#{$fonts}/cloudify-events/cloudify-events.eot');
+    src: url('#{$fonts}/cloudify-events/cloudify-events.eot?#iefix') format('embedded-opentype'), url('#{$fonts}/cloudify-events/cloudify-events.woff') format('woff'), url('#{$fonts}/cloudify-events/cloudify-events.ttf') format('truetype'), url('#{$fonts}/cloudify-events/cloudify-events.svg#cloudifyevents') format('svg');
+    font-weight: normal;
+    font-style: normal;
 }
 
 /* glyph icon mapping */
