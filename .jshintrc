@@ -21,6 +21,7 @@
   "smarttabs": true,
   "globals": {
     "angular": false,
-      "d3":false
+     "d3":false,
+     "$" : false
   }
 }

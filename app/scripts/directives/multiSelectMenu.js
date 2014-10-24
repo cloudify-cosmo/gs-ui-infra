@@ -40,9 +40,38 @@ angular.module('gsUiInfraApp')
                 var optionMark = false,
                     isOpen = false;
 
-                if($attrs.listner === 'true') {
+
+                /**
+                 * Update Marked option when filtering the options
+                 */
+                function _filterItems() {
+                    $scope.$watch('filteredItems', function () {
+                        _navigateStart();
+                    }, true);
+                }
+
+                /**
+                 * Clean non relevant selected options
+                 */
+                function _listener() {
+                    $scope.$watch('options', function (options) {
+                        setInit();
+                        if ($scope.selected.length > 0) {
+                            var selected = $scope.selected;
+                            for(var i in selected) {
+                                var option = selected[i];
+                                if (options.indexOf(option) === -1) {
+                                    selected.splice(i, 1);
+                                }
+                            }
+                            $scope.selected = selected;
+                        }
+                    }, true);
+                }
+
+                if($attrs.listener === 'true') {
                     _filterItems();
-                    _listner();
+                    _listener();
                 }
 
                 /**
@@ -99,7 +128,7 @@ angular.module('gsUiInfraApp')
                  * @private
                  */
                 function _close() {
-                    isOpen = false
+                    isOpen = false;
                 }
 
                 /**
@@ -133,7 +162,9 @@ angular.module('gsUiInfraApp')
                                 optionMark = $scope.filteredItems[0];
                             }
                         }
-                        else optionMark = $scope.filteredItems[0];
+                        else {
+                            optionMark = $scope.filteredItems[0];
+                        }
                     }
                 }
 
@@ -181,12 +212,12 @@ angular.module('gsUiInfraApp')
                  * @returns {*}
                  */
                 $scope.selectedLabel = function () {
-                    if (!$scope.selected || $scope.selected.length == 0) {
+                    if (!$scope.selected || $scope.selected.length === 0) {
                         return $attrs.text || 'Select';
                     }
                     else {
                         if($scope.multiple === true) {
-                            if($scope.selected.length == 1) {
+                            if($scope.selected.length === 1) {
                                 return $scope.selected[0].label;
                             }
                             if($attrs.hasOwnProperty('selection')) {
@@ -246,33 +277,7 @@ angular.module('gsUiInfraApp')
                     }
                 };
 
-                /**
-                 * Update Marked option when filtering the options
-                 */
-                function _filterItems() {
-                    $scope.$watch('filteredItems', function () {
-                        _navigateStart();
-                    }, true);
-                }
 
-                /**
-                 * Clean non relevant selected options
-                 */
-                function _listner() {
-                    $scope.$watch('options', function (options) {
-                        setInit();
-                        if ($scope.selected.length > 0) {
-                            var selected = $scope.selected;
-                            for(var i in selected) {
-                                var option = selected[i];
-                                if (options.indexOf(option) === -1) {
-                                    selected.splice(i, 1);
-                                }
-                            }
-                            $scope.selected = selected;
-                        }
-                    }, true);
-                }
 
                 /**
                  * Close on Click Out

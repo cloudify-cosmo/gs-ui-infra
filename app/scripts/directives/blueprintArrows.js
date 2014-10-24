@@ -21,40 +21,40 @@ angular.module('gsUiInfraApp')
                     .attr('height', '100%')
                     .attr('fill', 'silver');
 
-                var group = canvas.append("g")
+                var group = canvas.append('g')
                     .attr('transform', 'translate(0, 0)');
 
-                var diagonal = d3.svg.diagonal();
+//                var diagonal = d3.svg.diagonal();
 
-                function applyDiagonals(data) {
-                    return diagonal.apply(this, [{
-                        source : {
-                            x: data[0].x,
-                            y: Math.floor(data[0].y)
-                        },
-                        target : {
-                            x: data[1].x,
-                            y: Math.floor(data[1].y)
-                        }
-                    }]);
-                }
+//                function applyDiagonals(data) {
+//                    return diagonal.apply(this, [{
+//                        source : {
+//                            x: data[0].x,
+//                            y: Math.floor(data[0].y)
+//                        },
+//                        target : {
+//                            x: data[1].x,
+//                            y: Math.floor(data[1].y)
+//                        }
+//                    }]);
+//                }
 
-                if(withArrow == true) {
+                if(withArrow) {
                     canvas.append('svg:defs').selectAll('marker')
                         .data(['Arrow'])
                         .enter()
                         .append('svg:marker')
                         .attr('id', 'arrowhead')
-                        .attr("viewBox", "0 0 20 20")
-                        .attr("refX", 16)
-                        .attr("refY", 10)
-                        .attr("markerUnits", "userSpaceOnUse")
-                        .attr("markerWidth", 16)
-                        .attr("markerHeight", 12)
-                        .attr("orient", "auto")
+                        .attr('viewBox', '0 0 20 20')
+                        .attr('refX', 16)
+                        .attr('refY', 10)
+                        .attr('markerUnits', 'userSpaceOnUse')
+                        .attr('markerWidth', 16)
+                        .attr('markerHeight', 12)
+                        .attr('orient', 'auto')
                         .attr('fill', lineColor)
-                        .append("path")
-                        .attr("d", "M 0 0 L 20 10 L 0 20 z");
+                        .append('path')
+                        .attr('d', 'M 0 0 L 20 10 L 0 20 z');
                 }
 
                 $scope.$watch('coordinates', function(data){
@@ -69,7 +69,7 @@ angular.module('gsUiInfraApp')
                             .attr('d', d3.svg.line()
                                 .x(function(d) { return d.x; })
                                 .y(function(d) { return d.y; })
-                                .interpolate("linear"))
+                                .interpolate('linear'))
                             .attr('marker-end', 'url(#arrowhead)')
                             .attr('fill', 'none')
                             .attr('stroke', lineColor)
@@ -90,7 +90,7 @@ angular.module('gsUiInfraApp')
 
 /***************
 * Directive to define DOM element coordinate
-* Must be as: Attribute="{id}"
+* Must be as: Attribute='{id}'
 */
 angular.module('gsUiInfraApp')
     .directive('blueprintCoordinate', function(blueprintCoordinateService){
@@ -105,7 +105,7 @@ angular.module('gsUiInfraApp')
 
 /*****************
 * This directive listen to the blueprint container for any resize
-* and broadcast it into angular, which update the "data" of the
+* and broadcast it into angular, which update the 'data' of the
 * coordinates
 */
 angular.module('gsUiInfraApp')
@@ -186,9 +186,9 @@ angular.module('gsUiInfraApp')
             angular.forEach(elements, function (element, id){
                 if($(document).find(element).length) {
                     data[id] = {
-                        "x": element.offset().left - element.parents('.bpContainer').offset().left,
-                        "y": element.offset().top  - element.parents('.bpContainer').offset().top
-                    }
+                        'x': element.offset().left - element.parents('.bpContainer').offset().left,
+                        'y': element.offset().top  - element.parents('.bpContainer').offset().top
+                    };
                 }
                 else {
                     delete elements[id];
@@ -207,7 +207,7 @@ angular.module('gsUiInfraApp')
                 var from = relation.source,
                     to = relation.target;
 
-                if(data[from] != undefined && data[to] != undefined) {
+                if(data[from] !== undefined && data[to] !== undefined) {
                     var thisCord = getNearestPoints(from, to);
                     if(thisCord !== null) {
                         Coords.push(thisCord);
@@ -236,8 +236,8 @@ angular.module('gsUiInfraApp')
                         if (!nearest || current < nearest) {
                             nearest = current;  // update the lower value of distance between points
                             collector = { // Set the index of the nearest point until now
-                                "from": fi,
-                                "to": ti
+                                'from': fi,
+                                'to': ti
                             };
                         }
                     });
