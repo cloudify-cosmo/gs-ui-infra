@@ -5,6 +5,14 @@ angular.module('gsUiInfraApp')
 
         var fn = null;
 
+        I18next.getPromise().then(function (result) {
+                fn = result;
+            },
+            angular.noop,
+            function (message) {
+                $log.info('notification: ', message);
+            });
+
         var realFilter = function () {
             return $sce.trustAsHtml(fn(arguments));
         };
@@ -12,16 +20,11 @@ angular.module('gsUiInfraApp')
         return function () { // filter wrapper to cope with service asynchronicity
             if (fn === null) {
                 // call the async service (this is a promise)
-                I18next.getPromise().then(function (result) {
-                        fn = result;
-                    },
-                    angular.noop,
-                    function (message) {
-                        $log.info('notification: ', message);
-                    });
-                return ''; // placeholder while loading
+                return ''; // hate it, but that's what we got
             } else {
                 return realFilter.apply(this, arguments);
             }
         };
+
+
     });
