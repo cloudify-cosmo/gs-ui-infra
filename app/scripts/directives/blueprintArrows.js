@@ -21,7 +21,7 @@ angular.module('gsUiInfraApp')
                     .attr('height', '100%')
                     .attr('fill', 'silver');
 
-                var group = canvas.append("g")
+                var group = canvas.append('g')
                     .attr('transform', 'translate(0, 0)');
 
                 var diagonal = d3.svg.diagonal();
