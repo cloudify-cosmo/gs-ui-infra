@@ -115,7 +115,7 @@ angular.module('gsUiInfraApp')
             scope: false,
             link: function($scope, $element) {
                 function broadcastResize() {
-                    $element.scope().$apply(function(){
+                    $scope.$apply(function(){
                         blueprintCoordinateService.draw();
                     });
                 }
