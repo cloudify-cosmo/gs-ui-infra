@@ -1,0 +1,185 @@
+@font-face {
+	font-family: 'gigaspaces';
+	src:url('fonts/gigaspaces.eot?-yft3a9');
+	src:url('fonts/gigaspaces.eot?#iefix-yft3a9') format('embedded-opentype'),
+		url('fonts/gigaspaces.woff?-yft3a9') format('woff'),
+		url('fonts/gigaspaces.ttf?-yft3a9') format('truetype'),
+		url('fonts/gigaspaces.svg?-yft3a9#gigaspaces') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-gs-"], [class*=" icon-gs-"] {
+	font-family: 'gigaspaces';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-gs-workflow-cancelled:before {
+	content: "\e600";
+}
+
+.icon-gs-workflow-failed:before {
+	content: "\e601";
+}
+
+.icon-gs-workflow-started:before {
+	content: "\e602";
+}
+
+.icon-gs-workflow-success:before {
+	content: "\e603";
+}
+
+.icon-gs-task-rescheduled:before {
+	content: "\e604";
+}
+
+.icon-gs-policy-failed:before {
+	content: "\e605";
+}
+
+.icon-gs-policy-success:before {
+	content: "\e606";
+}
+
+.icon-gs-task-blocked:before {
+	content: "\e607";
+}
+
+.icon-gs-task-failed:before {
+	content: "\e608";
+}
+
+.icon-gs-task-sent:before {
+	content: "\e609";
+}
+
+.icon-gs-task-started:before {
+	content: "\e60a";
+}
+
+.icon-gs-task-success:before {
+	content: "\e60b";
+}
+
+.icon-gs-workflow-stage:before {
+	content: "\e60c";
+}
+
+.icon-gs-blueprints:before {
+	content: "\e60d";
+}
+
+.icon-gs-deployments:before {
+	content: "\e60e";
+}
+
+.icon-gs-alert:before {
+	content: "\e60f";
+}
+
+.icon-gs-note:before {
+	content: "\e610";
+}
+
+.icon-gs-unread:before {
+	content: "\e611";
+}
+
+.icon-gs-read:before {
+	content: "\e612";
+}
+
+.icon-gs-edit:before {
+	content: "\e613";
+}
+
+.icon-gs-search:before {
+	content: "\e614";
+}
+
+.icon-gs-task-retried:before {
+	content: "\e615";
+}
+
+.icon-gs-node-root:before {
+	content: "\e616";
+}
+
+.icon-gs-node-load-balancer:before {
+	content: "\e617";
+}
+
+.icon-gs-node-dbms:before {
+	content: "\e618";
+}
+
+.icon-gs-node-virtual-ip:before {
+	content: "\e619";
+}
+
+.icon-gs-node-compute:before {
+	content: "\e61a";
+}
+
+.icon-gs-node-msg-bus-srv:before {
+	content: "\e61b";
+}
+
+.icon-gs-node-subnet:before {
+	content: "\e61c";
+}
+
+.icon-gs-node-application-server:before {
+	content: "\e61d";
+}
+
+.icon-gs-node-security-group:before {
+	content: "\e61e";
+}
+
+.icon-gs-node-volume:before {
+	content: "\e61f";
+}
+
+.icon-gs-node-tier:before {
+	content: "\e620";
+}
+
+.icon-gs-node-web-server:before {
+	content: "\e621";
+}
+
+.icon-gs-add-file:before {
+	content: "\e622";
+}
+
+.icon-gs-logs-events:before {
+	content: "\e623";
+}
+
+.icon-gs-node-file-system:before {
+	content: "\e624";
+}
+
+.icon-gs-node-keypair:before {
+	content: "\e625";
+}
+
+.icon-gs-node-object-storage:before {
+	content: "\e626";
+}
+
+.icon-gs-screen-cloud:before {
+	content: "\e627";
+}
+
