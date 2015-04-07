@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'gigaspaces';
-	src:url('fonts/gigaspaces.eot?-6dzt99');
-	src:url('fonts/gigaspaces.eot?#iefix-6dzt99') format('embedded-opentype'),
-		url('fonts/gigaspaces.woff?-6dzt99') format('woff'),
-		url('fonts/gigaspaces.ttf?-6dzt99') format('truetype'),
-		url('fonts/gigaspaces.svg?-6dzt99#gigaspaces') format('svg');
+	src:url('fonts/gigaspaces.eot?j5fm52');
+	src:url('fonts/gigaspaces.eot?#iefixj5fm52') format('embedded-opentype'),
+		url('fonts/gigaspaces.woff?j5fm52') format('woff'),
+		url('fonts/gigaspaces.ttf?j5fm52') format('truetype'),
+		url('fonts/gigaspaces.svg?j5fm52#gigaspaces') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -55,7 +55,7 @@
 	content: "\e603";
 }
 
-.icon-gs-task-rescheduled:before {
+.icon-gs-task-retried:before {
 	content: "\e604";
 }
 
@@ -75,7 +75,7 @@
 	content: "\e608";
 }
 
-.icon-gs-task-sent:before {
+.icon-gs-task-recieved:before {
 	content: "\e609";
 }
 
@@ -85,6 +85,14 @@
 
 .icon-gs-task-success:before {
 	content: "\e60b";
+}
+
+.icon-gs-task-sent:before {
+	content: "\e62c";
+}
+
+.icon-gs-task-retry:before {
+	content: "\e615";
 }
 
 .icon-gs-workflow-stage:before {
@@ -121,10 +129,6 @@
 
 .icon-gs-search:before {
 	content: "\e614";
-}
-
-.icon-gs-task-retried:before {
-	content: "\e615";
 }
 
 .icon-gs-node-root:before {
