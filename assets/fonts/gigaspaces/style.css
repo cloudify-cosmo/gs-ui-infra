@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'gigaspaces';
-	src:url('fonts/gigaspaces.eot?j5fm52');
-	src:url('fonts/gigaspaces.eot?#iefixj5fm52') format('embedded-opentype'),
-		url('fonts/gigaspaces.woff?j5fm52') format('woff'),
-		url('fonts/gigaspaces.ttf?j5fm52') format('truetype'),
-		url('fonts/gigaspaces.svg?j5fm52#gigaspaces') format('svg');
+	src:url('fonts/gigaspaces.eot?docwe3');
+	src:url('fonts/gigaspaces.eot?#iefixdocwe3') format('embedded-opentype'),
+		url('fonts/gigaspaces.woff?docwe3') format('woff'),
+		url('fonts/gigaspaces.ttf?docwe3') format('truetype'),
+		url('fonts/gigaspaces.svg?docwe3#gigaspaces') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -67,7 +67,7 @@
 	content: "\e606";
 }
 
-.icon-gs-task-blocked:before {
+.icon-gs-task-cancelled:before {
 	content: "\e607";
 }
 

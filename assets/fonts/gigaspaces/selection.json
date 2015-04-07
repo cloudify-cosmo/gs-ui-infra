@@ -371,7 +371,7 @@
 				"order": 8,
 				"prevSize": 32,
 				"code": 58887,
-				"name": "task-blocked"
+				"name": "task-cancelled"
 			},
 			"setIdx": 0,
 			"setId": 0,
