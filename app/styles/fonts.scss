@@ -135,6 +135,9 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     &.router:after {
         font-family: 'routerregular';
         content: 'b';
+        position: relative;
+        left: 5px;
+        top: 7px;
     }
     &.network:after {
         font-family: 'routerregular';
