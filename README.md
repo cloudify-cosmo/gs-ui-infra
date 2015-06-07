@@ -52,3 +52,8 @@ You can easily remote debug node with the flag `--debug-brk`.
 
 Since Grunt is usually executed directly `grunt args` - to debug it you need to do
 `node --debug-brk /full/path/to/grunt myTask`
+
+# How should this be used?
+
+This does not go through a build process. When you add js-ui-infra in your project as bower dependency, it downloads the entire thing. 
+That way, you can include only the resources you require.
