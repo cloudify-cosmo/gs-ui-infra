@@ -3,6 +3,7 @@
     display: inline-block;
     overflow: hidden;
     min-width: 200px;
+    padding:0;
     *:focus {
         outline: 0;
     }
@@ -19,7 +20,7 @@
             width: 100%;
             font-weight: normal;
             margin: 0 28px 0 0;
-            padding: 5px 10px;
+            padding-left: 5px;
             cursor: pointer;
             > input {
                 position: relative;
@@ -104,7 +105,7 @@
             content: "";
             position: relative;
             left: 10px;
-            bottom: -18px;
+            bottom: -14px;
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
             border-top: 5px solid #cccccc;
