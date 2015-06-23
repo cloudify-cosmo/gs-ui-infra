@@ -42,6 +42,27 @@ module.exports = function (grunt) {
                     '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
                 ],
                 tasks: ['livereload']
+            },
+            html2js:{
+                files: [
+                    '<%= yeoman.app %>/templates/*.html'
+                ],
+                tasks: ['html2js:main']
+            }
+        },
+
+        html2js:{
+            main:{
+                options: {
+                    module: 'gsUiInfraApp',
+                    rename: function(name){
+                        var args = name.split('/');
+                        var lastName = args[args.length-1].replace('.html','');
+                        return '/gs-ui-infra-templates/' + lastName;
+                    }
+                },
+                src: ['<%= yeoman.app %>/templates/*.html'],
+                dest: '<%= yeoman.app %>/templates/all.js'
             }
         },
         connect: {
