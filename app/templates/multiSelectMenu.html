@@ -1,12 +1,16 @@
+<div class="multiSelectMenu" data-ng-class="isOpen()" >
+    <span data-ng-click="open($event)">
+        <div class="button">
+            <label>
+                <t>{{ selectedLabel() }}</t>
+                <input type="text" class="no-click" data-ng-model="filter" placeholder="{{ reflection() }}">
+                <!--<input value="{{ reflection() }}"  class="no-click reflection">-->
+            </label>
+        </div>
+        <div class="msArrow"></div>
+    </span>
 
-<div class="multiSelectMenu" data-ng-class="isOpen()" data-ng-click="open()">
-    <div class="button">
-        <label>
-            <t>{{ selectedLabel() }}</t>
-            <input type="text" data-ng-model="filter">
-            <input value="{{ reflection() }}" class="reflection">
-        </label>
-    </div>
+
     <ul>
         <li data-ng-repeat="option in options | filter: filter | as: 'filteredItems'"
             data-ng-click="select(option)"
@@ -14,8 +18,8 @@
             data-ng-mouseover="hoverOption(option)"
             title="{{ option.label }}">
             <input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">
-            {{ option.label }}</li>
+            {{ option.label }}
+        </li>
     </ul>
-    <div class="msArrow"></div>
 </div>
 

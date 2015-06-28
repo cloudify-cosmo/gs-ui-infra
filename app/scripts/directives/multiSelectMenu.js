@@ -94,12 +94,36 @@ angular.module('gsUiInfraApp')
                  * Open DropDown
                  * @private
                  */
-                function _open() {
-                    $scope.filter = '';
-                    if ($scope.selected) {
-                        optionMark = $scope.selected;
+                function _open( $event ) {
+                    if ($event.stopPropagation){ $event.stopPropagation(); }
+                    if ($event.preventDefault){ $event.preventDefault(); }
+                    $event.cancelBubble = true;
+                    $event.returnValue = false;
+
+                    if ( $event && $event.target ){
+                        if ( $($event.target).is('.no-click')  ){
+                            return;
+                        }
+
+                        if ( $($event.target).is('t') ){
+                            $('[data-ng-model="filter"]').focus();
+                            $('[data-ng-model="filter"]')[0].setSelectionRange(0,0);
+                        }
+
                     }
-                    isOpen = true;
+
+
+
+                    if ( !isOpen ){
+                        $scope.filter = '';
+                        if ($scope.selected) {
+                            optionMark = $scope.selected;
+                        }
+                        isOpen = true;
+                    }else{
+                        _close();
+                    }
+
                 }
 
                 /**
@@ -183,7 +207,7 @@ angular.module('gsUiInfraApp')
                  * @returns {string}
                  */
                 $scope.isOpen = function () {
-                    return isOpen ? 'open' : '';
+                    return isOpen ? 'open' : 'closed';
                 };
 
                 /**

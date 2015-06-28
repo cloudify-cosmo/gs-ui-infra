@@ -3,7 +3,13 @@
     display: inline-block;
     overflow: hidden;
     min-width: 200px;
+    height:35px;
     padding:0;
+
+    t{
+        display:inline-block;
+    }
+
     *:focus {
         outline: 0;
     }
@@ -16,6 +22,8 @@
         border-radius: 3px;
         cursor: pointer;
         > label {
+            height:30px;
+            overflow-y:hidden;
             display: block;
             width: 100%;
             font-weight: normal;
@@ -28,16 +36,27 @@
                 border: 0px;
                 background: transparent;
                 z-index: 2;
-                &.reflection {
-                    position: absolute;
-                    top: 6px;
-                    left: 11px;
-                    z-index: 1;
-                    color: #ccc;
+                $REFLECTION_COLOR:#ccc;
+                &::-webkit-input-placeholder {
+                    color: $REFLECTION_COLOR;
+                }
+
+                &:-moz-placeholder { /* Firefox 18- */
+                    color: $REFLECTION_COLOR;
+                }
+
+                &::-moz-placeholder {  /* Firefox 19+ */
+                    color: $REFLECTION_COLOR;
+                }
+
+                &:-ms-input-placeholder {
+                    color: $REFLECTION_COLOR;
                 }
             }
         }
     }
+
+    &.closed { ul : { display: none; } }
     ul {
         display: block;
         position: absolute;
@@ -77,7 +96,7 @@
         overflow: visible;
         height: auto;
         ul {
-            top: calc(100% - 1px);
+            top: calc(100% + 1px);
         }
         div.button {
             border-radius: 3px 3px 0 0;
