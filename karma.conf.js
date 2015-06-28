@@ -15,6 +15,7 @@ files = [
     'app/bower_components/jquery/jquery.js',
     'app/scripts/*.js',
     'app/scripts/**/*.js',
+    'app/templates/all.js',
     'test/mock/**/*.js',
     'test/spec/**/*.js'
 ];
