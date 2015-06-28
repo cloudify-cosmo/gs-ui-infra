@@ -1,4 +1,4 @@
-angular.module('gsUiInfraApp', ['/gs-ui-infra-templates/multiSelectMenu']);
+angular.module('gsUiInfraAppTemplates', ['/gs-ui-infra-templates/multiSelectMenu']);
 
 angular.module("/gs-ui-infra-templates/multiSelectMenu", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("/gs-ui-infra-templates/multiSelectMenu",

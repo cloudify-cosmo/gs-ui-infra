@@ -54,7 +54,7 @@ module.exports = function (grunt) {
         html2js:{
             main:{
                 options: {
-                    module: 'gsUiInfraApp',
+                    module: 'gsUiInfraAppTemplates',
                     rename: function(name){
                         var args = name.split('/');
                         var lastName = args[args.length-1].replace('.html','');
@@ -317,13 +317,15 @@ module.exports = function (grunt) {
         'clean:server',
         'coffee',
         'compass',
+        'html2js',
         'connect:test',
-        'karma'
+        'karma:unit'
     ]);
 
     grunt.registerTask('buildAll', [
         'clean:dist',
         'jshint',
+        'html2js',
         'test',
         'coffee',
         'compass:dist',
