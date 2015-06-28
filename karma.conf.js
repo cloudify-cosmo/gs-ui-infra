@@ -9,12 +9,13 @@ files = [
   JASMINE_ADAPTER,
     'test/jasmineConf.js',
     'test/jasmineUtils.js',
+    'app/bower_components/jquery/dist/jquery.js',
     'app/bower_components/angular/angular.js',
     'app/bower_components/angular-mocks/angular-mocks.js',
     'app/bower_components/raphael/raphael.js',
-    'app/bower_components/jquery/jquery.js',
     'app/scripts/*.js',
     'app/scripts/**/*.js',
+    'app/templates/all.js',
     'test/mock/**/*.js',
     'test/spec/**/*.js'
 ];

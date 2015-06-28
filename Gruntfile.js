@@ -42,6 +42,27 @@ module.exports = function (grunt) {
                     '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
                 ],
                 tasks: ['livereload']
+            },
+            html2js:{
+                files: [
+                    '<%= yeoman.app %>/templates/*.html'
+                ],
+                tasks: ['html2js:main']
+            }
+        },
+
+        html2js:{
+            main:{
+                options: {
+                    module: 'gsUiInfraAppTemplates',
+                    rename: function(name){
+                        var args = name.split('/');
+                        var lastName = args[args.length-1].replace('.html','');
+                        return '/gs-ui-infra-templates/' + lastName;
+                    }
+                },
+                src: ['<%= yeoman.app %>/templates/*.html'],
+                dest: '<%= yeoman.app %>/templates/all.js'
             }
         },
         connect: {
@@ -106,6 +127,10 @@ module.exports = function (grunt) {
             unit: {
                 configFile: 'karma.conf.js',
                 singleRun: true
+            },
+            debug: {
+                configFile: 'karma.conf.js',
+                singleRun: false
             }
         },
         coffee: {
@@ -292,13 +317,15 @@ module.exports = function (grunt) {
         'clean:server',
         'coffee',
         'compass',
+        'html2js',
         'connect:test',
-        'karma'
+        'karma:unit'
     ]);
 
     grunt.registerTask('buildAll', [
         'clean:dist',
         'jshint',
+        'html2js',
         'test',
         'coffee',
         'compass:dist',

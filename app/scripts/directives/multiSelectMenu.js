@@ -5,28 +5,7 @@ angular.module('gsUiInfraApp')
         return {
             restrict: 'A',
             require: '?ngModel',
-            template:
-                '<div ' +
-                'class="multiSelectMenu"' +
-                'data-ng-class="isOpen()">' +
-                '<div class="button" data-ng-click="open()">' +
-                '<label>' +
-                '<t>{{ selectedLabel() }}</t>' +
-                '<input type="text" data-ng-model="filter">' +
-                '<input value="{{ reflection() }}" class="reflection">' +
-                '</label>' +
-                '</div>' +
-                '<ul>' +
-                '<li data-ng-repeat="option in options | filter: filter | as: \'filteredItems\'"' +
-                'data-ng-click="select(option)" ' +
-                'data-ng-class="navigator(option)" ' +
-                'data-ng-mouseover="hoverOption(option)" ' +
-                'title="{{ option.label }}">' +
-                '<input type="checkbox" data-ng-show="multiple" data-ng-checked="optionChecked(option)">' +
-                '{{ option.label }}</li> ' +
-                '</ul>' +
-                '<div class="msArrow" data-ng-click="open()"></div>' +
-                '</div>',
+            templateUrl : '/gs-ui-infra-templates/multiSelectMenu',
             replace: true,
             scope: {
                 options: '=',
