@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('gsUiInfraApp')
-    .directive('topology', function ($log) {
+angular.module('gsUiInfraApp') // todo: remove this directive
+    .directive('topology2', function ($log) {
         return {
             template: '<div class="topology-directive-inner-div"></div>',
             restrict: 'EAC',
