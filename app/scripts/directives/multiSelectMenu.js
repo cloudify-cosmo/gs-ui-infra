@@ -13,12 +13,16 @@ angular.module('gsUiInfraApp')
             },
             link: function postLink($scope, $element, $attrs, ngModel) {
 
-                $scope.selected = false;
+
                 $scope.multiple = false;
                 $scope.isInit = false;
                 var optionMark = false,
                     isOpen = false;
 
+
+                function setValue(value){
+                    ngModel.$setViewValue(value);
+                }
 
                 /**
                  * Update Marked option when filtering the options
@@ -35,15 +39,15 @@ angular.module('gsUiInfraApp')
                 function _listener() {
                     $scope.$watch('options', function (options) {
                         setInit();
-                        if ($scope.selected.length > 0) {
-                            var selected = $scope.selected;
+                        if (ngModel.$modelValue && ngModel.$modelValue.length > 0) {
+                            var selected = ngModel.$modelValue;
                             for(var i in selected) {
                                 var option = selected[i];
                                 if (options.indexOf(option) === -1) {
                                     selected.splice(i, 1);
                                 }
                             }
-                            $scope.selected = selected;
+                            setValue(selected);
                         }
                     }, true);
                 }
@@ -58,7 +62,8 @@ angular.module('gsUiInfraApp')
                  */
                 $scope.$watch('selected', function (newValue) {
                     if (newValue) {
-                        ngModel.$setViewValue(newValue);
+
+                        setValue(newValue);
                         if(angular.isFunction($scope.onchange)) {
                             $scope.onchange({filter: newValue});
                         }
@@ -70,7 +75,7 @@ angular.module('gsUiInfraApp')
                  */
                 if($attrs.hasOwnProperty('multiple') && $attrs.multiple === 'true') {
                     $scope.multiple = true;
-                    $scope.selected = [];
+                    setValue([]);
                 }
 
                 /**
@@ -116,8 +121,8 @@ angular.module('gsUiInfraApp')
 
                     if ( !isOpen ){
                         $scope.filter = '';
-                        if ($scope.selected) {
-                            optionMark = $scope.selected;
+                        if (ngModel.$modelValue) {
+                            optionMark = ngModel.$modelValue;
                         }
                         isOpen = true;
                     }else{
@@ -140,16 +145,22 @@ angular.module('gsUiInfraApp')
                  * @private
                  */
                 function _select(option) {
-                    if($scope.multiple === true) {
-                        if($scope.selected.indexOf(option) > -1) {
-                            $scope.selected.splice($scope.selected.indexOf(option), 1);
+
+                    if($scope.multiple === true ) {
+                        if ( !ngModel.$modelValue ){
+                            ngModel.$modelValue = []; // init
+                        }
+                        if(ngModel.$modelValue.indexOf(option) > -1) {
+                            var values = ngModel.$modelValue;
+                            values.splice(ngModel.$modelValue.indexOf(option), 1);
+                            setValue(values);
                         }
                         else {
-                            $scope.selected.push(option);
+                            setValue(ngModel.$modelValue.concat(option));
                         }
                     }
                     else {
-                        $scope.selected = option;
+                        setValue(option);
                         _close();
                     }
                 }
@@ -215,20 +226,21 @@ angular.module('gsUiInfraApp')
                  * @returns {*}
                  */
                 $scope.selectedLabel = function () {
-                    if (!$scope.selected || $scope.selected.length === 0) {
+
+                    if (!ngModel.$modelValue || ngModel.$modelValue.length === 0) {
                         return $attrs.text || 'Select';
                     }
                     else {
                         if($scope.multiple === true) {
-                            if($scope.selected.length === 1) {
-                                return $scope.selected[0].label;
+                            if(ngModel.$modelValue.length === 1) {
+                                return ngModel.$modelValue[0].label;
                             }
                             if($attrs.hasOwnProperty('selection')) {
-                                return $attrs.selection.replace('$count', $scope.selected.length);
+                                return $attrs.selection.replace('$count', ngModel.$modelValue.length);
                             }
-                            return $scope.selected.length + ' Selections';
+                            return ngModel.$modelValue.length + ' Selections';
                         }
-                        return $scope.selected.label;
+                        return ngModel.$modelValue.label;
                     }
                 };
 
@@ -238,8 +250,8 @@ angular.module('gsUiInfraApp')
                  * @returns {boolean}
                  */
                 $scope.optionChecked = function(option) {
-                    if($scope.multiple === true) {
-                        return $scope.selected.indexOf(option) > -1 ? true : false;
+                    if($scope.multiple === true && ngModel.$modelValue ) {
+                        return ngModel.$modelValue.indexOf(option) > -1 ? true : false;
                     }
                     return false;
                 };
