@@ -8,12 +8,4 @@ before_script:
   - npm install -g bower
   - bower update
   - bower install
-notifications:
-  email:
-    - guym@gigaspaces.com
-    - eliranm@gigaspaces.com
-    - evgeny@gigaspaces.com
-    - erez@gigaspaces.com
-
-#    on_success: [always|never|change] # default: change
-#    on_failure: [always|never|change] # default: always
+sudo: false
