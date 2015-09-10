@@ -6,7 +6,7 @@ angular.module("/gs-ui-infra-templates/multiSelectMenu", []).run(["$templateCach
     "    <span data-ng-click=\"open($event)\">\n" +
     "        <div class=\"button\">\n" +
     "            <label>\n" +
-    "                <t>{{ selectedLabel() }}</t>\n" +
+    "                <t title=\"{{selectedLabel()}}\">{{ selectedLabel() }}</t>\n" +
     "                <input type=\"text\" class=\"no-click\" data-ng-model=\"filter\" placeholder=\"{{ reflection() }}\">\n" +
     "                <!--<input value=\"{{ reflection() }}\"  class=\"no-click reflection\">-->\n" +
     "            </label>\n" +

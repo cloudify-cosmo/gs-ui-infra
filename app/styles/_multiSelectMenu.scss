@@ -23,6 +23,9 @@
 
     t{
         display:inline-block;
+        max-width: 83%;
+        overflow:hidden;
+        text-overflow: ellipsis;
     }
 
     *:focus {
@@ -120,6 +123,7 @@
             > label {
                 > t {
                     display: none;
+
                 }
                 > input {
                     display: block;
