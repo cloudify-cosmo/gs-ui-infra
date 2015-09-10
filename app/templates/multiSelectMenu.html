@@ -2,7 +2,7 @@
     <span data-ng-click="open($event)">
         <div class="button">
             <label>
-                <t>{{ selectedLabel() }}</t>
+                <t title="{{selectedLabel()}}">{{ selectedLabel() }}</t>
                 <input type="text" class="no-click" data-ng-model="filter" placeholder="{{ reflection() }}">
                 <!--<input value="{{ reflection() }}"  class="no-click reflection">-->
             </label>
