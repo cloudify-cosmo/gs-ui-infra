@@ -58,17 +58,17 @@ angular.module('gsUiInfraApp')
                 }
 
                 /**
-                 * Bind data to ng-model
+                 * call onchange function when model change
                  */
-                $scope.$watch('selected', function (newValue) {
-                    if (newValue) {
-
-                        setValue(newValue);
-                        if(angular.isFunction($scope.onchange)) {
-                            $scope.onchange({filter: newValue});
+                if(angular.isFunction($scope.onchange)) {
+                    $scope.$watch(function() {
+                        return ngModel.$modelValue;
+                    }, function (newValue) {
+                        if (newValue) {
+                            $scope.onchange({newValue: newValue});
                         }
-                    }
-                });
+                    },true);
+                }
 
                 /**
                  * Define Multiple Mode
