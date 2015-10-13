@@ -1,20 +1,20 @@
 {
-  "name": "gs-ui-infra",
-  "version": "0.0.0",
-  "dependencies": {
-    "angular": "1.2.10",
-    "json3": "~3.2.4",
-    "es5-shim": "~2.0.8",
-    "angular-resource": "1.2.10",
-    "angular-cookies": "1.2.10",
-    "angular-sanitize": "1.2.10",
-    "raphael": "~2.1.0"
-  },
-  "devDependencies": {
-    "angular-mocks": "1.2.10",
-    "angular-scenario": "1.2.10"
-  },
-  "resolutions": {
-    "angular": ">=1.2.26 <=1.4"
-  }
+    "name": "gs-ui-infra",
+    "version": "0.0.0",
+    "dependencies": {
+    },
+    "devDependencies": {
+        "angular-mocks": "1.2.10",
+        "angular-scenario": "1.2.10",
+        "angular": "1.2.10",
+        "json3": "~3.2.4",
+        "es5-shim": "~2.0.8",
+        "angular-resource": "1.2.10",
+        "angular-cookies": "1.2.10",
+        "angular-sanitize": "1.2.10",
+        "raphael": "~2.1.0"
+    },
+    "resolutions": {
+        "angular": ">=1.2.26 <=1.4"
+    }
 }
