@@ -8,8 +8,7 @@ angular.module('gsUiInfraApp')
             templateUrl : '/gs-ui-infra-templates/multiSelectMenu',
             replace: true,
             scope: {
-                options: '=',
-                onchange: '&'
+                options: '='
             },
             link: function postLink($scope, $element, $attrs, ngModel) {
 
@@ -55,19 +54,6 @@ angular.module('gsUiInfraApp')
                 if($attrs.listener === 'true') {
                     _filterItems();
                     _listener();
-                }
-
-                /**
-                 * call onchange function when model change
-                 */
-                if(angular.isFunction($scope.onchange)) {
-                    $scope.$watch(function() {
-                        return ngModel.$modelValue;
-                    }, function (newValue) {
-                        if (newValue) {
-                            $scope.onchange({newValue: newValue});
-                        }
-                    },true);
                 }
 
                 /**
