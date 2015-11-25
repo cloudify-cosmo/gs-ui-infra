@@ -1,14 +1,13 @@
 machine:
   node:
-    version: 0.10
+    version: 0.10.40
   environment:
     DISPLAY: :99.0
 
 dependencies:
-  pre:
-    - /etc/init.d/xvfb start
   override:
     - npm install -g bower
+    - /etc/init.d/xvfb start
 
 test:
   pre:
