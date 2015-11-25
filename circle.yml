@@ -1,0 +1,19 @@
+machine:
+  node:
+    version: 0.10.40
+  environment:
+    DISPLAY: :99.0
+
+dependencies:
+  pre:
+    - nvm install 0.10
+  override:
+    - npm install
+    - npm install -g bower
+
+test:
+  pre:
+    - bower update
+    - bower install
+
+
