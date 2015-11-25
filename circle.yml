@@ -6,7 +6,7 @@ machine:
 
 dependencies:
   pre:
-    - sudo /etc/init.d/xvfb start
+    - /etc/init.d/xvfb start
   override:
     - npm install -g bower
 
