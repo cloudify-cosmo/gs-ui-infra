@@ -1,0 +1,17 @@
+machine:
+  node:
+    bersion: 0.10
+
+dependencies:
+  pre:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+  override:
+  - npm install -g bower
+
+test:
+  pre:
+    - bower update
+    - bower install
+
+
