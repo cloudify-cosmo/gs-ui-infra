@@ -16,7 +16,7 @@ angular.module("/gs-ui-infra-templates/multiSelectMenu", []).run(["$templateCach
     "\n" +
     "\n" +
     "    <ul>\n" +
-    "        <li data-ng-repeat=\"option in options | filter: filter | as: 'filteredItems'\"\n" +
+    "        <li data-ng-repeat=\"option in options | filter: filter\"\n" +
     "            data-ng-click=\"select(option)\"\n" +
     "            data-ng-class=\"navigator(option)\"\n" +
     "            data-ng-mouseover=\"hoverOption(option)\"\n" +

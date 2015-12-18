@@ -12,7 +12,7 @@
 
 
     <ul>
-        <li data-ng-repeat="option in options | filter: filter | as: 'filteredItems'"
+        <li data-ng-repeat="option in options | filter: filter"
             data-ng-click="select(option)"
             data-ng-class="navigator(option)"
             data-ng-mouseover="hoverOption(option)"
