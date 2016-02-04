@@ -25,4 +25,9 @@ test:
     - bower update
     - bower install
 
-
+deployment:
+  release:
+    tag: /[0-9]+(\.[0-9]+)*/
+    owner: circleci
+    commands:
+      - "true"  
