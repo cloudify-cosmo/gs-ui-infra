@@ -59,6 +59,9 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
     &.web-server:after {
         content: '\e622';
     }
+    &.component:after {
+        content: '\e623';
+    }
     &.edit-node:after {
         content: '\e623';
     }
