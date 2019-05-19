@@ -60,7 +60,10 @@ $fonts: '#{$gs-infra-root}/assets/fonts' !default;
         content: '\e622';
     }
     &.component:after {
-        content: '\e623';
+        content: '\e631';
+    }
+    &.shared-resource:after {
+        content: '\e632';
     }
     &.edit-node:after {
         content: '\e623';
