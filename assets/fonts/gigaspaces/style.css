@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'gigaspaces';
-  src:  url('fonts/gigaspaces.eot?jz26tz');
-  src:  url('fonts/gigaspaces.eot?jz26tz#iefix') format('embedded-opentype'),
-    url('fonts/gigaspaces.ttf?jz26tz') format('truetype'),
-    url('fonts/gigaspaces.woff?jz26tz') format('woff'),
-    url('fonts/gigaspaces.svg?jz26tz#gigaspaces') format('svg');
+  src:  url('fonts/gigaspaces.eot?r9046i');
+  src:  url('fonts/gigaspaces.eot?r9046i#iefix') format('embedded-opentype'),
+    url('fonts/gigaspaces.ttf?r9046i') format('truetype'),
+    url('fonts/gigaspaces.woff?r9046i') format('woff'),
+    url('fonts/gigaspaces.svg?r9046i#gigaspaces') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -151,23 +151,26 @@
   content: "\e629";
 }
 .icon-gs-node-status-success:before {
-	content: "\e62a";
+  content: "\e62a";
 }
 .icon-gs-node-status-fail:before {
-	content: "\e62b";
+  content: "\e62b";
 }
 .icon-gs-task-sent:before {
-	content: "\e62c";
+  content: "\e62c";
 }
 .icon-gs-task-started:before {
-	content: "\e62d";
+  content: "\e62d";
 }
 .icon-gs-node-network:before {
-	content: "\e62f";
+  content: "\e62f";
 }
 .icon-gs-node-status-loading:before {
   content: "\e630";
 }
-.icon-uniE631:before {
+.icon-gs-node-component:before {
   content: "\e631";
+}
+.icon-gs-node-shared-resource:before {
+  content: "\e632";
 }
