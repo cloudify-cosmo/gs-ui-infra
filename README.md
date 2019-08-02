@@ -1,3 +1,6 @@
+
+# This repository is depracted by [cloudify-ui-common](https://github.com/cloudify-cosmo/cloudify-ui-common).
+
 * Master [![Circle CI](https://circleci.com/gh/cloudify-cosmo/gs-ui-infra/tree/master.svg?style=shield)](https://circleci.com/gh/cloudify-cosmo/gs-ui-infra/tree/master)
 
 [![Build Status](https://travis-ci.org/guy-mograbi-at-gigaspaces/gs-ui-infra.png)](https://travis-ci.org/guy-mograbi-at-gigaspaces/gs-ui-infra.png)
